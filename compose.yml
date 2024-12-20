@@ -1,0 +1,15 @@
+# version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: .
+    ports:
+      - 5173:5173
+    develop:
+      watch:
+        - action: sync
+          path: .
+          target: /frontend
+          ignore:
+            - node_modules
