@@ -50,12 +50,19 @@ export default tseslint.config({
 ```
 
 Build app with:
+```bash
 docker build -t frontend .
+```
 OR
+```bash
 docker build --no-cache -t frontend .
+```
 
 Run app with:
-docker-compose up
-
+```bash
+docker-compose up --watch
+```
 Close app with:
+```bash
 docker-compose down
+```
