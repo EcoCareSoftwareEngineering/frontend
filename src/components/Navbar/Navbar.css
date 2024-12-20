@@ -1,10 +1,15 @@
-/* Navbar Container */
 .navbar {
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 100;
     display: flex;
+    position: fixed;
+    align-items: center; 
     justify-content: space-between;
-    align-items: center;
+    padding: 0.6rem 1.5rem;
+    box-sizing: border-box;
     background-color: #333;
-    padding: 0.5rem 1rem;
     color: white;
   }
   
@@ -20,7 +25,7 @@
   .navbar-links {
     list-style: none;
     display: flex;
-    gap: 1.5rem;
+    gap: 2.5rem;
     margin: 0;
     padding: 0;
   }

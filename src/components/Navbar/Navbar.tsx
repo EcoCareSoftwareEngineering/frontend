@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import './Navbar.css';
 
 const Navbar: React.FC = () => {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -12,7 +12,7 @@ const Navbar: React.FC = () => {
   return (
     <nav className="navbar">
       <div className="navbar-logo">
-        <Link to="/">MyApp</Link>
+        <Link to="/">EcoCare</Link>
       </div>
 
       {/* Toggle button for mobile */}
@@ -23,16 +23,16 @@ const Navbar: React.FC = () => {
       {/* Navigation Links */}
       <ul className={`navbar-links ${isOpen ? 'open' : ''}`}>
         <li>
-          <Link to="/" onClick={() => setIsOpen(false)}>Home</Link>
+          <Link to="/" onClick={() => setIsOpen(false)}>Dashboard</Link>
         </li>
         <li>
-          <Link to="/about" onClick={() => setIsOpen(false)}>About</Link>
+          <Link to="/devices" onClick={() => setIsOpen(false)}>Devices</Link>
         </li>
         <li>
-          <Link to="/services" onClick={() => setIsOpen(false)}>Services</Link>
+          <Link to="/utilities" onClick={() => setIsOpen(false)}>Utilities</Link>
         </li>
         <li>
-          <Link to="/contact" onClick={() => setIsOpen(false)}>Contact</Link>
+          <Link to="/account" onClick={() => setIsOpen(false)}>My Account</Link>
         </li>
       </ul>
     </nav>
