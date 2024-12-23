@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import tree from '/assets/tree.png'
 import './Navbar.css';
 
 const Navbar: React.FC = () => {
@@ -12,7 +13,10 @@ const Navbar: React.FC = () => {
   return (
     <nav className="navbar">
       <div className="navbar-logo">
-        <Link to="/">EcoCare</Link>
+        <Link to="/">
+          <img src="/tree.png"/>
+          EcoCare
+        </Link>
       </div>
 
       {/* Toggle button for mobile */}
