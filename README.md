@@ -60,9 +60,9 @@ docker build --no-cache -t frontend .
 
 Run app with:
 ```bash
-docker-compose up --watch
+docker compose up --watch
 ```
 Close app with:
 ```bash
-docker-compose down
+docker compose down
 ```
