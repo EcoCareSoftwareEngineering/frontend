@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import tree from '/assets/tree.png'
 import './Navbar.css';
 
 const Navbar: React.FC = () => {
