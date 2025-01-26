@@ -1,9 +1,14 @@
-import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
-import './Navbar.css'
+import { useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
+import './Navbar.scss'
 
-const Navbar: React.FC = () => {
+const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false)
+  const location = useLocation()
+
+  const getLinkClassName = (path: string) => {
+    return location.pathname === path ? 'nav-button active' : 'nav-button'
+  }
 
   const toggleMenu = () => {
     setIsOpen(!isOpen)
@@ -13,12 +18,11 @@ const Navbar: React.FC = () => {
     <nav className='navbar'>
       <div className='navbar-logo'>
         <Link to='/'>
-          <img src='/tree.png' />
-          EcoCare
+          Eco
+          <p style={{ color: '#1f8cfb' }}>Care</p>
         </Link>
       </div>
 
-      {/* Toggle button for mobile */}
       <button className='navbar-toggle' onClick={toggleMenu}>
         {isOpen ? '✖' : '☰'}
       </button>
@@ -26,28 +30,57 @@ const Navbar: React.FC = () => {
       {/* Navigation Links */}
       <ul className={`navbar-links ${isOpen ? 'open' : ''}`}>
         <li>
-          <Link to='/' onClick={() => setIsOpen(false)}>
-            <i className='bi bi-house'></i>
+          <Link
+            to='/'
+            className={getLinkClassName('/')}
+            onClick={() => setIsOpen(false)}
+          >
+            <div className='bar' />
+            <i className='bi bi-house' />
             Home
           </Link>
         </li>
         <li>
-          <Link to='/devices' onClick={() => setIsOpen(false)}>
+          <Link
+            to='/devices'
+            className={getLinkClassName('/devices')}
+            onClick={() => setIsOpen(false)}
+          >
+            <div className='bar' />
+            <i className='bi bi-pc-display-horizontal' />
             Devices
           </Link>
         </li>
         <li>
-          <Link to='/analytics' onClick={() => setIsOpen(false)}>
+          <Link
+            to='/analytics'
+            className={getLinkClassName('/analytics')}
+            onClick={() => setIsOpen(false)}
+          >
+            <div className='bar' />
+            <i className='bi bi-graph-up' />
             Analytics
           </Link>
         </li>
         <li>
-          <Link to='/rules' onClick={() => setIsOpen(false)}>
+          <Link
+            to='/rules'
+            className={getLinkClassName('/rules')}
+            onClick={() => setIsOpen(false)}
+          >
+            <div className='bar' />
+            <i className='bi bi-calendar-week' />
             Rules
           </Link>
         </li>
         <li>
-          <Link to='/account' onClick={() => setIsOpen(false)}>
+          <Link
+            to='/settings'
+            className={getLinkClassName('/settings')}
+            onClick={() => setIsOpen(false)}
+          >
+            <div className='bar' />
+            <i className='bi bi-gear' />
             Settings
           </Link>
         </li>

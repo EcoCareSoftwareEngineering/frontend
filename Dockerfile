@@ -1,9 +1,8 @@
 FROM oven/bun:1
 WORKDIR /frontend
 
-# Copy only the package files and install dependencies
+# Copy only the package json and lockfile
 COPY package.json bun.lockb ./
-# RUN rm -rf node_modules
 RUN bun install --frozen-lockfile
 
 # Now copy the rest of the files

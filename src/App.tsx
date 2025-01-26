@@ -4,6 +4,8 @@ import viteLogo from '/vite.svg'
 import './App.css'
 import Navbar from './components/Navbar/Navbar'
 import { BrowserRouter } from 'react-router-dom'
+
+// @ts-ignore - Import alias in vite.config
 import 'bootstrap-icons'
 
 function App() {

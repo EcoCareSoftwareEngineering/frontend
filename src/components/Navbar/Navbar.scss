@@ -1,0 +1,110 @@
+$background-color: #1f2738;
+$highlight-color: #1a2130;
+$active-color: #1d8ef7;
+$clear-text: #fefdff;
+$grey-text: #6b7f94;
+
+.navbar {
+  top: 0;
+  left: 0;
+  width: 11%;
+  height: 100%;
+  min-width: 200px;
+  position: fixed;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  background-color: $background-color;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-logo {
+  display: flex;
+  height: 5%;
+  padding-top: 15px;
+  padding-bottom: 100px;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.navbar-logo img {
+  height: 3rem;
+  padding-right: 0.5rem;
+}
+
+.navbar-logo a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: $clear-text;
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+/* Navigation links */
+.navbar-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+
+.navbar-links li {
+  padding-block: 10px;
+  text-align: left;
+}
+
+.bi {
+  font-size: 110%;
+  padding-right: 1rem;
+}
+
+.nav-button {
+  height: 4rem;
+  display: flex;
+  align-items: center;
+  padding-inline: 15%;
+  margin-right: 10px;
+  font-weight: bold;
+  font-size: 1.3rem;
+  color: $grey-text;
+  text-decoration: none;
+  border-radius: 0 10px 10px 0;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.nav-button.active {
+  background-color: $highlight-color;
+  color: $active-color;
+}
+
+.nav-button.active div {
+  left: 0;
+  height: inherit;
+  width: 0.6rem;
+  position: fixed;
+  background-color: $active-color;
+}
+
+.navbar-links a:hover {
+  background-color: $highlight-color;
+  color: $active-color;
+}
+
+/* Toggle button for mobile (optional, hidden for now) */
+.navbar-toggle {
+  display: none; /* Hide the toggle button for vertical layout */
+}
+
+/* Responsive styles for smaller screens */
+@media (max-width: 768px) {
+  .navbar {
+    width: 200px; /* Adjust navbar width for smaller screens */
+  }
+
+  .navbar-links a {
+    font-size: 1rem; /* Reduce font size for smaller screens */
+  }
+}
