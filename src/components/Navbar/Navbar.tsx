@@ -27,7 +27,8 @@ const Navbar: React.FC = () => {
       <ul className={`navbar-links ${isOpen ? 'open' : ''}`}>
         <li>
           <Link to='/' onClick={() => setIsOpen(false)}>
-            Dashboard
+            <i className='bi bi-house'></i>
+            Home
           </Link>
         </li>
         <li>
@@ -36,13 +37,18 @@ const Navbar: React.FC = () => {
           </Link>
         </li>
         <li>
-          <Link to='/utilities' onClick={() => setIsOpen(false)}>
-            Utilities
+          <Link to='/analytics' onClick={() => setIsOpen(false)}>
+            Analytics
+          </Link>
+        </li>
+        <li>
+          <Link to='/rules' onClick={() => setIsOpen(false)}>
+            Rules
           </Link>
         </li>
         <li>
           <Link to='/account' onClick={() => setIsOpen(false)}>
-            My Account
+            Settings
           </Link>
         </li>
       </ul>
