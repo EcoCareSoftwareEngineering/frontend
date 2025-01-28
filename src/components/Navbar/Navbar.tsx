@@ -16,18 +16,28 @@ const Navbar = () => {
 
   return (
     <nav className='navbar'>
-      <div className='navbar-logo'>
-        <Link to='/'>
-          Eco
-          <p style={{ color: '#1f8cfb' }}>Care</p>
-        </Link>
+      <div className='navbar-header'>
+        {/* Navbar Logo */}
+        <div className='navbar-logo'>
+          <Link to='/'>
+            Eco<p style={{ color: '#1f8cfb' }}>Care</p>
+          </Link>
+        </div>
+
+        {/* Mobile toggle menu button */}
+        <button
+          className={`navbar-toggle ${isOpen ? 'active' : ''}`}
+          onClick={toggleMenu}
+        >
+          <div className='toggle'>
+            <div className='bars' id='bar1' />
+            <div className='bars' id='bar2' />
+            <div className='bars' id='bar3' />
+          </div>
+        </button>
       </div>
 
-      <button className='navbar-toggle' onClick={toggleMenu}>
-        {isOpen ? '✖' : '☰'}
-      </button>
-
-      {/* Navigation Links */}
+      {/* Main Navigation Links */}
       <ul className={`navbar-links ${isOpen ? 'open' : ''}`}>
         <li>
           <Link
