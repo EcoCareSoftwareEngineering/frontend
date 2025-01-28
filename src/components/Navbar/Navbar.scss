@@ -1,6 +1,6 @@
 $background-color: #1f2738;
 $highlight-color: #1a2130;
-$active-color: #1d8ef7;
+$active-color: #2992ff;
 $clear-text: #fefdff;
 $grey-text: #6b7f94;
 
@@ -120,18 +120,18 @@ $grey-text: #6b7f94;
   }
 
   .navbar-links {
-    display: none;
-    font-size: 1rem;
-  }
+    height: 0;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px); /* Add a slight offset for sliding effect */
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
 
-  .navbar-links:not(.open) {
-    .nav-button {
-      display: none;
+    &.open {
+      opacity: 1;
+      height: 40vh;
+      visibility: visible;
+      transform: translateY(0);
     }
-  }
-
-  .navbar-links.open {
-    display: block;
   }
 
   .navbar-toggle {

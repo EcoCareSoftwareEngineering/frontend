@@ -20,7 +20,7 @@ const Navbar = () => {
         {/* Navbar Logo */}
         <div className='navbar-logo'>
           <Link to='/'>
-            Eco<p style={{ color: '#1f8cfb' }}>Care</p>
+            Eco<p style={{ color: '#2992ff' }}>Care</p>
           </Link>
         </div>
 
