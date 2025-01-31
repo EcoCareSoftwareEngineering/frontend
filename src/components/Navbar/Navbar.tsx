@@ -29,7 +29,7 @@ const Navbar = () => {
           className={`navbar-toggle ${isOpen ? 'active' : ''}`}
           onClick={toggleMenu}
         >
-          <div className='toggle'>
+          <div className='bars-container'>
             <div className='bars' id='bar1' />
             <div className='bars' id='bar2' />
             <div className='bars' id='bar3' />
@@ -47,7 +47,7 @@ const Navbar = () => {
           >
             <div className='bar' />
             <i className='bi bi-house' />
-            Home
+            Overview
           </Link>
         </li>
         <li>
@@ -63,13 +63,13 @@ const Navbar = () => {
         </li>
         <li>
           <Link
-            to='/analytics'
-            className={getLinkClassName('/analytics')}
+            to='/statistics'
+            className={getLinkClassName('/statistics')}
             onClick={() => setIsOpen(false)}
           >
             <div className='bar' />
             <i className='bi bi-graph-up' />
-            Analytics
+            Statistics
           </Link>
         </li>
         <li>
@@ -81,6 +81,17 @@ const Navbar = () => {
             <div className='bar' />
             <i className='bi bi-calendar-week' />
             Rules
+          </Link>
+        </li>
+        <li>
+          <Link
+            to='/messages'
+            className={getLinkClassName('/messages')}
+            onClick={() => setIsOpen(false)}
+          >
+            <div className='bar' />
+            <i className='bi bi-chat-dots' />
+            Messages
           </Link>
         </li>
         <li>

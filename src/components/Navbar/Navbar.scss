@@ -7,7 +7,6 @@ $grey-text: #6b7f94;
 .navbar {
   top: 0;
   left: 0;
-  width: 11%;
   z-index: 100;
   min-width: 200px;
   position: fixed;
@@ -19,13 +18,14 @@ $grey-text: #6b7f94;
 }
 
 .navbar-header {
-  padding-top: 30px;
-  padding-bottom: 80px;
+  height: 11vh;
+  margin-top: 10px;
+  margin-bottom: 20px;
 }
 
 .navbar-logo {
   display: flex;
-  height: 5%;
+  height: inherit;
   align-items: center;
   flex-direction: column;
   justify-content: center;
@@ -47,11 +47,7 @@ $grey-text: #6b7f94;
   margin: 0;
   width: 100%;
   height: 100vh;
-}
-
-.navbar-links li {
-  padding-block: 10px;
-  text-align: left;
+  overflow-y: auto;
 }
 
 .bi {
@@ -60,13 +56,16 @@ $grey-text: #6b7f94;
 }
 
 .nav-button {
-  height: 4rem;
+  height: 7.5vh;
+  min-height: 3rem;
   display: flex;
-  align-items: center;
-  padding-inline: 15%;
+  margin-block: 10px;
   margin-right: 10px;
+  padding-inline: 15%;
+  align-items: center;
+  text-align: left;
+  font-size: 1.15em;
   font-weight: bold;
-  font-size: 1.3rem;
   color: $grey-text;
   text-decoration: none;
   border-radius: 0 10px 10px 0;
@@ -103,10 +102,11 @@ $grey-text: #6b7f94;
   .navbar-header {
     display: flex;
     width: 100%;
-    justify-content: space-between;
+    height: 9vh;
+    margin-top: 5px;
+    margin-bottom: 0;
     align-items: center;
-    padding-top: 0;
-    padding-bottom: 0;
+    justify-content: space-between;
   }
 
   .navbar-logo {
@@ -114,41 +114,43 @@ $grey-text: #6b7f94;
     padding-left: 10%;
   }
 
-  .navbar-toggle {
-    display: flex;
-    margin-right: 8%;
-  }
-
   .navbar-links {
     height: 0;
     opacity: 0;
     visibility: hidden;
-    transform: translateY(-10px); /* Add a slight offset for sliding effect */
+    margin-bottom: 10px;
+    transform: translateY(-10px);
     transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
 
     &.open {
       opacity: 1;
-      height: 40vh;
+      height: 100%;
       visibility: visible;
       transform: translateY(0);
+    }
+
+    .nav-button {
+      padding-inline: 10%;
     }
   }
 
   .navbar-toggle {
+    display: flex;
+    margin-right: 8%;
     background: none;
     border: none;
     cursor: pointer;
   }
 
-  .toggle {
-    position: relative;
+  .bars-container {
+    gap: 10px;
     width: 40px;
     height: 40px;
     display: flex;
+    position: relative;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 10px;
     transition-duration: 0.5s;
   }
 
@@ -191,7 +193,7 @@ $grey-text: #6b7f94;
     transition-duration: 0.5s;
   }
 
-  .navbar-toggle.active .toggle {
+  .navbar-toggle.active .bars-container {
     transform: rotate(180deg);
     transition-duration: 0.5s;
   }
