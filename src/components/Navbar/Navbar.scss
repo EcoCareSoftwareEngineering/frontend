@@ -4,7 +4,7 @@
   top: 0;
   left: 0;
   z-index: 100;
-  min-width: 200px;
+  width: clamp(min(15em, 30vh), min(15vw, 250px), 350px);
   position: fixed;
   display: flex;
   align-items: center;
@@ -14,8 +14,9 @@
 
 .navbar-header {
   height: 11vh;
+  width: 100%;
   margin-top: 10px;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
 }
 
 .navbar-logo {
@@ -32,7 +33,7 @@
   justify-content: center;
   text-align: center;
   color: $clear-text;
-  font-size: 2rem;
+  font-size: clamp(1.3rem, 4.2vh, 2.8rem);
   font-weight: bold;
 }
 
@@ -52,14 +53,13 @@
 
 .nav-button {
   height: 7.5vh;
-  min-height: 3rem;
   display: flex;
   margin-block: 10px;
   margin-right: 10px;
   padding-inline: 15%;
   align-items: center;
   text-align: left;
-  font-size: 1.15em;
+  font-size: clamp(1rem, 2.5vh, 1.5rem);
   font-weight: bold;
   color: $grey-text;
   text-decoration: none;
@@ -75,7 +75,8 @@
 .nav-button.active div {
   left: 0;
   height: inherit;
-  width: 0.6rem;
+  min-height: inherit;
+  width: 1vh;
   position: fixed;
   background-color: $active-color;
 }
@@ -92,6 +93,7 @@
 @media (max-width: 768px) {
   .navbar {
     width: 100%;
+    max-width: none;
   }
 
   .navbar-header {
@@ -109,12 +111,18 @@
     padding-left: 10%;
   }
 
+  .navbar-links a:hover {
+    background-color: $background-color;
+    color: $grey-text;
+  }
+
   .navbar-links {
     height: 0;
     opacity: 0;
     visibility: hidden;
     margin-bottom: 10px;
     transform: translateY(-10px);
+    box-shadow: 0 30px 30px rgba(22, 27, 40, 1);
     transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
 
     &.open {
