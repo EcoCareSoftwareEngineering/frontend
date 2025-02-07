@@ -1,6 +1,6 @@
 import './App.css'
 import Home from './pages/home/Home'
-import Navbar from './components/navbar/Navbar'
+import Navbar from './components/Navbar/Navbar'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 
 // @ts-ignore - Import alias in vite.config
