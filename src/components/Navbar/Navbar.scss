@@ -4,7 +4,7 @@
   top: 0;
   left: 0;
   z-index: 100;
-  width: clamp(min(15em, 30vh), min(15vw, 250px), 350px);
+  width: clamp(min(15em, 35vh), min(15vw, 250px), 350px);
   position: fixed;
   display: flex;
   align-items: center;
@@ -59,7 +59,7 @@
   padding-inline: 15%;
   align-items: center;
   text-align: left;
-  font-size: clamp(1rem, 2.5vh, 1.5rem);
+  font-size: clamp(1rem, max(2.5vh, 100em), 1.5rem);
   font-weight: bold;
   color: $grey-text;
   text-decoration: none;
