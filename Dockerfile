@@ -1,15 +1,14 @@
 FROM oven/bun:1
 WORKDIR /frontend
 
-# Copy the lock and package file
-COPY . .
-RUN rm -rf node_modules
-
-# Install dependencies
+# Copy only the package json and lockfile
+COPY package.json bun.lockb ./
 RUN bun install --frozen-lockfile
 
+# Now copy the rest of the files
+COPY . .
 
 ARG PORT
 EXPOSE 3000
-     
+  
 CMD ["bun", "run", "dev"]

@@ -1,0 +1,203 @@
+@use '/variables' as *;
+
+.navbar {
+  top: 0;
+  left: 0;
+  z-index: 100;
+  width: clamp(min(15em, 35vh), min(15vw, 250px), 350px);
+  position: fixed;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  background-color: $background-color;
+}
+
+.navbar-header {
+  height: 11vh;
+  width: 100%;
+  margin-top: 10px;
+  margin-bottom: 15px;
+}
+
+.navbar-logo {
+  display: flex;
+  height: inherit;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.navbar-logo a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: $clear-text;
+  font-size: clamp(1.3rem, 4.2vh, 2.8rem);
+  font-weight: bold;
+}
+
+.navbar-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.bi {
+  font-size: 110%;
+  padding-right: 1rem;
+}
+
+.nav-button {
+  height: 7.5vh;
+  display: flex;
+  margin-block: 10px;
+  margin-right: 10px;
+  padding-inline: 15%;
+  align-items: center;
+  text-align: left;
+  font-size: clamp(1rem, max(2.5vh, 100em), 1.5rem);
+  font-weight: bold;
+  color: $grey-text;
+  text-decoration: none;
+  border-radius: 0 10px 10px 0;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.nav-button.active {
+  background-color: $highlight-color;
+  color: $active-color;
+}
+
+.nav-button.active div {
+  left: 0;
+  height: inherit;
+  min-height: inherit;
+  width: 1vh;
+  position: fixed;
+  background-color: $active-color;
+}
+
+.navbar-links a:hover {
+  background-color: $highlight-color;
+  color: $active-color;
+}
+
+.navbar-toggle {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    width: 100%;
+    max-width: none;
+  }
+
+  .navbar-header {
+    display: flex;
+    width: 100%;
+    height: 9vh;
+    margin-top: 5px;
+    margin-bottom: 0;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .navbar-logo {
+    left: 0;
+    padding-left: 10%;
+  }
+
+  .navbar-links a:hover {
+    background-color: $background-color;
+    color: $grey-text;
+  }
+
+  .navbar-links {
+    height: 0;
+    opacity: 0;
+    visibility: hidden;
+    margin-bottom: 10px;
+    transform: translateY(-10px);
+    box-shadow: 0 30px 30px rgba(22, 27, 40, 1);
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+
+    &.open {
+      opacity: 1;
+      height: 100%;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .nav-button {
+      padding-inline: 10%;
+    }
+  }
+
+  .navbar-toggle {
+    display: flex;
+    margin-right: 8%;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+
+  .bars-container {
+    gap: 10px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    position: relative;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition-duration: 0.5s;
+  }
+
+  .bars {
+    width: 100%;
+    height: 4px;
+    border-radius: 4px;
+    transition-duration: 0.5s;
+    background-color: $active-color;
+  }
+
+  #bar1,
+  #bar3 {
+    width: 70%;
+  }
+
+  #bar2 {
+    transition-duration: 0.8s;
+  }
+
+  .navbar-toggle.active .bars {
+    position: absolute;
+    transition-duration: 0.5s;
+  }
+
+  .navbar-toggle.active #bar2 {
+    transform: scaleX(0);
+    transition-duration: 0.5s;
+  }
+
+  .navbar-toggle.active #bar1 {
+    width: 100%;
+    transform: rotate(45deg);
+    transition-duration: 0.5s;
+  }
+
+  .navbar-toggle.active #bar3 {
+    width: 100%;
+    transform: rotate(-45deg);
+    transition-duration: 0.5s;
+  }
+
+  .navbar-toggle.active .bars-container {
+    transform: rotate(180deg);
+    transition-duration: 0.5s;
+  }
+}

@@ -1,9 +1,14 @@
-import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
-import './Navbar.css'
+import { useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
+import './Navbar.scss'
 
-const Navbar: React.FC = () => {
+const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false)
+  const location = useLocation()
+
+  const getLinkClassName = (path: string) => {
+    return location.pathname === path ? 'nav-button active' : 'nav-button'
+  }
 
   const toggleMenu = () => {
     setIsOpen(!isOpen)
@@ -11,38 +16,93 @@ const Navbar: React.FC = () => {
 
   return (
     <nav className='navbar'>
-      <div className='navbar-logo'>
-        <Link to='/'>
-          <img src='/tree.png' />
-          EcoCare
-        </Link>
+      <div className='navbar-header'>
+        {/* Navbar Logo */}
+        <div className='navbar-logo'>
+          <Link to='/'>
+            Eco<p style={{ color: '#2992ff' }}>Care</p>
+          </Link>
+        </div>
+
+        {/* Mobile toggle menu button */}
+        <button
+          className={`navbar-toggle ${isOpen ? 'active' : ''}`}
+          onClick={toggleMenu}
+        >
+          <div className='bars-container'>
+            <div className='bars' id='bar1' />
+            <div className='bars' id='bar2' />
+            <div className='bars' id='bar3' />
+          </div>
+        </button>
       </div>
 
-      {/* Toggle button for mobile */}
-      <button className='navbar-toggle' onClick={toggleMenu}>
-        {isOpen ? '✖' : '☰'}
-      </button>
-
-      {/* Navigation Links */}
+      {/* Main Navigation Links */}
       <ul className={`navbar-links ${isOpen ? 'open' : ''}`}>
         <li>
-          <Link to='/' onClick={() => setIsOpen(false)}>
-            Dashboard
+          <Link
+            to='/'
+            className={getLinkClassName('/')}
+            onClick={() => setIsOpen(false)}
+          >
+            <div className='bar' />
+            <i className='bi bi-house' />
+            Overview
           </Link>
         </li>
         <li>
-          <Link to='/devices' onClick={() => setIsOpen(false)}>
+          <Link
+            to='/devices'
+            className={getLinkClassName('/devices')}
+            onClick={() => setIsOpen(false)}
+          >
+            <div className='bar' />
+            <i className='bi bi-pc-display-horizontal' />
             Devices
           </Link>
         </li>
         <li>
-          <Link to='/utilities' onClick={() => setIsOpen(false)}>
-            Utilities
+          <Link
+            to='/statistics'
+            className={getLinkClassName('/statistics')}
+            onClick={() => setIsOpen(false)}
+          >
+            <div className='bar' />
+            <i className='bi bi-graph-up' />
+            Statistics
           </Link>
         </li>
         <li>
-          <Link to='/account' onClick={() => setIsOpen(false)}>
-            My Account
+          <Link
+            to='/rules'
+            className={getLinkClassName('/rules')}
+            onClick={() => setIsOpen(false)}
+          >
+            <div className='bar' />
+            <i className='bi bi-calendar-week' />
+            Rules
+          </Link>
+        </li>
+        <li>
+          <Link
+            to='/messages'
+            className={getLinkClassName('/messages')}
+            onClick={() => setIsOpen(false)}
+          >
+            <div className='bar' />
+            <i className='bi bi-chat-dots' />
+            Messages
+          </Link>
+        </li>
+        <li>
+          <Link
+            to='/settings'
+            className={getLinkClassName('/settings')}
+            onClick={() => setIsOpen(false)}
+          >
+            <div className='bar' />
+            <i className='bi bi-gear' />
+            Settings
           </Link>
         </li>
       </ul>
