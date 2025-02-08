@@ -1,0 +1,51 @@
+@use '/variables' as *;
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+  z-index: 10;
+
+  .dropdown-toggle {
+    display: flex;
+    min-width: 150px;
+    align-items: center;
+    padding: 4px 15px;
+    color: $grey-text;
+    border-radius: 4px;
+    background: $highlight-color;
+    justify-content: space-between;
+
+    .dropdown-arrow {
+      margin-left: 10px;
+      transition: transform 0.3s ease;
+    }
+
+    .open {
+      transform: rotate(180deg);
+    }
+  }
+
+  .dropdown-menu {
+    left: 0;
+    top: 100%;
+    position: absolute;
+    background: $highlight-color;
+    color: $clear-text;
+    font-weight: normal;
+    border-radius: 4px;
+    list-style: none;
+    padding: 0;
+    margin: 5px 0;
+    width: 100%;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+
+    li {
+      padding: 10px;
+      cursor: pointer;
+
+      &:hover {
+        background: $active-color;
+      }
+    }
+  }
+}
