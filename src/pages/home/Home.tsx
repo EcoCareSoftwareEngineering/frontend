@@ -29,7 +29,7 @@ const tableData = [
 ]
 
 // HOME PAGE SHOULD SHOW THIS:
-// Energy usage by room
+// Device usage by room
 // Solar panel performance
 // Thermostat temp + humidity
 // Security activity?
