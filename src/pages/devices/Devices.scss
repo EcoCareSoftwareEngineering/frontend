@@ -1,0 +1,64 @@
+@use '/variables' as *;
+
+.devices {
+  top: 0;
+  right: 0;
+  height: 100%;
+  display: flex;
+  position: fixed;
+  align-items: center;
+  flex-direction: column;
+  background-color: $background-color;
+  width: calc(100vw - clamp(min(15em, 30vh), min(15vw, 250px), 350px));
+
+  .MuiDataGrid-root {
+    margin-block: 8% 2%;
+    width: 90%;
+    background-color: $grey-background;
+    border: 0;
+    color: $clear-text;
+
+    div div {
+      .MuiDataGrid-topContainer {
+        .MuiDataGrid-columnHeaders .MuiDataGrid-row--borderBottom {
+          background-color: $highlight-color;
+
+          .MuiDataGrid-columnHeader {
+            border: 0;
+
+            .MuiDataGrid-columnSeparator {
+              color: $grey-text;
+            }
+
+            div button {
+              color: $grey-text;
+            }
+          }
+        }
+      }
+
+      .MuiDataGrid-virtualScrollerContent {
+        div .MuiDataGrid-row .MuiDataGrid-cell {
+          border-color: $grey-text;
+        }
+      }
+
+      div div {
+        border-color: $grey-text;
+      }
+    }
+
+    .MuiDataGrid-footerContainer {
+      border-color: $grey-text;
+
+      .MuiTablePagination-root {
+        background-color: $highlight-color;
+        color: $grey-text !important;
+
+        .MuiToolbar-root .MuiTablePagination-actions button {
+          color: $grey-text;
+        }
+      }
+    }
+  }
+}

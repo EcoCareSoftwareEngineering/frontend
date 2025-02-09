@@ -1,27 +1,23 @@
-import { DataGrid, GridRowsProp, GridColDef } from '@mui/x-data-grid'
-import { Device } from '../../types/deviceTypes'
+import { DataGrid, GridColDef } from '@mui/x-data-grid'
+import { Device, DeviceData } from '../../types/deviceTypes'
 import { useEffect, useState } from 'react'
 import API from '../../api'
 import './Devices.scss'
 
-const rows: GridRowsProp = [
-  { id: 1, col1: 'Hello', col2: 'World' },
-  { id: 2, col1: 'DataGridPro', col2: 'is Awesome' },
-  { id: 3, col1: 'MUI', col2: 'is Amazing' },
-]
-
 const columns: GridColDef[] = [
-  { field: 'col1', headerName: 'Column 1', width: 150 },
-  { field: 'col2', headerName: 'Column 2', width: 150 },
+  { field: 'name', headerName: 'Device', width: 150 },
+  { field: 'location', headerName: 'Location', width: 150 },
+  { field: 'powerOn', headerName: 'Status', width: 150 },
 ]
 
 const Devices = () => {
-  const [data, setData] = useState<Device[]>()
+  const [devices, setDevices] = useState<Device[]>()
+  const [deviceData, setDeviceData] = useState<DeviceData[]>()
 
   useEffect(() => {
     API.get('/devices')
       .then((response: any) => {
-        setData(response.data)
+        setDevices(response.data)
       })
       .catch(error => {
         console.error('Error fetching device data:', error)
@@ -29,12 +25,19 @@ const Devices = () => {
   }, [])
 
   useEffect(() => {
-    console.log(data)
-  }, [data])
+    setDeviceData(
+      devices?.map((item, index) => ({
+        id: index,
+        name: item.name,
+        location: 'Kitchen',
+        powerOn: item.status === 'On',
+      }))
+    )
+  }, [devices])
 
   return (
     <div className='devices'>
-      <DataGrid rows={rows} columns={columns} />
+      {devices && <DataGrid rows={deviceData} columns={columns} />}
     </div>
   )
 }
