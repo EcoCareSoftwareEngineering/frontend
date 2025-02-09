@@ -11,6 +11,17 @@
   background-color: $background-color;
   width: calc(100vw - clamp(min(15em, 30vh), min(15vw, 250px), 350px));
 
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+
+    .dropdown {
+      margin-inline-end: 1%;
+    }
+  }
+
   .energy-consumption {
     color: $grey-text;
     display: flex;
@@ -38,6 +49,7 @@
         list-style: none;
         height: 80%;
         min-width: 200px;
+        margin-inline-start: -0.5%;
         width: 20%;
         top: 4%;
 
