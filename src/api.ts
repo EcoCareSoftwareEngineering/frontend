@@ -1,15 +1,51 @@
 import axios from 'axios'
 
-const BASE_URL = 'http://localhost:5000/api'
+const BASE_URL = 'http://192.168.0.11:5000/api'
 
 const API = {
   get: async (url: string) => {
-    const response = await axios.get(BASE_URL + url)
-    return response
+    try {
+      const response = await axios.get(BASE_URL + url)
+      if (response.status >= 400)
+        throw new Error(`HTTP Error: ${response.status}`)
+      return response.data
+    } catch (error) {
+      console.error(`GET request to ${url} failed: ${error}`)
+      throw error
+    }
   },
   post: async (url: string, postData: object) => {
-    const response = axios.post(BASE_URL + url, postData)
-    return response
+    try {
+      const response = await axios.post(BASE_URL + url, postData)
+      if (response.status >= 400)
+        throw new Error(`HTTP Error: ${response.status}`)
+      return response.data
+    } catch (error) {
+      console.error(`POST request to ${url} failed: ${error}`)
+      throw error
+    }
+  },
+  put: async (url: string, updateData: object) => {
+    try {
+      const response = await axios.put(BASE_URL + url, updateData)
+      if (response.status >= 400)
+        throw new Error(`HTTP Error: ${response.status}`)
+      return response.data
+    } catch (error) {
+      console.error(`PUT request to ${url} failed: ${error}`)
+      throw error
+    }
+  },
+  delete: async (url: string) => {
+    try {
+      const response = await axios.delete(BASE_URL + url)
+      if (response.status >= 400)
+        throw new Error(`HTTP Error: ${response.status}`)
+      return response.data
+    } catch (error) {
+      console.error(`DELETE request to ${url} failed: ${error}`)
+      throw error
+    }
   },
 }
 
