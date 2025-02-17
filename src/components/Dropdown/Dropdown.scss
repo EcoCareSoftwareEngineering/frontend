@@ -11,9 +11,9 @@
     min-width: 150px;
     align-items: center;
     padding: 4px 15px;
-    color: $grey-text;
+    color: var(--grey-text);
     border-radius: 4px;
-    background: $highlight-color;
+    background: var(--highlight-color);
     justify-content: space-between;
 
     .dropdown-arrow {
@@ -30,8 +30,8 @@
     left: 0;
     top: 100%;
     position: absolute;
-    background: $highlight-color;
-    color: $clear-text;
+    background: var(--highlight-color);
+    color: var(--clear-text);
     font-weight: normal;
     border-radius: 4px;
     list-style: none;
@@ -46,7 +46,7 @@
       cursor: pointer;
 
       &:hover {
-        background: $active-color;
+        background: var(--active-color);
       }
     }
   }

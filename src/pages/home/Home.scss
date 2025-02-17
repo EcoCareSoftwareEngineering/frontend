@@ -8,7 +8,7 @@
   position: fixed;
   align-items: center;
   flex-direction: column;
-  background-color: $background-color;
+  background-color: var(--background-color);
   width: calc(100vw - clamp(min(15em, 30vh), min(15vw, 250px), 350px));
 
   .header {
@@ -23,7 +23,7 @@
   }
 
   .energy-consumption {
-    color: $grey-text;
+    color: var(--grey-text);
     display: flex;
     flex-direction: column;
     margin-inline: 6%;
@@ -36,7 +36,7 @@
     text-align: left;
     text-indent: 20px;
     font-size: 1.1rem;
-    background-color: $grey-background;
+    background-color: var(--grey-background);
 
     .data-container {
       position: relative;
@@ -80,7 +80,7 @@
               margin: 0;
             }
             .label {
-              color: $clear-text;
+              color: var(--clear-text);
               position: absolute;
               top: 25%;
             }
@@ -100,15 +100,15 @@
         right: 0;
 
         .MuiChartsAxis-line {
-          stroke: $background-color;
+          stroke: var(--background-color);
         }
 
         .MuiChartsAxis-tickLabel {
-          fill: $grey-text;
+          fill: var(--grey-text);
         }
 
         .MuiChartsAxis-tick {
-          fill: $grey-background;
+          fill: var(--grey-background);
           display: 'none';
         }
       }
@@ -175,7 +175,7 @@
     position: fixed;
 
     .energy-consumption {
-      color: $grey-text;
+      color: var(--grey-text);
       margin-inline: 0;
     }
   }
