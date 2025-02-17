@@ -2,7 +2,8 @@ import axios from 'axios'
 
 const BASE_URL = 'http://192.168.0.11:5000/api'
 
-const API = {
+// API utility wrapper
+export const API = {
   get: async (url: string) => {
     try {
       const response = await axios.get(BASE_URL + url)
@@ -49,4 +50,9 @@ const API = {
   },
 }
 
-export default API
+// Get SCSS variable by name
+export const getCSSVariable = (variable: string) => {
+  return getComputedStyle(document.documentElement)
+    .getPropertyValue(variable)
+    .trim()
+}
