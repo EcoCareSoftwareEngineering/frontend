@@ -1,7 +1,8 @@
 export interface Device {
-  name: string
   deviceId: number
+  name: string
   description?: string
+  location?: string
   unlocked?: boolean
   ipAddress?: string
   pinEnabled?: boolean
