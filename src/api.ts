@@ -8,7 +8,7 @@ const API = {
       const response = await axios.get(BASE_URL + url)
       if (response.status >= 400)
         throw new Error(`HTTP Error: ${response.status}`)
-      return response.data
+      return response
     } catch (error) {
       console.error(`GET request to ${url} failed: ${error}`)
       throw error
@@ -19,7 +19,7 @@ const API = {
       const response = await axios.post(BASE_URL + url, postData)
       if (response.status >= 400)
         throw new Error(`HTTP Error: ${response.status}`)
-      return response.data
+      return response
     } catch (error) {
       console.error(`POST request to ${url} failed: ${error}`)
       throw error
@@ -30,7 +30,7 @@ const API = {
       const response = await axios.put(BASE_URL + url, updateData)
       if (response.status >= 400)
         throw new Error(`HTTP Error: ${response.status}`)
-      return response.data
+      return response
     } catch (error) {
       console.error(`PUT request to ${url} failed: ${error}`)
       throw error
@@ -41,7 +41,7 @@ const API = {
       const response = await axios.delete(BASE_URL + url)
       if (response.status >= 400)
         throw new Error(`HTTP Error: ${response.status}`)
-      return response.data
+      return response
     } catch (error) {
       console.error(`DELETE request to ${url} failed: ${error}`)
       throw error
