@@ -50,6 +50,17 @@
             outline: none;
           }
 
+          .device-nav {
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--clear-text);
+
+            &:hover {
+              color: var(--active-color);
+              text-decoration: underline;
+            }
+          }
+
           .power-cell {
             justify-content: flex-end;
           }

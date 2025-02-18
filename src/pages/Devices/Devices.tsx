@@ -11,6 +11,7 @@ import {
   Box,
 } from '@mui/material'
 import './Devices.scss'
+import { Link } from 'react-router-dom'
 
 const Devices = () => {
   const [selectedDevice, setSelectedDevice] = useState<TDevice | null>(null)
@@ -18,6 +19,17 @@ const Devices = () => {
   const [isLoading, setIsLoading] = useState<Boolean>(false)
   const [isEdited, setIsEdited] = useState<Boolean>(false)
   const [devices, setDevices] = useState<TDevice[]>()
+
+  useEffect(() => {
+    API.get('/devices/').then((response: any) => {
+      setDevices(
+        response.data.map((device: TDevice) => ({
+          ...device,
+          location: 'Kitchen',
+        }))
+      )
+    })
+  }, [])
 
   // useDeferredValue resolves intensive re-rendering issue
   useDeferredValue(currentDevice)
@@ -81,27 +93,36 @@ const Devices = () => {
     })
   }
 
-  useEffect(() => {
-    API.get('/devices/').then((response: any) => {
-      setDevices(
-        response.data.map((device: TDevice) => ({
-          ...device,
-          location: 'Kitchen',
-        }))
-      )
-    })
-  }, [])
-
   const columns: GridColDef[] = [
     {
       field: 'deviceId',
       headerName: 'ID',
       width: 70,
       renderCell: (params: any) => (
-        <div style={{ textIndent: '5px' }}>{params.value}</div>
+        <Link
+          className='device-nav'
+          state={{ device: params.row }}
+          to={`/devices/${params.value}`}
+        >
+          {params.value}
+        </Link>
       ),
     },
-    { field: 'name', headerName: 'Device', minWidth: 150, flex: 8 },
+    {
+      field: 'name',
+      headerName: 'Device',
+      minWidth: 150,
+      flex: 8,
+      renderCell: (params: any) => (
+        <Link
+          className='device-nav'
+          state={{ device: params.row }}
+          to={`/devices/${params.row.deviceId}`}
+        >
+          {params.value}
+        </Link>
+      ),
+    },
     { field: 'location', headerName: 'Location', minWidth: 150, flex: 8 },
     {
       field: 'status',
