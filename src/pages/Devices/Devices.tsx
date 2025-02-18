@@ -1,7 +1,7 @@
 import { useDeferredValue, useEffect, useState } from 'react'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import { API, getCSSVariable } from '../../utils'
-import { Device } from '../../types/deviceTypes'
+import { TDevice } from '../../types/deviceTypes'
 import {
   useMediaQuery,
   Typography,
@@ -13,11 +13,11 @@ import {
 import './Devices.scss'
 
 const Devices = () => {
-  const [selectedDevice, setSelectedDevice] = useState<Device | null>(null)
-  const [currentDevice, setCurrentDevice] = useState<Device>()
+  const [selectedDevice, setSelectedDevice] = useState<TDevice | null>(null)
+  const [currentDevice, setCurrentDevice] = useState<TDevice>()
   const [isLoading, setIsLoading] = useState<Boolean>(false)
   const [isEdited, setIsEdited] = useState<Boolean>(false)
-  const [devices, setDevices] = useState<Device[]>()
+  const [devices, setDevices] = useState<TDevice[]>()
 
   // useDeferredValue resolves intensive re-rendering issue
   useDeferredValue(currentDevice)
@@ -27,7 +27,7 @@ const Devices = () => {
 
   const [showDelete, setShowDelete] = useState<boolean>(false)
   const setDeleteIsClosed = () => setShowDelete(false)
-  const handleClickDelete = (row: Device) => {
+  const handleClickDelete = (row: TDevice) => {
     setSelectedDevice(row)
     setShowDelete(true)
   }
@@ -47,14 +47,14 @@ const Devices = () => {
 
   const [showEdit, setShowEdit] = useState<boolean>(false)
   const setEditIsClosed = () => setShowEdit(false)
-  const handleClickEdit = (row: Device) => {
+  const handleClickEdit = (row: TDevice) => {
     setSelectedDevice(row)
     setCurrentDevice(row)
     setShowEdit(true)
   }
 
   // Handle update device call and data grid update
-  const updateDevice = (updatedDevice?: Device) => {
+  const updateDevice = (updatedDevice?: TDevice) => {
     API.put(`/devices/${updatedDevice?.deviceId}/`, updatedDevice).then(
       (response: any) => {
         if (response.status == 200) {
@@ -71,8 +71,8 @@ const Devices = () => {
       if (selectedDevice) {
         const hasChanges = ['name', 'description', 'location'].some(
           field =>
-            updatedDevice[field as keyof Device] !==
-            selectedDevice[field as keyof Device]
+            updatedDevice[field as keyof TDevice] !==
+            selectedDevice[field as keyof TDevice]
         )
         if (hasChanges !== isEdited) setIsEdited(hasChanges)
       } else if (!isEdited) setIsEdited(true)
@@ -84,7 +84,7 @@ const Devices = () => {
   useEffect(() => {
     API.get('/devices/').then((response: any) => {
       setDevices(
-        response.data.map((device: Device) => ({
+        response.data.map((device: TDevice) => ({
           ...device,
           location: 'Kitchen',
         }))

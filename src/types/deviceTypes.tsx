@@ -1,4 +1,4 @@
-export interface Device {
+export interface TDevice {
   deviceId: number
   name: string
   description?: string
@@ -7,12 +7,12 @@ export interface Device {
   ipAddress?: string
   pinEnabled?: boolean
   uptimeTimestamp?: null
-  state: DeviceState[]
+  state: TDeviceState[]
   status: 'On' | 'Off'
   faultStatus: 'Ok' | 'Fault'
 }
 
-export interface DeviceState {
+export interface TDeviceState {
   dataType: string
   fieldName: string
   value: number
