@@ -183,9 +183,9 @@ const Devices = () => {
         return (
           <div className='actions'>
             <Tooltip title='Edit device'>
-              <div role='button' onClick={() => handleClickEdit(params.row)}>
+              <Button onClick={() => handleClickEdit(params.row)}>
                 <i className='bi bi-pencil' />
-              </div>
+              </Button>
             </Tooltip>
             <Modal
               open={showEdit}
@@ -245,9 +245,9 @@ const Devices = () => {
               </Box>
             </Modal>
             <Tooltip title='Delete device'>
-              <div role='button' onClick={() => handleClickDelete(params.row)}>
+              <Button onClick={() => handleClickDelete(params.row)}>
                 <i className='bi bi-trash' />
-              </div>
+              </Button>
             </Tooltip>
             <Modal
               open={showDelete}

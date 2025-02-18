@@ -95,16 +95,18 @@
             height: 100%;
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 0.1rem;
+            justify-content: flex-start;
 
-            div[role='button'] {
-              transition: background-color 0.1s, color 0.1s;
+            button {
+              width: 45%;
+              height: 75%;
+              display: flex;
+              min-width: unset;
               border-radius: 25px;
               align-items: center;
-              cursor: pointer;
-              display: flex;
-              height: 75%;
+              justify-content: center;
+              color: var(--clear-text);
+              transition: background-color 0.1s, color 0.1s;
 
               &:hover {
                 background: var(--highlight-color);
