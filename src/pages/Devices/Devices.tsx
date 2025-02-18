@@ -102,6 +102,7 @@ const Devices = () => {
       renderCell: (params: any) => (
         <Link
           className='device-nav'
+          style={{ paddingLeft: '5px' }}
           state={{ device: params.row }}
           to={`/devices/${params.value}`}
         >
