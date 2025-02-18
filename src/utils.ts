@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const BASE_URL = 'http://192.168.0.11:5000/api'
+const BASE_URL = 'http://localhost:5000/api'
 
 // API utility wrapper
 export const API = {
@@ -26,7 +26,7 @@ export const API = {
       throw error
     }
   },
-  put: async (url: string, updateData: object) => {
+  put: async (url: string, updateData?: object) => {
     try {
       const response = await axios.put(BASE_URL + url, updateData)
       if (response.status >= 400)

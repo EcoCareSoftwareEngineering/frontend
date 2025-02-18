@@ -140,15 +140,33 @@
     background-color: var(--background-color);
     box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
 
+    .device-info {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      margin-block: 15px;
+      gap: 2px 25px;
+
+      .field-name {
+        padding-bottom: 7px;
+      }
+
+      .input-field-name {
+        padding-top: 7px;
+      }
+
+      .MuiFormControl-root {
+        left: -8px;
+        background-color: var(--grey-background);
+
+        input {
+          font-size: 0.95rem;
+          color: var(--clear-text);
+        }
+      }
+    }
+
     #modal-description {
       margin-bottom: 25px;
-
-      .device-info {
-        display: grid;
-        grid-template-columns: auto 1fr;
-        margin-bottom: 15px;
-        gap: 2px 25px;
-      }
     }
 
     .actions {
@@ -166,6 +184,10 @@
       .update-btn {
         background-color: var(--active-color);
         padding-inline: 1.3rem;
+
+        &.Mui-disabled {
+          background-color: var(--grey-background);
+        }
 
         i {
           padding-right: 0.6rem;

@@ -1,15 +1,26 @@
-import { Box, Typography, Modal, Button } from '@mui/material'
+import { useDeferredValue, useEffect, useState } from 'react'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import { API, getCSSVariable } from '../../utils'
 import { Device } from '../../types/deviceTypes'
-import { useEffect, useState } from 'react'
+import {
+  useMediaQuery,
+  Typography,
+  TextField,
+  Button,
+  Modal,
+  Box,
+} from '@mui/material'
 import './Devices.scss'
 
 const Devices = () => {
   const [selectedDevice, setSelectedDevice] = useState<Device | null>(null)
-  const [currentDevice, setCurrentDevice] = useState<Device | null>(null)
+  const [currentDevice, setCurrentDevice] = useState<Device>()
   const [isLoading, setIsLoading] = useState<Boolean>(false)
+  const [isEdited, setIsEdited] = useState<Boolean>(false)
   const [devices, setDevices] = useState<Device[]>()
+
+  // useDeferredValue resolves intensive re-rendering issue
+  useDeferredValue(currentDevice)
 
   const onColor = getCSSVariable('--on-color')
   const offColor = getCSSVariable('--off-color')
@@ -21,6 +32,7 @@ const Devices = () => {
     setShowDelete(true)
   }
 
+  // Handle device deletion call and data grid update
   const deleteDevice = (deviceId?: number) => {
     setIsLoading(true)
     API.delete(`/devices/${deviceId}/`).then((response: any) => {
@@ -37,13 +49,35 @@ const Devices = () => {
   const setEditIsClosed = () => setShowEdit(false)
   const handleClickEdit = (row: Device) => {
     setSelectedDevice(row)
+    setCurrentDevice(row)
     setShowEdit(true)
   }
 
-  const updateDevice = (deviceId: number, updatedDevice: Device) => {
-    API.put(`/devices/${deviceId}/`, updatedDevice).then((response: any) => {
-      if (response.status == 200) {
+  // Handle update device call and data grid update
+  const updateDevice = (updatedDevice?: Device) => {
+    API.put(`/devices/${updatedDevice?.deviceId}/`, updatedDevice).then(
+      (response: any) => {
+        if (response.status == 200) {
+        }
       }
+    )
+  }
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCurrentDevice(prev => {
+      if (!prev) return prev
+      const updatedDevice = { ...prev, [e.target.name]: e.target.value }
+
+      if (selectedDevice) {
+        const hasChanges = ['name', 'description', 'location'].some(
+          field =>
+            updatedDevice[field as keyof Device] !==
+            selectedDevice[field as keyof Device]
+        )
+        if (hasChanges !== isEdited) setIsEdited(hasChanges)
+      } else if (!isEdited) setIsEdited(true)
+
+      return updatedDevice
     })
   }
 
@@ -55,7 +89,6 @@ const Devices = () => {
           location: 'Kitchen',
         }))
       )
-      console.log(devices)
     })
   }, [])
 
@@ -63,18 +96,21 @@ const Devices = () => {
     {
       field: 'deviceId',
       headerName: 'ID',
-      width: 75,
-      renderCell: params => (
+      width: 70,
+      renderCell: (params: any) => (
         <div style={{ textIndent: '5px' }}>{params.value}</div>
       ),
     },
-    { field: 'name', headerName: 'Device', width: 150 },
-    { field: 'location', headerName: 'Location', width: 150 },
+    { field: 'name', headerName: 'Device', minWidth: 150, flex: 8 },
+    { field: 'location', headerName: 'Location', minWidth: 150, flex: 8 },
     {
       field: 'status',
       headerName: 'Power',
-      width: 100,
-      renderCell: params => (
+      flex: 5,
+      minWidth: 70,
+      sortable: false,
+      disableColumnMenu: true,
+      renderCell: (params: any) => (
         <div className='status-cell power-cell'>
           <div
             className='power value'
@@ -90,8 +126,11 @@ const Devices = () => {
     {
       field: 'faultStatus',
       headerName: 'Fault',
-      width: 100,
-      renderCell: params => (
+      flex: 7,
+      minWidth: 70,
+      sortable: false,
+      disableColumnMenu: true,
+      renderCell: (params: any) => (
         <div className='status-cell fault-cell'>
           <div
             className='fault value'
@@ -104,13 +143,20 @@ const Devices = () => {
         </div>
       ),
     },
+    !useMediaQuery('(max-width:1000px)') && {
+      field: 'description',
+      headerName: 'Description',
+      flex: 20,
+      minWidth: 250,
+    },
     {
       field: 'deviceActions',
       headerName: 'Actions',
+      resizable: false,
       width: 100,
       sortable: false,
       disableColumnMenu: true,
-      renderCell: params => {
+      renderCell: (params: any) => {
         return (
           <div className='actions'>
             <div role='button' onClick={() => handleClickEdit(params.row)}>
@@ -123,19 +169,50 @@ const Devices = () => {
               aria-describedby='modal-modal-description'
             >
               <Box>
-                <Typography id='modal-modal-title' variant='h6' component='h2'>
+                <Typography
+                  id='modal-modal-title'
+                  fontWeight='bold'
+                  variant='h5'
+                >
                   Edit Device Details:
                 </Typography>
-                <Typography id='modal-modal-description' sx={{ mt: 2 }}>
-                  Duis mollis, est non commodo luctus, nisi erat porttitor
-                  ligula.
-                </Typography>
+                <div className='device-info'>
+                  <strong className='field-name'>Device ID:</strong>{' '}
+                  {selectedDevice?.deviceId}
+                  <strong className='field-name'>IP Address:</strong>{' '}
+                  {selectedDevice?.ipAddress}
+                  <strong className='input-field-name'>Name:</strong>
+                  <TextField
+                    size='small'
+                    name='name'
+                    defaultValue={currentDevice?.name}
+                    onChange={handleChange}
+                  />
+                  <strong className='input-field-name'>Description:</strong>
+                  <TextField
+                    size='small'
+                    name='description'
+                    value={currentDevice?.description}
+                    onChange={handleChange}
+                  />
+                  <strong className='input-field-name'>Location:</strong>
+                  <TextField
+                    size='small'
+                    name='location'
+                    value={currentDevice?.location}
+                    onChange={handleChange}
+                  />
+                </div>
                 <div className='actions'>
                   <Button className='cancel-btn' onClick={setEditIsClosed}>
                     <i className='bi bi-x-lg' />
                     Cancel
                   </Button>
-                  <Button className='update-btn'>
+                  <Button
+                    disabled={!isEdited}
+                    className={`update-btn ${isEdited ?? 'disabled'}`}
+                    onClick={() => updateDevice(currentDevice)}
+                  >
                     <i className='bi bi-floppy' />
                     Save
                   </Button>
@@ -159,14 +236,14 @@ const Devices = () => {
                 >
                   Remove Device from System:
                 </Typography>
+                <div className='device-info'>
+                  <strong>Device ID:</strong> {selectedDevice?.deviceId}
+                  <strong>Name:</strong> {selectedDevice?.name}
+                  <strong>Description:</strong> {selectedDevice?.description}
+                  <strong>IP Address:</strong> {selectedDevice?.ipAddress}
+                  <strong>Location:</strong> {selectedDevice?.location}
+                </div>
                 <Typography id='modal-description' sx={{ mt: 2 }}>
-                  <div className='device-info'>
-                    <strong>Device ID:</strong> {selectedDevice?.deviceId}
-                    <strong>Name:</strong> {selectedDevice?.name}
-                    <strong>Description:</strong> {selectedDevice?.description}
-                    <strong>IP Address:</strong> {selectedDevice?.ipAddress}
-                    <strong>Location:</strong> {selectedDevice?.location}
-                  </div>
                   Are you sure you want to delete this device from the system?
                   Once it was been removed, it will needed to be reconnected
                   again.
@@ -190,7 +267,7 @@ const Devices = () => {
         )
       },
     },
-  ]
+  ].filter(Boolean) as GridColDef[]
 
   return (
     <div className='devices'>
@@ -202,6 +279,7 @@ const Devices = () => {
           rowCount={devices.length}
           getRowId={row => row.deviceId}
           disableRowSelectionOnClick
+          disableColumnResize
         />
       )}
     </div>
