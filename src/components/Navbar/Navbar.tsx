@@ -7,7 +7,13 @@ const Navbar = () => {
   const location = useLocation()
 
   const getLinkClassName = (path: string) => {
-    return location.pathname === path ? 'nav-button active' : 'nav-button'
+    if (path !== '/') {
+      return location.pathname.includes(path)
+        ? 'nav-button active'
+        : 'nav-button'
+    } else if (path === '/') {
+      return location.pathname == '/' ? 'nav-button active' : 'nav-button'
+    }
   }
 
   const toggleMenu = () => {
