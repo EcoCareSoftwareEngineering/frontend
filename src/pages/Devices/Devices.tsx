@@ -2,16 +2,17 @@ import { useDeferredValue, useEffect, useState } from 'react'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import { API, getCSSVariable } from '../../utils'
 import { TDevice } from '../../types/deviceTypes'
+import { Link } from 'react-router-dom'
 import {
   useMediaQuery,
   Typography,
   TextField,
+  Tooltip,
   Button,
   Modal,
   Box,
 } from '@mui/material'
 import './Devices.scss'
-import { Link } from 'react-router-dom'
 
 const Devices = () => {
   const [selectedDevice, setSelectedDevice] = useState<TDevice | null>(null)
@@ -180,9 +181,11 @@ const Devices = () => {
       renderCell: (params: any) => {
         return (
           <div className='actions'>
-            <div role='button' onClick={() => handleClickEdit(params.row)}>
-              <i className='bi bi-pencil' />
-            </div>
+            <Tooltip title='Edit device'>
+              <div role='button' onClick={() => handleClickEdit(params.row)}>
+                <i className='bi bi-pencil' />
+              </div>
+            </Tooltip>
             <Modal
               open={showEdit}
               onClose={setEditIsClosed}
@@ -240,9 +243,11 @@ const Devices = () => {
                 </div>
               </Box>
             </Modal>
-            <div role='button' onClick={() => handleClickDelete(params.row)}>
-              <i className='bi bi-trash' />
-            </div>
+            <Tooltip title='Delete device'>
+              <div role='button' onClick={() => handleClickDelete(params.row)}>
+                <i className='bi bi-trash' />
+              </div>
+            </Tooltip>
             <Modal
               open={showDelete}
               onClose={setDeleteIsClosed}
