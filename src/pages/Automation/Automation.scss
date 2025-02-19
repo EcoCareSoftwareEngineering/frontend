@@ -10,4 +10,9 @@
   flex-direction: column;
   background-color: var(--background-color);
   width: calc(100vw - clamp(min(15em, 30vh), min(15vw, 250px), 350px));
+
+  .fc {
+    width: 90%;
+    height: 85%;
+  }
 }
