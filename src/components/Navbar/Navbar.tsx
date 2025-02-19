@@ -80,13 +80,13 @@ const Navbar = () => {
         </li>
         <li>
           <Link
-            to='/rules'
-            className={getLinkClassName('/rules')}
+            to='/automation'
+            className={getLinkClassName('/automation')}
             onClick={() => setIsOpen(false)}
           >
             <div className='bar' />
             <i className='bi bi-calendar-week' />
-            Rules
+            Automation
           </Link>
         </li>
         <li>
