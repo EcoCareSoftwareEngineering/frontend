@@ -2,6 +2,7 @@ import { useLocation, useParams } from 'react-router-dom'
 import { TDevice } from '../../types/deviceTypes'
 import { useEffect, useState } from 'react'
 import { API } from '../../utils'
+import './Device.scss'
 
 const Device = () => {
   const { id } = useParams()
@@ -25,7 +26,7 @@ const Device = () => {
   }, [])
 
   return (
-    <div>
+    <div className='device'>
       <h2>Device Details</h2>
       <p>Device ID: {id}</p>
       {device && <p>Name: {device?.name}</p>}
