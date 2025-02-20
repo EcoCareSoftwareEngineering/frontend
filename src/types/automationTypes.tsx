@@ -8,10 +8,10 @@ export interface TAutomation {
 }
 
 export interface TAutomationEvent {
-  id: number
+  id: string
   title: string
-  start: Date
-  end: Date
+  start: string
+  end: string
   extendedProps?: any
   allDay?: false
 }
