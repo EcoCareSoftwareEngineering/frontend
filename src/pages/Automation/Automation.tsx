@@ -4,6 +4,7 @@ import interactionPlugin from '@fullcalendar/interaction'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import FullCalendar from '@fullcalendar/react'
+import { enqueueSnackbar } from 'notistack'
 import { useEffect, useState } from 'react'
 import { API } from '../../utils'
 import './Automation.scss'
@@ -14,22 +15,33 @@ const Device = () => {
   const [isLoading, setIsLoading] = useState<Boolean>(false)
 
   useEffect(() => {
-    API.get('/automations/').then((response: any) => {
-      const newAutomations = response.data.map((automation: TAutomation) => ({
-        ...automation,
-        dateTime: new Date(automation.dateTime),
-      }))
-
-      setAutomations(newAutomations)
-      setAutomationEvents(
-        newAutomations.map((automation: TAutomation) => ({
-          id: automation.automationId.toString(),
-          start: automation.dateTime.toISOString(),
-          end: automation.dateTime.toISOString(),
-          title: `${automation.deviceId} set ${automation.newState[0].fieldName} to ${automation.newState[0].value}`,
+    API.get('/automations/')
+      .then((response: any) => {
+        const newAutomations = response.data.map((automation: TAutomation) => ({
+          ...automation,
+          dateTime: new Date(automation.dateTime),
         }))
-      )
-    })
+
+        setAutomations(newAutomations)
+        setAutomationEvents(
+          newAutomations.map((automation: TAutomation) => ({
+            id: automation.automationId.toString(),
+            start: automation.dateTime.toISOString(),
+            end: automation.dateTime.toISOString(),
+            title: `${automation.deviceId} set ${automation.newState[0].fieldName} to ${automation.newState[0].value}`,
+          }))
+        )
+      })
+      .catch((err: any) => {
+        enqueueSnackbar(err.message ?? 'Error fetching automations', {
+          variant: 'error',
+          preventDuplicate: true,
+          anchorOrigin: {
+            vertical: 'top',
+            horizontal: 'right',
+          },
+        })
+      })
   }, [])
 
   useEffect(() => {
@@ -46,7 +58,7 @@ const Device = () => {
 
   return (
     <div className='automation'>
-      <h2>Automation {automationEvents?.length}</h2>
+      <h2>Automations</h2>
       {automationEvents && automationEvents.length > 0 && (
         <FullCalendar
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}

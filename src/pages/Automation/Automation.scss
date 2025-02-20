@@ -14,5 +14,57 @@
   .fc {
     width: 90%;
     height: 85%;
+    color: var(--clear-text);
+
+    // Calendar event
+    .fc-event {
+      cursor: pointer;
+    }
+
+    // Calendar column header
+    [role='columnheader'] div {
+      background-color: var(--grey-background);
+      padding-block: 5px;
+      a {
+        color: var(--clear-text) !important;
+      }
+    }
+
+    // Calendar grid
+    [role='grid'] {
+      border: 0;
+    }
+
+    // Calendar month view - day cell
+    .fc-daygrid-day-number {
+      color: var(--clear-text) !important;
+    }
   }
+}
+
+// Override FullCalendar styling
+// Grid day cell frame
+.fc-daygrid-day-frame {
+  background-color: var(--highlight-color);
+}
+
+// Grid day cell
+.fc-theme-standard td {
+  border: 2.4px solid var(--grey-background) !important;
+}
+
+// Grid day cell (Today)
+.fc-day-today .fc-daygrid-day-frame {
+  background-color: #ae992131;
+}
+
+// All grid cells
+.fc-theme-standard td,
+.fc-theme-standard th {
+  border: 0px;
+}
+
+// Calendar scrollbar
+.fc-scroller::-webkit-scrollbar {
+  display: none;
 }
