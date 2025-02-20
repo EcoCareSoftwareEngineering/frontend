@@ -1,14 +1,14 @@
+import { TDevice } from '../types/deviceTypes'
+import { enqueueSnackbar } from 'notistack'
+import { API } from '../utils'
 import {
-  createContext,
-  Dispatch,
   SetStateAction,
+  createContext,
   useContext,
   useEffect,
   useState,
+  Dispatch,
 } from 'react'
-import { TDevice } from '../types/deviceTypes'
-import { API } from '../utils'
-import { enqueueSnackbar } from 'notistack'
 
 interface DeviceContextType {
   devices: TDevice[]
