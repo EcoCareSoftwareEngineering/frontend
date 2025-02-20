@@ -12,6 +12,7 @@ import {
 
 interface DeviceContextType {
   devices: TDevice[]
+  devicesLoaded: boolean
   setDevices: Dispatch<SetStateAction<TDevice[]>>
   refreshDevices: () => void
 }
@@ -22,6 +23,7 @@ export const DeviceContext = createContext<DeviceContextType | undefined>(
 
 // Context for devices
 export const DeviceProvider = ({ children }: { children: React.ReactNode }) => {
+  const [isLoading, setIsLoading] = useState<boolean>(true)
   const [devices, setDevicesList] = useState<TDevice[]>([])
 
   const fetchDevices = async () => {
@@ -34,6 +36,7 @@ export const DeviceProvider = ({ children }: { children: React.ReactNode }) => {
           }))
         )
       })
+      .then(() => setIsLoading(false))
       .catch((err: any) => {
         enqueueSnackbar(err.message, {
           variant: 'error',
@@ -54,6 +57,7 @@ export const DeviceProvider = ({ children }: { children: React.ReactNode }) => {
     <DeviceContext.Provider
       value={{
         devices,
+        devicesLoaded: !isLoading,
         setDevices: setDevicesList,
         refreshDevices: fetchDevices,
       }}
