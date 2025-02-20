@@ -5,8 +5,8 @@ import interactionPlugin from '@fullcalendar/interaction'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import FullCalendar from '@fullcalendar/react'
-import { enqueueSnackbar } from 'notistack'
 import { useEffect, useState } from 'react'
+import { enqueueSnackbar } from 'notistack'
 import { API } from '../../utils'
 import './Automation.scss'
 
@@ -18,7 +18,6 @@ const Automation = () => {
 
   useEffect(() => {
     if (!devicesLoaded) return
-
     API.get('/automations/')
       .then((response: any) => {
         setAutomations(
@@ -75,8 +74,9 @@ const Automation = () => {
       <h2>Automations</h2>
       <FullCalendar
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-        initialView={'dayGridMonth'}
+        navLinks={true}
         events={automationEvents}
+        initialView={'dayGridMonth'}
         eventClick={handleEventClick}
         eventContent={(eventInfo: EventContentArg) => (
           <div className='event-content'>
@@ -87,12 +87,17 @@ const Automation = () => {
         eventTimeFormat={{
           hour: 'numeric',
           minute: '2-digit',
-          meridiem: 'short', // 'short' for AM/PM, or use 'narrow'/'long'
+          meridiem: 'short',
         }}
         headerToolbar={{
-          left: 'prev,next today',
           center: 'title',
-          right: 'dayGridMonth,timeGridWeek,timeGridDay',
+          left: 'prev,next today',
+          right: 'dayGridMonth,timeGridWeek,timeGridDay myCustomButton',
+        }}
+        customButtons={{
+          myCustomButton: {
+            text: 'Add Automation',
+          },
         }}
       />
     </div>
