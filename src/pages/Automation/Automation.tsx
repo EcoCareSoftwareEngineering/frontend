@@ -1,5 +1,6 @@
 import { EventClickArg, EventContentArg } from '@fullcalendar/core/index.js'
 import { TAutomation, TAutomationEvent } from '../../types/automationTypes'
+import { useDevices } from '../../contexts/DeviceContext'
 import interactionPlugin from '@fullcalendar/interaction'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import dayGridPlugin from '@fullcalendar/daygrid'
@@ -9,26 +10,21 @@ import { useEffect, useState } from 'react'
 import { API } from '../../utils'
 import './Automation.scss'
 
-const Device = () => {
+const Automation = () => {
   const [automationEvents, setAutomationEvents] = useState<TAutomationEvent[]>()
   const [automations, setAutomations] = useState<TAutomation[]>()
   const [isLoading, setIsLoading] = useState<Boolean>(false)
+  const { devices, devicesLoaded } = useDevices()
 
   useEffect(() => {
+    if (!devicesLoaded) return
+
     API.get('/automations/')
       .then((response: any) => {
-        const newAutomations = response.data.map((automation: TAutomation) => ({
-          ...automation,
-          dateTime: new Date(automation.dateTime),
-        }))
-
-        setAutomations(newAutomations)
-        setAutomationEvents(
-          newAutomations.map((automation: TAutomation) => ({
-            id: automation.automationId.toString(),
-            start: automation.dateTime.toISOString(),
-            end: automation.dateTime.toISOString(),
-            title: `${automation.deviceId} set ${automation.newState[0].fieldName} to ${automation.newState[0].value}`,
+        setAutomations(
+          response.data.map((automation: TAutomation) => ({
+            ...automation,
+            dateTime: new Date(automation.dateTime),
           }))
         )
       })
@@ -42,14 +38,32 @@ const Device = () => {
           },
         })
       })
-  }, [])
+  }, [devicesLoaded])
 
   useEffect(() => {
-    if (automations) console.log(automations)
+    if (automations && automations.length > 0)
+      setAutomationEvents(
+        automations.map((automation: TAutomation) => {
+          const device = devices.find(
+            item => item.deviceId === automation.deviceId
+          )
+          return {
+            device: device,
+            title: `${device?.name}`,
+            id: automation.automationId.toString(),
+            end: automation.dateTime.toISOString(),
+            start: automation.dateTime.toISOString(),
+          }
+        })
+      )
   }, [automations])
 
   useEffect(() => {
-    if (automationEvents) console.log(automationEvents)
+    if (automations) console.log('Automations', automations)
+  }, [automations])
+
+  useEffect(() => {
+    if (automationEvents) console.log('Automation events', automationEvents)
   }, [automationEvents])
 
   const handleEventClick = (clickInfo: EventClickArg) => {
@@ -59,32 +73,30 @@ const Device = () => {
   return (
     <div className='automation'>
       <h2>Automations</h2>
-      {automationEvents && automationEvents.length > 0 && (
-        <FullCalendar
-          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-          initialView={'dayGridMonth'}
-          initialEvents={automationEvents}
-          eventClick={handleEventClick}
-          eventContent={(eventInfo: EventContentArg) => (
-            <>
-              <b>{eventInfo.timeText}:&nbsp;</b>
-              <i>{eventInfo.event.title}</i>
-            </>
-          )}
-          eventTimeFormat={{
-            hour: 'numeric',
-            minute: '2-digit',
-            meridiem: 'short', // 'short' for AM/PM, or use 'narrow'/'long'
-          }}
-          headerToolbar={{
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay',
-          }}
-        />
-      )}
+      <FullCalendar
+        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+        initialView={'dayGridMonth'}
+        events={automationEvents}
+        eventClick={handleEventClick}
+        eventContent={(eventInfo: EventContentArg) => (
+          <div className='event-content'>
+            <b>{eventInfo.timeText}:&nbsp;</b>
+            <i>{eventInfo.event.title}</i>
+          </div>
+        )}
+        eventTimeFormat={{
+          hour: 'numeric',
+          minute: '2-digit',
+          meridiem: 'short', // 'short' for AM/PM, or use 'narrow'/'long'
+        }}
+        headerToolbar={{
+          left: 'prev,next today',
+          center: 'title',
+          right: 'dayGridMonth,timeGridWeek,timeGridDay',
+        }}
+      />
     </div>
   )
 }
 
-export default Device
+export default Automation

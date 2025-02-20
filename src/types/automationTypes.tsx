@@ -1,4 +1,4 @@
-import { TDeviceState } from './deviceTypes'
+import { TDevice, TDeviceState } from './deviceTypes'
 
 export interface TAutomation {
   automationId: number
@@ -9,9 +9,10 @@ export interface TAutomation {
 
 export interface TAutomationEvent {
   id: string
-  title: string
-  start: string
   end: string
-  extendedProps?: any
+  start: string
+  title: string
   allDay?: false
+  device?: TDevice
+  extendedProps?: any
 }
