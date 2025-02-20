@@ -1,4 +1,5 @@
 import { useDeferredValue, useEffect, useState } from 'react'
+import { useDevices } from '../../contexts/DeviceContext'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import { API, getCSSVariable } from '../../utils'
 import { TDevice } from '../../types/deviceTypes'
@@ -13,24 +14,14 @@ import {
   Box,
 } from '@mui/material'
 import './Devices.scss'
+import { enqueueSnackbar } from 'notistack'
 
 const Devices = () => {
   const [selectedDevice, setSelectedDevice] = useState<TDevice | null>(null)
   const [currentDevice, setCurrentDevice] = useState<TDevice>()
   const [isLoading, setIsLoading] = useState<Boolean>(false)
   const [isEdited, setIsEdited] = useState<Boolean>(false)
-  const [devices, setDevices] = useState<TDevice[]>()
-
-  useEffect(() => {
-    API.get('/devices/').then((response: any) => {
-      setDevices(
-        response.data.map((device: TDevice) => ({
-          ...device,
-          location: 'Kitchen',
-        }))
-      )
-    })
-  }, [])
+  const { devices, setDevices } = useDevices()
 
   // useDeferredValue resolves intensive re-rendering issue
   useDeferredValue(currentDevice)
@@ -48,13 +39,24 @@ const Devices = () => {
   // Handle device deletion call and data grid update
   const deleteDevice = (deviceId?: number) => {
     setIsLoading(true)
-    API.delete(`/devices/${deviceId}/`).then((response: any) => {
-      if (response.status == 200) {
-        setSelectedDevice(null)
-        setDevices(devices?.filter(device => device.deviceId != deviceId))
-        setDeleteIsClosed()
-      }
-    })
+    API.delete(`/devices/${deviceId}/`)
+      .then((response: any) => {
+        if (response.status == 200) {
+          setSelectedDevice(null)
+          setDevices(devices?.filter(device => device.deviceId != deviceId))
+          setDeleteIsClosed()
+        }
+      })
+      .catch((err: any) => {
+        enqueueSnackbar(err.message ?? 'Error deleting device', {
+          variant: 'error',
+          preventDuplicate: true,
+          anchorOrigin: {
+            vertical: 'top',
+            horizontal: 'right',
+          },
+        })
+      })
     setIsLoading(false)
   }
 
@@ -68,12 +70,21 @@ const Devices = () => {
 
   // Handle update device call and data grid update
   const updateDevice = (updatedDevice?: TDevice) => {
-    API.put(`/devices/${updatedDevice?.deviceId}/`, updatedDevice).then(
-      (response: any) => {
+    API.put(`/devices/${updatedDevice?.deviceId}/`, updatedDevice)
+      .then((response: any) => {
         if (response.status == 200) {
         }
-      }
-    )
+      })
+      .catch((err: any) => {
+        enqueueSnackbar(err.message ?? 'Error updating device', {
+          variant: 'error',
+          preventDuplicate: true,
+          anchorOrigin: {
+            vertical: 'top',
+            horizontal: 'right',
+          },
+        })
+      })
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
