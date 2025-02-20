@@ -4,6 +4,7 @@ import { useDevices } from '../../contexts/DeviceContext'
 import interactionPlugin from '@fullcalendar/interaction'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import dayGridPlugin from '@fullcalendar/daygrid'
+import { CircularProgress } from '@mui/material'
 import FullCalendar from '@fullcalendar/react'
 import { useEffect, useState } from 'react'
 import { enqueueSnackbar } from 'notistack'
@@ -13,10 +14,11 @@ import './Automation.scss'
 const Automation = () => {
   const [automationEvents, setAutomationEvents] = useState<TAutomationEvent[]>()
   const [automations, setAutomations] = useState<TAutomation[]>()
-  const [isLoading, setIsLoading] = useState<Boolean>(false)
+  const [isLoading, setIsLoading] = useState<Boolean>(true)
   const { devices, devicesLoaded } = useDevices()
 
   useEffect(() => {
+    setIsLoading(true)
     if (!devicesLoaded) return
     API.get('/automations/')
       .then((response: any) => {
@@ -40,7 +42,7 @@ const Automation = () => {
   }, [devicesLoaded])
 
   useEffect(() => {
-    if (automations && automations.length > 0)
+    if (automations && automations.length > 0) {
       setAutomationEvents(
         automations.map((automation: TAutomation) => {
           const device = devices.find(
@@ -55,6 +57,8 @@ const Automation = () => {
           }
         })
       )
+      setIsLoading(false)
+    }
   }, [automations])
 
   useEffect(() => {
@@ -72,6 +76,7 @@ const Automation = () => {
   return (
     <div className='automation'>
       <h2>Automations</h2>
+      {isLoading && <CircularProgress size={100} className='loading' />}
       <FullCalendar
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
         navLinks={true}
