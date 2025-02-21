@@ -1,9 +1,11 @@
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { DeviceProvider } from './contexts/DeviceContext'
 import Automation from './pages/Automation/Automation'
 import Navbar from './components/Navbar/Navbar'
-import { SnackbarProvider } from 'notistack'
 import Devices from './pages/Devices/Devices'
+import { SnackbarProvider } from 'notistack'
 import Device from './pages/Device/Device'
 import Home from './pages/Home/Home'
 import './App.scss'
@@ -14,17 +16,19 @@ import 'bootstrap-icons'
 function App() {
   return (
     <BrowserRouter>
-      <SnackbarProvider>
-        <DeviceProvider>
-          <Navbar />
-          <Routes>
-            <Route path='/' element={<Home />} />
-            <Route path='/devices' element={<Devices />} />
-            <Route path='/devices/:id' element={<Device />} />
-            <Route path='/automation' element={<Automation />} />
-          </Routes>
-        </DeviceProvider>
-      </SnackbarProvider>
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <SnackbarProvider>
+          <DeviceProvider>
+            <Navbar />
+            <Routes>
+              <Route path='/' element={<Home />} />
+              <Route path='/devices' element={<Devices />} />
+              <Route path='/devices/:id' element={<Device />} />
+              <Route path='/automation' element={<Automation />} />
+            </Routes>
+          </DeviceProvider>
+        </SnackbarProvider>
+      </LocalizationProvider>
     </BrowserRouter>
   )
 }
