@@ -13,7 +13,7 @@ export interface TDevice {
 }
 
 export interface TDeviceState {
-  dataType: string
-  fieldName: string
+  fieldName: 'integer' | 'float' | 'string' | 'boolean'
+  datatype: string
   value: number
 }
