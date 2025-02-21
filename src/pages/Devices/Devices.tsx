@@ -1,8 +1,9 @@
-import { useDeferredValue, useEffect, useState } from 'react'
 import { useDevices } from '../../contexts/DeviceContext'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
+import { useDeferredValue, useState } from 'react'
 import { API, getCSSVariable } from '../../utils'
 import { TDevice } from '../../types/deviceTypes'
+import { enqueueSnackbar } from 'notistack'
 import { Link } from 'react-router-dom'
 import {
   useMediaQuery,
@@ -14,7 +15,6 @@ import {
   Box,
 } from '@mui/material'
 import './Devices.scss'
-import { enqueueSnackbar } from 'notistack'
 
 const Devices = () => {
   const [selectedDevice, setSelectedDevice] = useState<TDevice | null>(null)
@@ -23,11 +23,11 @@ const Devices = () => {
   const [isEdited, setIsEdited] = useState<Boolean>(false)
   const { devices, setDevices } = useDevices()
 
+  const offColor = getCSSVariable('--off-color')
+  const onColor = getCSSVariable('--on-color')
+
   // useDeferredValue resolves intensive re-rendering issue
   useDeferredValue(currentDevice)
-
-  const onColor = getCSSVariable('--on-color')
-  const offColor = getCSSVariable('--off-color')
 
   const [showDelete, setShowDelete] = useState<boolean>(false)
   const setDeleteIsClosed = () => setShowDelete(false)
@@ -212,10 +212,10 @@ const Devices = () => {
                 >
                   Edit Device Details:
                 </Typography>
-                <div className='device-info'>
-                  <strong className='field-name'>Device ID:</strong>{' '}
+                <div className='modal-table device-info'>
+                  <strong className='field-name'>Device ID:</strong>
                   {selectedDevice?.deviceId}
-                  <strong className='field-name'>IP Address:</strong>{' '}
+                  <strong className='field-name'>IP Address:</strong>
                   {selectedDevice?.ipAddress}
                   <strong className='input-field-name'>Name:</strong>
                   <TextField
@@ -274,7 +274,7 @@ const Devices = () => {
                 >
                   Remove Device from System:
                 </Typography>
-                <div className='device-info'>
+                <div className='modal-table device-info'>
                   <strong>Device ID:</strong> {selectedDevice?.deviceId}
                   <strong>Name:</strong> {selectedDevice?.name}
                   <strong>Description:</strong> {selectedDevice?.description}
