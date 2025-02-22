@@ -8,10 +8,14 @@ import Devices from './pages/Devices/Devices'
 import { SnackbarProvider } from 'notistack'
 import Device from './pages/Device/Device'
 import Home from './pages/Home/Home'
+import utc from 'dayjs/plugin/utc'
+import dayjs from 'dayjs'
 import './App.scss'
 
 // @ts-ignore - Import alias in vite.config
 import 'bootstrap-icons'
+
+dayjs.extend(utc)
 
 function App() {
   return (
