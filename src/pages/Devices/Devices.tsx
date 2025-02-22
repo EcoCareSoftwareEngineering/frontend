@@ -265,7 +265,7 @@ const Devices = () => {
                 </div>
                 <Typography id='modal-description' sx={{ mt: 2 }}>
                   Are you sure you want to delete this device from the system?
-                  Once it was been removed, it will needed to be reconnected
+                  Once it has been removed, it will needed to be reconnected
                   again.
                 </Typography>
                 <div className='actions'>
