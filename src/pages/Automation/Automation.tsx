@@ -39,8 +39,8 @@ const getDeviceOptions = (
 
 const Automation = () => {
   const [detailsModalIsOpen, setDetailsModalIsOpen] = useState<boolean>(false)
-  const [updateModalIsOpen, setUpdateModalIsOpen] = useState<boolean>(false)
   const [deleteModalIsOpen, setDeleteModalIsOpen] = useState<boolean>(false)
+  const [updateModalIsOpen, setUpdateModalIsOpen] = useState<boolean>(false)
   const [addModalIsOpen, setAddModalIsOpen] = useState<boolean>(false)
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
@@ -130,11 +130,6 @@ const Automation = () => {
     setUpdateModalIsOpen(false)
   }
 
-  const handleDeleteModalOpen = () => {
-    setDeleteModalIsOpen(true)
-    setDetailsModalIsOpen(false)
-  }
-
   const handleDeleteModalClosed = () => {
     setDeleteModalIsOpen(false)
   }
@@ -187,7 +182,6 @@ const Automation = () => {
         }}
       />
 
-      {/* Add Automation Modal */}
       <AddAutomationModal
         devices={devices}
         newState={newState}
@@ -202,15 +196,25 @@ const Automation = () => {
         setSelectedDevice={setSelectedDevice}
         handleNewStateChange={handleNewStateChange}
       />
-      {/* Automation Details Modal */}
       <AutomationDetailsModal
         selectedEvent={selectedEvent}
         selectedDevice={selectedDevice}
         detailsModalIsOpen={detailsModalIsOpen}
         selectedAutomation={selectedAutomation}
-        handleEditModalOpen={handleEditModalOpen}
-        handleDeleteModalOpen={handleDeleteModalOpen}
+        setUpdateModalIsOpen={setUpdateModalIsOpen}
+        setDeleteModalIsOpen={setDeleteModalIsOpen}
+        setDetailsModalIsOpen={setDetailsModalIsOpen}
         handleDetailsModalClose={handleDetailsModalClose}
+      />
+      <DeleteAutomationModal
+        automations={automations}
+        setIsLoading={setIsLoading}
+        selectedEvent={selectedEvent}
+        selectedDevice={selectedDevice}
+        setAutomations={setAutomations}
+        selectedAutomation={selectedAutomation}
+        deleteModalIsOpen={deleteModalIsOpen}
+        setDeleteModalIsOpen={setDeleteModalIsOpen}
       />
     </div>
   )
@@ -397,18 +401,30 @@ const AutomationDetailsModal = ({
   selectedDevice,
   detailsModalIsOpen,
   selectedAutomation,
-  handleEditModalOpen,
-  handleDeleteModalOpen,
+  setUpdateModalIsOpen,
+  setDeleteModalIsOpen,
+  setDetailsModalIsOpen,
   handleDetailsModalClose,
 }: {
   detailsModalIsOpen: boolean
-  handleEditModalOpen: () => void
-  handleDeleteModalOpen: () => void
   selectedDevice: TDevice | undefined
   handleDetailsModalClose: () => void
   selectedEvent: EventImpl | undefined
+  setUpdateModalIsOpen: SetState<boolean>
+  setDeleteModalIsOpen: SetState<boolean>
+  setDetailsModalIsOpen: SetState<boolean>
   selectedAutomation: TAutomation | undefined
 }) => {
+  const handleEditModalOpen = () => {
+    setUpdateModalIsOpen(true)
+    setDetailsModalIsOpen(false)
+  }
+
+  const handleDeleteModalOpen = () => {
+    setDeleteModalIsOpen(true)
+    setDetailsModalIsOpen(false)
+  }
+
   return (
     <Modal
       open={detailsModalIsOpen}
@@ -438,6 +454,95 @@ const AutomationDetailsModal = ({
             Edit
           </Button>
           <Button className='delete-btn' onClick={handleDeleteModalOpen}>
+            <i className='bi bi-trash' />
+            Delete
+          </Button>
+        </div>
+      </Box>
+    </Modal>
+  )
+}
+
+const DeleteAutomationModal = ({
+  automations,
+  setIsLoading,
+  selectedEvent,
+  setAutomations,
+  selectedDevice,
+  deleteModalIsOpen,
+  selectedAutomation,
+  setDeleteModalIsOpen,
+}: {
+  automations: TAutomation[]
+  deleteModalIsOpen: boolean
+  setIsLoading: SetState<boolean>
+  selectedDevice: TDevice | undefined
+  selectedEvent: EventImpl | undefined
+  setAutomations: SetState<TAutomation[]>
+  selectedAutomation: TAutomation | undefined
+  setDeleteModalIsOpen: SetState<boolean>
+}) => {
+  const handleDeleteAutomation = (automationId?: number) => {
+    setIsLoading(true)
+    API.delete(`/automations/${automationId}/`)
+      .then((response: AxiosResponse) => {
+        if (response.status == 200) {
+          setAutomations(
+            automations?.filter(a => a.automationId !== automationId)
+          )
+          enqueueSnackbar('Successfully deleted automation', {
+            variant: 'success',
+            anchorOrigin: {
+              vertical: 'top',
+              horizontal: 'right',
+            },
+          })
+        }
+      })
+      .catch(err => console.error('DELETE request failed', err))
+      .finally(() => {
+        setIsLoading(true)
+        setDeleteModalIsOpen(false)
+      })
+  }
+
+  return (
+    <Modal
+      open={deleteModalIsOpen}
+      onClose={() => setDeleteModalIsOpen(false)}
+      aria-labelledby='modal-modal-title'
+      aria-describedby='modal-modal-description'
+    >
+      <Box>
+        <Typography id='modal-modal-title' fontWeight='bold' variant='h6'>
+          Delete Automation from System?
+        </Typography>
+        <div className='modal-table device-info'>
+          <strong>Automation ID:</strong> {selectedEvent?.id}
+          <strong>Device Name:</strong> {selectedDevice?.name}
+          <strong>Device Info:</strong> {selectedDevice?.description}
+          <strong>Location:</strong> {selectedDevice?.location}
+          <strong>Action:</strong>
+          {`Set ${selectedAutomation?.newState[0].fieldName} to ${selectedAutomation?.newState[0].value}`}
+        </div>
+        <Typography id='modal-description' sx={{ mt: 2 }}>
+          Are you sure you want to delete this automation from the system? Once
+          it has been removed, it will needed to be created again.
+        </Typography>
+        <div className='event-actions actions'>
+          <Button
+            className='cancel-btn'
+            onClick={() => setDeleteModalIsOpen(false)}
+          >
+            <i className='bi bi-x-lg' />
+            Cancel
+          </Button>
+          <Button
+            className='delete-btn'
+            onClick={() =>
+              handleDeleteAutomation(selectedAutomation?.automationId)
+            }
+          >
             <i className='bi bi-trash' />
             Delete
           </Button>
