@@ -407,9 +407,9 @@ const UpdateAutomationModal = ({
             <i className='bi bi-x-lg' />
             Cancel
           </Button>
-          <Button className='submit-btn' onClick={handleUpdateModalSubmit}>
+          <Button className='update-btn' onClick={handleUpdateModalSubmit}>
             <i className='bi bi-floppy' />
-            Create
+            Save
           </Button>
         </div>
       </Box>
