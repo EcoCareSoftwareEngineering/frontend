@@ -9,6 +9,7 @@ import dayGridPlugin from '@fullcalendar/daygrid'
 import FullCalendar from '@fullcalendar/react'
 import { useEffect, useState } from 'react'
 import { enqueueSnackbar } from 'notistack'
+import { AxiosResponse } from 'axios'
 import dayjs, { Dayjs } from 'dayjs'
 import { API } from '../../utils'
 import './Automation.scss'
@@ -40,7 +41,7 @@ const Automation = () => {
     setIsLoading(true)
     if (!devicesLoaded) return
     API.get('/automations/')
-      .then((response: any) => {
+      .then((response: AxiosResponse) => {
         setAutomations(
           response.data.map((automation: TAutomation) => ({
             ...automation,
@@ -48,16 +49,7 @@ const Automation = () => {
           }))
         )
       })
-      .catch((err: any) => {
-        enqueueSnackbar(err.message ?? 'Error fetching automations', {
-          variant: 'error',
-          preventDuplicate: true,
-          anchorOrigin: {
-            vertical: 'top',
-            horizontal: 'right',
-          },
-        })
-      })
+      .catch(err => console.error('POST request failed', err))
   }, [devicesLoaded])
 
   // Format automation events for calendar
@@ -119,8 +111,8 @@ const Automation = () => {
       deviceId: selectedDevice?.deviceId,
       newState: newState,
     }
-    API.post('/automations/', postData)
-      .then((res: any) => {
+    API.post('/automations/', postData, 'Create new automation request.\n')
+      .then((res: AxiosResponse) => {
         setAutomations([
           ...automations,
           { ...res.data, dateTime: new Date(res.data.dateTime) },
@@ -133,15 +125,7 @@ const Automation = () => {
           },
         })
       })
-      .catch((err: any) => {
-        enqueueSnackbar(err.message ?? 'Error fetching automations', {
-          variant: 'error',
-          anchorOrigin: {
-            vertical: 'top',
-            horizontal: 'right',
-          },
-        })
-      })
+      .catch(err => console.error('POST request failed', err))
       .finally(() => {
         handleAddModalClose()
         setIsLoading(false)

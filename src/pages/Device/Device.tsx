@@ -1,6 +1,7 @@
 import { useLocation, useParams } from 'react-router-dom'
 import { TDevice } from '../../types/deviceTypes'
 import { useEffect, useState } from 'react'
+import { AxiosResponse } from 'axios'
 import { API } from '../../utils'
 import './Device.scss'
 
@@ -15,7 +16,7 @@ const Device = () => {
     if (cachedDevice && cachedDevice.deviceId == deviceId) {
       setDevice(cachedDevice)
     } else {
-      API.get('/devices/').then((response: any) => {
+      API.get('/devices/').then((response: AxiosResponse) => {
         response.data.forEach((currDevice: TDevice) => {
           if (currDevice.deviceId === deviceId) {
             setDevice(currDevice)

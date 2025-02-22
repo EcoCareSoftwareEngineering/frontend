@@ -1,5 +1,5 @@
 import { TDevice } from '../types/deviceTypes'
-import { enqueueSnackbar } from 'notistack'
+import { AxiosResponse } from 'axios'
 import { API } from '../utils'
 import {
   SetStateAction,
@@ -28,7 +28,7 @@ export const DeviceProvider = ({ children }: { children: React.ReactNode }) => {
 
   const fetchDevices = async () => {
     API.get('/devices/')
-      .then((response: any) => {
+      .then((response: AxiosResponse) => {
         setDevicesList(
           response.data.map((device: TDevice) => ({
             ...device,
@@ -37,16 +37,7 @@ export const DeviceProvider = ({ children }: { children: React.ReactNode }) => {
         )
       })
       .then(() => setIsLoading(false))
-      .catch((err: any) => {
-        enqueueSnackbar(err.message, {
-          variant: 'error',
-          preventDuplicate: true,
-          anchorOrigin: {
-            vertical: 'top',
-            horizontal: 'right',
-          },
-        })
-      })
+      .catch(err => console.error('GET request failed', err))
   }
 
   useEffect(() => {

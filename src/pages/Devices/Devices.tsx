@@ -3,8 +3,8 @@ import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import { useDeferredValue, useState } from 'react'
 import { API, getCSSVariable } from '../../utils'
 import { TDevice } from '../../types/deviceTypes'
-import { enqueueSnackbar } from 'notistack'
 import { Link } from 'react-router-dom'
+import { AxiosResponse } from 'axios'
 import {
   useMediaQuery,
   Typography,
@@ -47,17 +47,8 @@ const Devices = () => {
           setDeleteIsClosed()
         }
       })
-      .catch((err: any) => {
-        enqueueSnackbar(err.message ?? 'Error deleting device', {
-          variant: 'error',
-          preventDuplicate: true,
-          anchorOrigin: {
-            vertical: 'top',
-            horizontal: 'right',
-          },
-        })
-      })
-    setIsLoading(false)
+      .catch(err => console.error('POST request failed', err))
+      .finally(() => setIsLoading(false))
   }
 
   const [showEdit, setShowEdit] = useState<boolean>(false)
@@ -71,20 +62,11 @@ const Devices = () => {
   // Handle update device call and data grid update
   const updateDevice = (updatedDevice?: TDevice) => {
     API.put(`/devices/${updatedDevice?.deviceId}/`, updatedDevice)
-      .then((response: any) => {
+      .then((response: AxiosResponse) => {
         if (response.status == 200) {
         }
       })
-      .catch((err: any) => {
-        enqueueSnackbar(err.message ?? 'Error updating device', {
-          variant: 'error',
-          preventDuplicate: true,
-          anchorOrigin: {
-            vertical: 'top',
-            horizontal: 'right',
-          },
-        })
-      })
+      .catch(err => console.error('POST request failed', err))
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
