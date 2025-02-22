@@ -38,12 +38,6 @@ const getDeviceOptions = (
 }
 
 const Automation = () => {
-  const [detailsModalIsOpen, setDetailsModalIsOpen] = useState<boolean>(false)
-  const [deleteModalIsOpen, setDeleteModalIsOpen] = useState<boolean>(false)
-  const [updateModalIsOpen, setUpdateModalIsOpen] = useState<boolean>(false)
-  const [addModalIsOpen, setAddModalIsOpen] = useState<boolean>(false)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
-
   const [automationEvents, setAutomationEvents] = useState<TAutomationEvent[]>()
   const [selectedAutomation, setSelectedAutomation] = useState<TAutomation>()
   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null)
@@ -52,6 +46,12 @@ const Automation = () => {
   const [selectedEvent, setSelectedEvent] = useState<EventImpl>()
   const [newState, setNewState] = useState<TDeviceState[]>()
   const { devices, devicesLoaded } = useDevices()
+
+  const [detailsModalIsOpen, setDetailsModalIsOpen] = useState<boolean>(false)
+  const [deleteModalIsOpen, setDeleteModalIsOpen] = useState<boolean>(false)
+  const [updateModalIsOpen, setUpdateModalIsOpen] = useState<boolean>(false)
+  const [addModalIsOpen, setAddModalIsOpen] = useState<boolean>(false)
+  const [isLoading, setIsLoading] = useState<boolean>(true)
 
   // Fetch all automations
   useEffect(() => {
@@ -121,28 +121,15 @@ const Automation = () => {
     setSelectedDevice(undefined)
   }
 
-  const handleEditModalOpen = () => {
-    setUpdateModalIsOpen(true)
-    setDetailsModalIsOpen(false)
-  }
-
-  const handleEditModalClosed = () => {
-    setUpdateModalIsOpen(false)
-  }
-
-  const handleDeleteModalClosed = () => {
-    setDeleteModalIsOpen(false)
-  }
-
   const getCurrentStateValue = (value: string): string | number | undefined => {
     if (!selectedDevice) return undefined
     switch (selectedDevice.state[0].datatype) {
       case 'string':
         return value
-      case 'integer':
+      case 'boolean':
+        return 'idk' // Todo fix this
+      default:
         return parseInt(value)
-      case 'float':
-        return parseFloat(value)
     }
   }
 
@@ -196,9 +183,25 @@ const Automation = () => {
         setSelectedDevice={setSelectedDevice}
         handleNewStateChange={handleNewStateChange}
       />
+      <UpdateAutomationModal
+        devices={devices}
+        newState={newState}
+        setIsLoading={setIsLoading}
+        automations={automations}
+        setAutomations={setAutomations}
+        selectedAutomation={selectedAutomation}
+        selectedDate={selectedDate}
+        setSelectedDate={setSelectedDate}
+        updateModalIsOpen={updateModalIsOpen}
+        selectedDevice={selectedDevice}
+        setUpdateModalIsOpen={setUpdateModalIsOpen}
+        setSelectedDevice={setSelectedDevice}
+        handleNewStateChange={handleNewStateChange}
+      />
       <AutomationDetailsModal
         selectedEvent={selectedEvent}
         selectedDevice={selectedDevice}
+        setSelectedDate={setSelectedDate}
         detailsModalIsOpen={detailsModalIsOpen}
         selectedAutomation={selectedAutomation}
         setUpdateModalIsOpen={setUpdateModalIsOpen}
@@ -291,96 +294,14 @@ const AddAutomationModal = ({
         <Typography id='modal-modal-title' fontWeight='bold' variant='h4'>
           Add Automation
         </Typography>
-        <div
-          className='modal-details-container'
-          style={{ marginBlock: '15px 30px' }}
-        >
-          <Typography className='field-name'>
-            Select date and time for automation:
-          </Typography>
-          <DateTimePicker
-            format='DD-MM-YYYY  HH:mm A'
-            onChange={date => setSelectedDate(date)}
-            value={selectedDate}
-          />
-        </div>
-        <Typography id='modal-modal-title' fontWeight='bold' variant='h6'>
-          Input Device Details
-        </Typography>
-        <div className='modal-details-container'>
-          <Typography className='field-name'>
-            Please select a device:
-          </Typography>
-          <Autocomplete
-            blurOnSelect
-            autoHighlight
-            options={getDeviceOptions(devices)}
-            getOptionDisabled={option => {
-              const device = devices.find(
-                currDevice => currDevice.deviceId === option.id
-              )
-              if (!device) return true
-              return !(device && Array.isArray(device.state))
-            }}
-            onChange={(_, newDevice) => {
-              if (newDevice)
-                setSelectedDevice(devices.find(d => d.deviceId == newDevice.id))
-              else setSelectedDevice(undefined)
-            }}
-            renderInput={params => (
-              <TextField {...params} placeholder='Device...' />
-            )}
-          />
-        </div>
-        {selectedDevice && (
-          <div>
-            <div className='modal-table automation-info'>
-              <strong>Description:</strong>
-              {selectedDevice?.description}
-              <strong>Location:</strong>
-              {selectedDevice?.location}
-            </div>
-            <div className='modal-details-container'>
-              <Typography className='input-field-name'>
-                Set device{' '}
-                <span style={{ fontWeight: 'bold' }}>
-                  {selectedDevice.state[0].fieldName}{' '}
-                </span>
-                to:
-              </Typography>
-              {selectedDevice.state[0].datatype === 'boolean' ? (
-                // Todo - Boolean automation interface
-                <RadioGroup
-                  aria-labelledby='radio-buttons-group-label'
-                  name='radio-buttons-group'
-                  defaultValue={true}
-                >
-                  <FormControlLabel
-                    control={<Radio />}
-                    value={true}
-                    label='On'
-                  />
-                  <FormControlLabel
-                    control={<Radio />}
-                    value={false}
-                    label='Off'
-                  />
-                </RadioGroup>
-              ) : (
-                <TextField
-                  placeholder={`Input ${selectedDevice.state[0].datatype}`}
-                  onChange={handleNewStateChange}
-                  size='small'
-                  type={
-                    selectedDevice.state[0].datatype === 'string'
-                      ? 'text'
-                      : 'number'
-                  }
-                />
-              )}
-            </div>
-          </div>
-        )}
+        <EditAutomationBox
+          devices={devices}
+          selectedDate={selectedDate}
+          selectedDevice={selectedDevice}
+          setSelectedDate={setSelectedDate}
+          setSelectedDevice={setSelectedDevice}
+          handleNewStateChange={handleNewStateChange}
+        />
         <div className='actions'>
           <Button className='cancel-btn' onClick={handleAddModalClose}>
             <i className='bi bi-x-lg' />
@@ -396,9 +317,221 @@ const AddAutomationModal = ({
   )
 }
 
+const UpdateAutomationModal = ({
+  devices,
+  newState,
+  setIsLoading,
+  automations,
+  setAutomations,
+  selectedDate,
+  setSelectedDate,
+  updateModalIsOpen,
+  setUpdateModalIsOpen,
+  selectedAutomation,
+  selectedDevice,
+  setSelectedDevice,
+  handleNewStateChange,
+}: {
+  devices: TDevice[]
+  newState: TDeviceState[] | undefined
+  setIsLoading: SetState<boolean>
+  automations: TAutomation[]
+  selectedAutomation: TAutomation | undefined
+  setAutomations: SetState<TAutomation[]>
+  selectedDate: Dayjs | null
+  setSelectedDate: SetState<Dayjs | null>
+  updateModalIsOpen: boolean
+  setUpdateModalIsOpen: SetState<boolean>
+  selectedDevice: TDevice | undefined
+  setSelectedDevice: SetState<TDevice | undefined>
+  handleNewStateChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+}) => {
+  const handleUpdateModalClose = () => {
+    setUpdateModalIsOpen(false)
+    setSelectedDevice(undefined)
+  }
+
+  const handleUpdateModalSubmit = () => {
+    setIsLoading(true)
+    const putData = {
+      dateTime: selectedDate?.utc().format('YYYY-MM-DD HH:mm:ss'),
+      newState: newState,
+    }
+    API.put(
+      `/automations/${selectedAutomation?.automationId}/`,
+      putData,
+      'Update an automation request.\n'
+    )
+      .then((res: AxiosResponse) => {
+        setAutomations([
+          ...automations,
+          { ...res.data, dateTime: new Date(res.data.dateTime) },
+        ])
+        enqueueSnackbar('Successfully updated automation', {
+          variant: 'success',
+          anchorOrigin: {
+            vertical: 'top',
+            horizontal: 'right',
+          },
+        })
+      })
+      .catch(err => console.error('PUT request failed', err))
+      .finally(() => {
+        handleUpdateModalClose()
+        setIsLoading(false)
+      })
+  }
+
+  return (
+    <Modal
+      open={updateModalIsOpen}
+      onClose={handleUpdateModalClose}
+      aria-labelledby='modal-modal-title'
+      aria-describedby='modal-modal-description'
+    >
+      <Box>
+        <Typography id='modal-modal-title' fontWeight='bold' variant='h4'>
+          Edit Automation
+        </Typography>
+        <EditAutomationBox
+          devices={devices}
+          selectedDate={selectedDate}
+          selectedDevice={selectedDevice}
+          selectedAutomation={selectedAutomation}
+          setSelectedDate={setSelectedDate}
+          setSelectedDevice={setSelectedDevice}
+          handleNewStateChange={handleNewStateChange}
+        />
+        <div className='actions'>
+          <Button className='cancel-btn' onClick={handleUpdateModalClose}>
+            <i className='bi bi-x-lg' />
+            Cancel
+          </Button>
+          <Button className='submit-btn' onClick={handleUpdateModalSubmit}>
+            <i className='bi bi-floppy' />
+            Create
+          </Button>
+        </div>
+      </Box>
+    </Modal>
+  )
+}
+
+const EditAutomationBox = ({
+  devices,
+  selectedDate,
+  selectedDevice,
+  setSelectedDate,
+  setSelectedDevice,
+  handleNewStateChange,
+  selectedAutomation,
+}: {
+  devices: TDevice[]
+  selectedDate: Dayjs | null
+  selectedAutomation?: TAutomation
+  selectedDevice: TDevice | undefined
+  setSelectedDate: SetState<Dayjs | null>
+  setSelectedDevice: SetState<TDevice | undefined>
+  handleNewStateChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+}) => {
+  return (
+    <>
+      <div
+        className='modal-details-container'
+        style={{ marginBlock: '15px 30px' }}
+      >
+        <Typography className='field-name'>
+          Select date and time for automation:
+        </Typography>
+        <DateTimePicker
+          format='DD-MM-YYYY  HH:mm A'
+          onChange={date => setSelectedDate(date)}
+          value={selectedDate}
+        />
+      </div>
+      <Typography id='modal-modal-title' fontWeight='bold' variant='h6'>
+        Input Device Details
+      </Typography>
+      <div className='modal-details-container'>
+        <Typography className='field-name'>Please select a device:</Typography>
+        <Autocomplete
+          blurOnSelect
+          autoHighlight
+          options={getDeviceOptions(devices)}
+          getOptionDisabled={option => {
+            const device = devices.find(
+              currDevice => currDevice.deviceId === option.id
+            )
+            if (!device) return true
+            return !(device && Array.isArray(device.state))
+          }}
+          defaultValue={selectedDevice && getDeviceOptions([selectedDevice])[0]}
+          onChange={(_, newDevice) => {
+            if (newDevice)
+              setSelectedDevice(devices.find(d => d.deviceId == newDevice.id))
+            else setSelectedDevice(undefined)
+          }}
+          renderInput={params => (
+            <TextField {...params} placeholder='Device...' />
+          )}
+        />
+      </div>
+      {selectedDevice && (
+        <div>
+          <div className='modal-table automation-info'>
+            <strong>Description:</strong>
+            {selectedDevice?.description}
+            <strong>Location:</strong>
+            {selectedDevice?.location}
+          </div>
+          <div className='modal-details-container'>
+            <Typography className='input-field-name'>
+              Set device{' '}
+              <span style={{ fontWeight: 'bold' }}>
+                {selectedDevice.state[0].fieldName}{' '}
+              </span>
+              to:
+            </Typography>
+            {selectedDevice.state[0].datatype === 'boolean' ? (
+              // Todo - Boolean automation interface
+              <RadioGroup
+                aria-labelledby='radio-buttons-group-label'
+                name='radio-buttons-group'
+                defaultValue={true}
+              >
+                <FormControlLabel control={<Radio />} value={true} label='On' />
+                <FormControlLabel
+                  control={<Radio />}
+                  value={false}
+                  label='Off'
+                />
+              </RadioGroup>
+            ) : (
+              <TextField
+                placeholder={`Input ${selectedDevice.state[0].datatype}`}
+                defaultValue={
+                  selectedAutomation && selectedAutomation.newState[0].value
+                }
+                onChange={handleNewStateChange}
+                size='small'
+                type={
+                  selectedDevice.state[0].datatype === 'string'
+                    ? 'text'
+                    : 'number'
+                }
+              />
+            )}
+          </div>
+        </div>
+      )}
+    </>
+  )
+}
+
 const AutomationDetailsModal = ({
   selectedEvent,
   selectedDevice,
+  setSelectedDate,
   detailsModalIsOpen,
   selectedAutomation,
   setUpdateModalIsOpen,
@@ -407,15 +540,17 @@ const AutomationDetailsModal = ({
   handleDetailsModalClose,
 }: {
   detailsModalIsOpen: boolean
-  selectedDevice: TDevice | undefined
   handleDetailsModalClose: () => void
-  selectedEvent: EventImpl | undefined
+  setSelectedDate: SetState<Dayjs | null>
   setUpdateModalIsOpen: SetState<boolean>
   setDeleteModalIsOpen: SetState<boolean>
   setDetailsModalIsOpen: SetState<boolean>
-  selectedAutomation: TAutomation | undefined
+  selectedAutomation?: TAutomation
+  selectedDevice?: TDevice
+  selectedEvent?: EventImpl
 }) => {
   const handleEditModalOpen = () => {
+    setSelectedDate(dayjs(selectedAutomation?.dateTime))
     setUpdateModalIsOpen(true)
     setDetailsModalIsOpen(false)
   }
@@ -484,7 +619,7 @@ const DeleteAutomationModal = ({
 }) => {
   const handleDeleteAutomation = (automationId?: number) => {
     setIsLoading(true)
-    API.delete(`/automations/${automationId}/`)
+    API.delete(`/automations/${automationId}/`, 'Delete an automation request')
       .then((response: AxiosResponse) => {
         if (response.status == 200) {
           setAutomations(
