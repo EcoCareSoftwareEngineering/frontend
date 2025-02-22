@@ -14,6 +14,6 @@ export interface TDevice {
 
 export interface TDeviceState {
   fieldName: 'integer' | 'float' | 'string' | 'boolean'
+  value?: number | string | boolean
   datatype: string
-  value: number
 }
