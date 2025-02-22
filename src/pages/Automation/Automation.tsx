@@ -66,7 +66,7 @@ const Automation = () => {
           }))
         )
       })
-      .catch(err => console.error('POST request failed', err))
+      .catch(err => console.error('GET request failed', err))
   }, [devicesLoaded])
 
   // Format automation events for calendar
