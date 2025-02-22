@@ -3,6 +3,7 @@ import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import { useDeferredValue, useState } from 'react'
 import { API, getCSSVariable } from '../../utils'
 import { TDevice } from '../../types/deviceTypes'
+import { enqueueSnackbar } from 'notistack'
 import { Link } from 'react-router-dom'
 import { AxiosResponse } from 'axios'
 import {
@@ -44,11 +45,20 @@ const Devices = () => {
         if (response.status == 200) {
           setSelectedDevice(null)
           setDevices(devices?.filter(device => device.deviceId != deviceId))
+          enqueueSnackbar('Successfully deleted device', {
+            variant: 'success',
+            anchorOrigin: {
+              vertical: 'top',
+              horizontal: 'right',
+            },
+          })
           setDeleteIsClosed()
         }
       })
-      .catch(err => console.error('POST request failed', err))
-      .finally(() => setIsLoading(false))
+      .catch(err => console.error('DELETE request failed', err))
+      .finally(() => {
+        setIsLoading(false)
+      })
   }
 
   const [showEdit, setShowEdit] = useState<boolean>(false)
@@ -61,12 +71,27 @@ const Devices = () => {
 
   // Handle update device call and data grid update
   const updateDevice = (updatedDevice?: TDevice) => {
-    API.put(`/devices/${updatedDevice?.deviceId}/`, updatedDevice)
+    if (!updatedDevice) return undefined
+    const { location, ...postData } = updatedDevice
+    API.put(`/devices/${updatedDevice?.deviceId}/`, postData)
       .then((response: AxiosResponse) => {
-        if (response.status == 200) {
-        }
+        setDevices(
+          devices.map(device =>
+            device.deviceId === updatedDevice.deviceId
+              ? { ...device, ...response.data }
+              : device
+          )
+        )
+        enqueueSnackbar('Successfully updated device', {
+          variant: 'success',
+          anchorOrigin: {
+            vertical: 'top',
+            horizontal: 'right',
+          },
+        })
       })
       .catch(err => console.error('POST request failed', err))
+      .finally()
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -1,4 +1,5 @@
 import { TDevice } from '../types/deviceTypes'
+import { Tag } from '../types/generalTypes'
 import { AxiosResponse } from 'axios'
 import { API } from '../utils'
 import {
@@ -25,6 +26,16 @@ export const DeviceContext = createContext<DeviceContextType | undefined>(
 export const DeviceProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [devices, setDevicesList] = useState<TDevice[]>([])
+  const [tags, setTagsList] = useState<Tag[]>()
+
+  const fetchTags = async () => {
+    setIsLoading(true)
+    await API.get('/tags/')
+      .then((response: AxiosResponse) => {
+        setTagsList(response.data)
+      })
+      .catch(err => console.error('GET request failed', err))
+  }
 
   const fetchDevices = async () => {
     API.get('/devices/')
@@ -32,17 +43,21 @@ export const DeviceProvider = ({ children }: { children: React.ReactNode }) => {
         setDevicesList(
           response.data.map((device: TDevice) => ({
             ...device,
-            location: 'Kitchen',
+            location: tags?.find(t => t.tagId === device.roomTag)?.name,
           }))
         )
       })
-      .then(() => setIsLoading(false))
       .catch(err => console.error('GET request failed', err))
+      .finally(() => setIsLoading(false))
   }
 
   useEffect(() => {
-    fetchDevices()
+    fetchTags()
   }, [])
+
+  useEffect(() => {
+    if (tags && Array.isArray(tags)) fetchDevices()
+  }, [tags])
 
   return (
     <DeviceContext.Provider

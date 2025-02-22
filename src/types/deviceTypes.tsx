@@ -1,7 +1,10 @@
+import { Tag } from './generalTypes'
+
 export interface TDevice {
   deviceId: number
   name: string
   description?: string
+  roomTag?: number
   location?: string
   unlocked?: boolean
   ipAddress?: string
@@ -10,6 +13,8 @@ export interface TDevice {
   state: TDeviceState[]
   status: 'On' | 'Off'
   faultStatus: 'Ok' | 'Fault'
+  customTags: Tag[]
+  userTags: Tag[]
 }
 
 export interface TDeviceState {
