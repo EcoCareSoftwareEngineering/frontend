@@ -62,6 +62,29 @@
       // Month view block
       .fc-daygrid-day-frame {
         background-color: var(--grey-background);
+        transition: background-color 0.15s;
+        cursor: pointer;
+
+        &:hover {
+          background-color: color-mix(
+            in srgb,
+            var(--grey-text) 40%,
+            transparent
+          );
+        }
+      }
+    }
+
+    // Calendar month view - day cell (Today)
+    .fc-day-today .fc-daygrid-day-frame {
+      background-color: #ae992121 !important;
+
+      &:hover {
+        background-color: color-mix(
+          in srgb,
+          var(--grey-text) 40%,
+          transparent
+        ) !important;
       }
     }
 
@@ -69,6 +92,33 @@
     .fc-daygrid-day-number {
       color: var(--clear-text);
       transform: translateX(-30%);
+    }
+
+    // Calendar week/day view
+    .fc-day {
+      background-color: var(--grey-background);
+      &.fc-day-today {
+        background-color: #ae992121 !important;
+      }
+    }
+
+    .fc-timegrid-slots table tbody tr {
+      .fc-timegrid-slot-label {
+        background-color: var(--highlight-color);
+      }
+
+      .fc-timegrid-slot {
+        transition: background-color 0.1s;
+        cursor: pointer;
+
+        &:hover {
+          background-color: color-mix(
+            in srgb,
+            var(--grey-text) 40%,
+            transparent
+          );
+        }
+      }
     }
 
     // Calendar events
@@ -103,11 +153,6 @@
 .fc-theme-standard td,
 .fc-theme-standard th {
   border: 0px;
-}
-
-// Grid day cell (Today)
-.fc-day-today .fc-daygrid-day-frame {
-  background-color: #ae992121 !important;
 }
 
 // Grid day cell

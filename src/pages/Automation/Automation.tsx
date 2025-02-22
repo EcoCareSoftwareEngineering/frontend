@@ -78,8 +78,8 @@ const Automation = () => {
     console.log('Display event modal to update/delete', clickInfo)
   }
 
-  const handleAddModalOpen = () => {
-    setSelectedDate(dayjs())
+  const handleAddModalOpen = (info?: any) => {
+    setSelectedDate(dayjs(info && 'date' in info ? info.date : undefined))
     setAddModalIsOpen(true)
   }
 
@@ -163,6 +163,7 @@ const Automation = () => {
         events={automationEvents}
         initialView={'dayGridMonth'}
         eventClick={handleEventClick}
+        dateClick={info => handleAddModalOpen(info)}
         eventContent={(eventInfo: EventContentArg) => (
           <div className='event-content'>
             <b>{eventInfo.timeText}:&nbsp;</b>
@@ -205,7 +206,11 @@ const Automation = () => {
             <Typography className='field-name'>
               Select date and time for automation:
             </Typography>
-            <DateTimePicker value={selectedDate} onChange={handleDateChange} />
+            <DateTimePicker
+              format='DD-MM-YYYY  HH:mm A'
+              onChange={handleDateChange}
+              value={selectedDate}
+            />
           </div>
           <Typography id='modal-modal-title' fontWeight='bold' variant='h6'>
             Input Device Details
