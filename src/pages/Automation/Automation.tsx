@@ -4,7 +4,9 @@ import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker'
 import { TDevice, TDeviceState } from '../../types/deviceTypes'
 import { useDevices } from '../../contexts/DeviceContext'
 import interactionPlugin from '@fullcalendar/interaction'
+import { EventImpl } from '@fullcalendar/core/internal'
 import timeGridPlugin from '@fullcalendar/timegrid'
+import { SetState } from '../../types/generalTypes'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import FullCalendar from '@fullcalendar/react'
 import { useEffect, useState } from 'react'
@@ -26,14 +28,29 @@ import {
   Box,
 } from '@mui/material'
 
+const getDeviceOptions = (
+  devices: TDevice[]
+): { id: number; label: string }[] => {
+  return devices.map(device => ({
+    label: `Device ${device.deviceId}: ${device.name}`,
+    id: device.deviceId,
+  }))
+}
+
 const Automation = () => {
-  const [automationEvents, setAutomationEvents] = useState<TAutomationEvent[]>()
+  const [detailsModalIsOpen, setDetailsModalIsOpen] = useState<boolean>(false)
+  const [updateModalIsOpen, setUpdateModalIsOpen] = useState<boolean>(false)
+  const [deleteModalIsOpen, setDeleteModalIsOpen] = useState<boolean>(false)
   const [addModalIsOpen, setAddModalIsOpen] = useState<boolean>(false)
+  const [isLoading, setIsLoading] = useState<boolean>(true)
+
+  const [automationEvents, setAutomationEvents] = useState<TAutomationEvent[]>()
+  const [selectedAutomation, setSelectedAutomation] = useState<TAutomation>()
   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null)
   const [automations, setAutomations] = useState<TAutomation[]>([])
   const [selectedDevice, setSelectedDevice] = useState<TDevice>()
+  const [selectedEvent, setSelectedEvent] = useState<EventImpl>()
   const [newState, setNewState] = useState<TDeviceState[]>()
-  const [isLoading, setIsLoading] = useState<boolean>(true)
   const { devices, devicesLoaded } = useDevices()
 
   // Fetch all automations
@@ -74,22 +91,9 @@ const Automation = () => {
   }, [automations])
 
   // Event handlers
-  const handleEventClick = (clickInfo: EventClickArg) => {
-    console.log('Display event modal to update/delete', clickInfo)
-  }
-
   const handleAddModalOpen = (info?: any) => {
     setSelectedDate(dayjs(info && 'date' in info ? info.date : undefined))
     setAddModalIsOpen(true)
-  }
-
-  const handleAddModalClose = () => {
-    setAddModalIsOpen(false)
-    setSelectedDevice(undefined)
-  }
-
-  const handleDateChange = (date: Dayjs | null) => {
-    setSelectedDate(date)
   }
 
   const handleNewStateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -103,41 +107,36 @@ const Automation = () => {
     ])
   }
 
-  const handleAddModalSubmit = () => {
-    setIsLoading(true)
-    const postData = {
-      // Format date for backend (HTTP Standard RFC 1123),
-      dateTime: selectedDate?.utc().format('YYYY-MM-DD HH:mm:ss'),
-      deviceId: selectedDevice?.deviceId,
-      newState: newState,
-    }
-    API.post('/automations/', postData, 'Create new automation request.\n')
-      .then((res: AxiosResponse) => {
-        setAutomations([
-          ...automations,
-          { ...res.data, dateTime: new Date(res.data.dateTime) },
-        ])
-        enqueueSnackbar('Successfully added automation', {
-          variant: 'success',
-          anchorOrigin: {
-            vertical: 'top',
-            horizontal: 'right',
-          },
-        })
-      })
-      .catch(err => console.error('POST request failed', err))
-      .finally(() => {
-        handleAddModalClose()
-        setIsLoading(false)
-      })
+  const handleEventClick = (clickInfo: EventClickArg) => {
+    setSelectedDevice(clickInfo.event.extendedProps.device)
+    setSelectedEvent(clickInfo.event)
+    setSelectedAutomation(
+      automations.find(a => a.automationId === parseInt(clickInfo.event.id))
+    )
+    setDetailsModalIsOpen(true)
   }
 
-  // Helper methods
-  const getDeviceOptions = (): { id: number; label: string }[] => {
-    return devices.map(device => ({
-      label: `Device ${device.deviceId}: ${device.name}`,
-      id: device.deviceId,
-    }))
+  const handleDetailsModalClose = () => {
+    setDetailsModalIsOpen(false)
+    setSelectedDevice(undefined)
+  }
+
+  const handleEditModalOpen = () => {
+    setUpdateModalIsOpen(true)
+    setDetailsModalIsOpen(false)
+  }
+
+  const handleEditModalClosed = () => {
+    setUpdateModalIsOpen(false)
+  }
+
+  const handleDeleteModalOpen = () => {
+    setDeleteModalIsOpen(true)
+    setDetailsModalIsOpen(false)
+  }
+
+  const handleDeleteModalClosed = () => {
+    setDeleteModalIsOpen(false)
   }
 
   const getCurrentStateValue = (value: string): string | number | undefined => {
@@ -189,122 +188,262 @@ const Automation = () => {
       />
 
       {/* Add Automation Modal */}
-      <Modal
-        open={addModalIsOpen}
-        onClose={handleAddModalClose}
-        aria-labelledby='modal-modal-title'
-        aria-describedby='modal-modal-description'
-      >
-        <Box>
-          <Typography id='modal-modal-title' fontWeight='bold' variant='h4'>
-            Add Automation
-          </Typography>
-          <div
-            className='modal-details-container'
-            style={{ marginBlock: '15px 30px' }}
-          >
-            <Typography className='field-name'>
-              Select date and time for automation:
-            </Typography>
-            <DateTimePicker
-              format='DD-MM-YYYY  HH:mm A'
-              onChange={handleDateChange}
-              value={selectedDate}
-            />
-          </div>
-          <Typography id='modal-modal-title' fontWeight='bold' variant='h6'>
-            Input Device Details
-          </Typography>
-          <div className='modal-details-container'>
-            <Typography className='field-name'>
-              Please select a device:
-            </Typography>
-            <Autocomplete
-              blurOnSelect
-              autoHighlight
-              options={getDeviceOptions()}
-              getOptionDisabled={option => {
-                const device = devices.find(
-                  currDevice => currDevice.deviceId === option.id
-                )
-                if (!device) return true
-                return !(device && Array.isArray(device.state))
-              }}
-              onChange={(_, newDevice) => {
-                if (newDevice)
-                  setSelectedDevice(
-                    devices.find(d => d.deviceId == newDevice.id)
-                  )
-                else setSelectedDevice(undefined)
-                console.log(selectedDevice)
-              }}
-              renderInput={params => (
-                <TextField {...params} placeholder='Device...' />
-              )}
-            />
-          </div>
-          {selectedDevice && (
-            <div>
-              <div className='modal-table automation-info'>
-                <strong>Description:</strong>
-                {selectedDevice?.description}
-                <strong>Location:</strong>
-                {selectedDevice?.location}
-              </div>
-              <div className='modal-details-container'>
-                <Typography className='input-field-name'>
-                  Set device{' '}
-                  <span style={{ fontWeight: 'bold' }}>
-                    {selectedDevice.state[0].fieldName}{' '}
-                  </span>
-                  to:
-                </Typography>
-                {selectedDevice.state[0].datatype === 'boolean' ? (
-                  // Todo - Boolean automation interface
-                  <RadioGroup
-                    aria-labelledby='radio-buttons-group-label'
-                    name='radio-buttons-group'
-                    defaultValue={true}
-                  >
-                    <FormControlLabel
-                      control={<Radio />}
-                      value={true}
-                      label='On'
-                    />
-                    <FormControlLabel
-                      control={<Radio />}
-                      value={false}
-                      label='Off'
-                    />
-                  </RadioGroup>
-                ) : (
-                  <TextField
-                    placeholder={`Input ${selectedDevice.state[0].datatype}`}
-                    onChange={handleNewStateChange}
-                    size='small'
-                    type={
-                      selectedDevice.state[0].datatype === 'string'
-                        ? 'text'
-                        : 'number'
-                    }
-                  />
-                )}
-              </div>
-            </div>
-          )}
-          <div className='actions'>
-            <Button className='cancel-btn' onClick={handleAddModalClose}>
-              <i className='bi bi-x-lg' />
-              Cancel
-            </Button>
-            <Button className='submit-btn' onClick={handleAddModalSubmit}>
-              <i className='bi bi-floppy' />
-              Create
-            </Button>
-          </div>
-        </Box>
-      </Modal>
+      <AddAutomationModal
+        devices={devices}
+        newState={newState}
+        setIsLoading={setIsLoading}
+        automations={automations}
+        setAutomations={setAutomations}
+        selectedDate={selectedDate}
+        setSelectedDate={setSelectedDate}
+        addModalIsOpen={addModalIsOpen}
+        setAddModalIsOpen={setAddModalIsOpen}
+        selectedDevice={selectedDevice}
+        setSelectedDevice={setSelectedDevice}
+        handleNewStateChange={handleNewStateChange}
+      />
+      {/* Automation Details Modal */}
+      <AutomationDetailsModal
+        selectedEvent={selectedEvent}
+        selectedDevice={selectedDevice}
+        detailsModalIsOpen={detailsModalIsOpen}
+        selectedAutomation={selectedAutomation}
+        handleEditModalOpen={handleEditModalOpen}
+        handleDeleteModalOpen={handleDeleteModalOpen}
+        handleDetailsModalClose={handleDetailsModalClose}
+      />
     </div>
+  )
+}
+
+const AddAutomationModal = ({
+  devices,
+  newState,
+  setIsLoading,
+  automations,
+  setAutomations,
+  selectedDate,
+  setSelectedDate,
+  addModalIsOpen,
+  setAddModalIsOpen,
+  selectedDevice,
+  setSelectedDevice,
+  handleNewStateChange,
+}: {
+  devices: TDevice[]
+  newState: TDeviceState[] | undefined
+  setIsLoading: SetState<boolean>
+  automations: TAutomation[]
+  setAutomations: SetState<TAutomation[]>
+  selectedDate: Dayjs | null
+  setSelectedDate: SetState<Dayjs | null>
+  addModalIsOpen: boolean
+  setAddModalIsOpen: SetState<boolean>
+  selectedDevice: TDevice | undefined
+  setSelectedDevice: SetState<TDevice | undefined>
+  handleNewStateChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+}) => {
+  const handleAddModalClose = () => {
+    setAddModalIsOpen(false)
+    setSelectedDevice(undefined)
+  }
+
+  const handleAddModalSubmit = () => {
+    setIsLoading(true)
+    const postData = {
+      dateTime: selectedDate?.utc().format('YYYY-MM-DD HH:mm:ss'),
+      deviceId: selectedDevice?.deviceId,
+      newState: newState,
+    }
+    API.post('/automations/', postData, 'Create new automation request.\n')
+      .then((res: AxiosResponse) => {
+        setAutomations([
+          ...automations,
+          { ...res.data, dateTime: new Date(res.data.dateTime) },
+        ])
+        enqueueSnackbar('Successfully added automation', {
+          variant: 'success',
+          anchorOrigin: {
+            vertical: 'top',
+            horizontal: 'right',
+          },
+        })
+      })
+      .catch(err => console.error('POST request failed', err))
+      .finally(() => {
+        handleAddModalClose()
+        setIsLoading(false)
+      })
+  }
+
+  return (
+    <Modal
+      open={addModalIsOpen}
+      onClose={handleAddModalClose}
+      aria-labelledby='modal-modal-title'
+      aria-describedby='modal-modal-description'
+    >
+      <Box>
+        <Typography id='modal-modal-title' fontWeight='bold' variant='h4'>
+          Add Automation
+        </Typography>
+        <div
+          className='modal-details-container'
+          style={{ marginBlock: '15px 30px' }}
+        >
+          <Typography className='field-name'>
+            Select date and time for automation:
+          </Typography>
+          <DateTimePicker
+            format='DD-MM-YYYY  HH:mm A'
+            onChange={date => setSelectedDate(date)}
+            value={selectedDate}
+          />
+        </div>
+        <Typography id='modal-modal-title' fontWeight='bold' variant='h6'>
+          Input Device Details
+        </Typography>
+        <div className='modal-details-container'>
+          <Typography className='field-name'>
+            Please select a device:
+          </Typography>
+          <Autocomplete
+            blurOnSelect
+            autoHighlight
+            options={getDeviceOptions(devices)}
+            getOptionDisabled={option => {
+              const device = devices.find(
+                currDevice => currDevice.deviceId === option.id
+              )
+              if (!device) return true
+              return !(device && Array.isArray(device.state))
+            }}
+            onChange={(_, newDevice) => {
+              if (newDevice)
+                setSelectedDevice(devices.find(d => d.deviceId == newDevice.id))
+              else setSelectedDevice(undefined)
+            }}
+            renderInput={params => (
+              <TextField {...params} placeholder='Device...' />
+            )}
+          />
+        </div>
+        {selectedDevice && (
+          <div>
+            <div className='modal-table automation-info'>
+              <strong>Description:</strong>
+              {selectedDevice?.description}
+              <strong>Location:</strong>
+              {selectedDevice?.location}
+            </div>
+            <div className='modal-details-container'>
+              <Typography className='input-field-name'>
+                Set device{' '}
+                <span style={{ fontWeight: 'bold' }}>
+                  {selectedDevice.state[0].fieldName}{' '}
+                </span>
+                to:
+              </Typography>
+              {selectedDevice.state[0].datatype === 'boolean' ? (
+                // Todo - Boolean automation interface
+                <RadioGroup
+                  aria-labelledby='radio-buttons-group-label'
+                  name='radio-buttons-group'
+                  defaultValue={true}
+                >
+                  <FormControlLabel
+                    control={<Radio />}
+                    value={true}
+                    label='On'
+                  />
+                  <FormControlLabel
+                    control={<Radio />}
+                    value={false}
+                    label='Off'
+                  />
+                </RadioGroup>
+              ) : (
+                <TextField
+                  placeholder={`Input ${selectedDevice.state[0].datatype}`}
+                  onChange={handleNewStateChange}
+                  size='small'
+                  type={
+                    selectedDevice.state[0].datatype === 'string'
+                      ? 'text'
+                      : 'number'
+                  }
+                />
+              )}
+            </div>
+          </div>
+        )}
+        <div className='actions'>
+          <Button className='cancel-btn' onClick={handleAddModalClose}>
+            <i className='bi bi-x-lg' />
+            Cancel
+          </Button>
+          <Button className='submit-btn' onClick={handleAddModalSubmit}>
+            <i className='bi bi-floppy' />
+            Create
+          </Button>
+        </div>
+      </Box>
+    </Modal>
+  )
+}
+
+const AutomationDetailsModal = ({
+  selectedEvent,
+  selectedDevice,
+  detailsModalIsOpen,
+  selectedAutomation,
+  handleEditModalOpen,
+  handleDeleteModalOpen,
+  handleDetailsModalClose,
+}: {
+  detailsModalIsOpen: boolean
+  handleEditModalOpen: () => void
+  handleDeleteModalOpen: () => void
+  selectedDevice: TDevice | undefined
+  handleDetailsModalClose: () => void
+  selectedEvent: EventImpl | undefined
+  selectedAutomation: TAutomation | undefined
+}) => {
+  return (
+    <Modal
+      open={detailsModalIsOpen}
+      onClose={handleDetailsModalClose}
+      aria-labelledby='modal-modal-title'
+      aria-describedby='modal-modal-description'
+    >
+      <Box>
+        <Typography id='modal-modal-title' fontWeight='bold' variant='h5'>
+          Automation Event Details
+        </Typography>
+        <div className='modal-table device-info'>
+          <strong>Automation ID:</strong> {selectedEvent?.id}
+          <strong>Device Name:</strong> {selectedDevice?.name}
+          <strong>Device Info:</strong> {selectedDevice?.description}
+          <strong>Location:</strong> {selectedDevice?.location}
+          <strong>Action:</strong>
+          {`Set ${selectedAutomation?.newState[0].fieldName} to ${selectedAutomation?.newState[0].value}`}
+        </div>
+        <div className='event-actions actions'>
+          <Button className='cancel-btn' onClick={handleDetailsModalClose}>
+            <i className='bi bi-x-lg' />
+            Cancel
+          </Button>
+          <Button className='update-btn' onClick={handleEditModalOpen}>
+            <i className='bi bi-pencil' />
+            Edit
+          </Button>
+          <Button className='delete-btn' onClick={handleDeleteModalOpen}>
+            <i className='bi bi-trash' />
+            Delete
+          </Button>
+        </div>
+      </Box>
+    </Modal>
   )
 }
 

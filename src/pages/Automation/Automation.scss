@@ -129,6 +129,11 @@
       margin-bottom: 3px;
       cursor: pointer;
 
+      &:hover {
+        background-color: var(--background-color);
+        transition: background-color 0.2s;
+      }
+
       .event-content {
         overflow: hidden;
         text-indent: 8px;
@@ -158,4 +163,8 @@
 // Grid day cell
 .fc-theme-standard td {
   border: 2.4px solid var(--highlight-color) !important;
+}
+
+.event-actions {
+  margin-top: 20px;
 }
