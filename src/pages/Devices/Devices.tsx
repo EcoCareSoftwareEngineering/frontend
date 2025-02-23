@@ -18,13 +18,14 @@ import {
   Modal,
   Box,
 } from '@mui/material'
+import LoadingModal from '../../components/LoadingModal/LoadingModal'
 
 const Devices = () => {
   const [selectedDevice, setSelectedDevice] = useState<TDevice | null>(null)
   const { tags, devices, devicesLoaded, setDevices } = useDevices()
   const [currentDevice, setCurrentDevice] = useState<TDevice>()
-  const [isLoading, setIsLoading] = useState<Boolean>(false)
-  const [isEdited, setIsEdited] = useState<Boolean>(false)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [isEdited, setIsEdited] = useState<boolean>(false)
 
   const offColor = getCSSVariable('--off-color')
   const onColor = getCSSVariable('--on-color')
@@ -375,17 +376,23 @@ const Devices = () => {
 
   return (
     <div className='devices'>
-      {devices && devices.length > 0 && (
-        <DataGrid
-          rows={devices}
-          columns={columns}
-          paginationMode='server'
-          rowCount={devices.length}
-          getRowId={row => row.deviceId}
-          disableRowSelectionOnClick
-          disableColumnResize
-        />
-      )}
+      <LoadingModal open={!devicesLoaded || isLoading} />
+      <DataGrid
+        rows={devices}
+        columns={columns}
+        paginationMode='server'
+        rowCount={devices.length}
+        getRowId={row => row.deviceId}
+        disableRowSelectionOnClick
+        disableColumnResize
+        slots={{
+          noRowsOverlay: () => (
+            <Box>
+              <Typography>No data available</Typography>
+            </Box>
+          ),
+        }}
+      />
     </div>
   )
 }
