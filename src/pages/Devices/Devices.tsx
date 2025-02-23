@@ -1,13 +1,16 @@
+import { TMUIAutocompleteOption } from '../../types/generalTypes'
+import { useDeferredValue, useEffect, useState } from 'react'
 import { useDevices } from '../../contexts/DeviceContext'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
-import { useDeferredValue, useState } from 'react'
 import { API, getCSSVariable } from '../../utils'
 import { TDevice } from '../../types/deviceTypes'
 import { enqueueSnackbar } from 'notistack'
 import { Link } from 'react-router-dom'
 import { AxiosResponse } from 'axios'
+import './Devices.scss'
 import {
   useMediaQuery,
+  Autocomplete,
   Typography,
   TextField,
   Tooltip,
@@ -15,14 +18,13 @@ import {
   Modal,
   Box,
 } from '@mui/material'
-import './Devices.scss'
 
 const Devices = () => {
   const [selectedDevice, setSelectedDevice] = useState<TDevice | null>(null)
+  const { tags, devices, devicesLoaded, setDevices } = useDevices()
   const [currentDevice, setCurrentDevice] = useState<TDevice>()
   const [isLoading, setIsLoading] = useState<Boolean>(false)
   const [isEdited, setIsEdited] = useState<Boolean>(false)
-  const { devices, setDevices } = useDevices()
 
   const offColor = getCSSVariable('--off-color')
   const onColor = getCSSVariable('--on-color')
@@ -30,6 +32,30 @@ const Devices = () => {
   // useDeferredValue resolves intensive re-rendering issue
   useDeferredValue(currentDevice)
 
+  const [locations, setLocations] = useState<TMUIAutocompleteOption[]>([])
+  const [location, setLocation] = useState<TMUIAutocompleteOption>()
+
+  // Load location tags
+  useEffect(() => {
+    const options = tags.map(tag => {
+      if (tag.tagType == 'Room')
+        return {
+          id: tag.tagId,
+          label: tag.name,
+        }
+    })
+    setLocations(options ?? [])
+  }, [devicesLoaded])
+
+  // Set default location
+  useEffect(() => {
+    const option = locations.find(
+      location => location?.id === currentDevice?.roomTag
+    )
+    setLocation(option ?? null)
+  }, [selectedDevice])
+
+  // DELETE device handlers
   const [showDelete, setShowDelete] = useState<boolean>(false)
   const setDeleteIsClosed = () => setShowDelete(false)
   const handleClickDelete = (row: TDevice) => {
@@ -61,8 +87,12 @@ const Devices = () => {
       })
   }
 
+  // UPDATE device handlers
   const [showEdit, setShowEdit] = useState<boolean>(false)
-  const setEditIsClosed = () => setShowEdit(false)
+  const setEditIsClosed = () => {
+    setCurrentDevice(undefined)
+    setShowEdit(false)
+  }
   const handleClickEdit = (row: TDevice) => {
     setSelectedDevice(row)
     setCurrentDevice(row)
@@ -72,6 +102,7 @@ const Devices = () => {
   // Handle update device call and data grid update
   const updateDevice = (updatedDevice?: TDevice) => {
     if (!updatedDevice) return undefined
+    setIsLoading(true)
     const { location, ...postData } = updatedDevice
     API.put(`/devices/${updatedDevice?.deviceId}/`, postData)
       .then((response: AxiosResponse) => {
@@ -91,7 +122,19 @@ const Devices = () => {
         })
       })
       .catch(err => console.error('POST request failed', err))
-      .finally()
+      .finally(() => {
+        if (currentDevice)
+          setDevices(
+            devices.map(device =>
+              device.deviceId === currentDevice.deviceId
+                ? currentDevice
+                : device
+            )
+          )
+        setIsLoading(false)
+        setShowEdit(false)
+        setIsEdited(false)
+      })
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -100,7 +143,7 @@ const Devices = () => {
       const updatedDevice = { ...prev, [e.target.name]: e.target.value }
 
       if (selectedDevice) {
-        const hasChanges = ['name', 'description', 'location'].some(
+        const hasChanges = ['name', 'description'].some(
           field =>
             updatedDevice[field as keyof TDevice] !==
             selectedDevice[field as keyof TDevice]
@@ -239,11 +282,27 @@ const Devices = () => {
                     onChange={handleChange}
                   />
                   <strong className='input-field-name'>Location:</strong>
-                  <TextField
+                  <Autocomplete
                     size='small'
-                    name='location'
-                    value={currentDevice?.location}
-                    onChange={handleChange}
+                    blurOnSelect
+                    autoHighlight
+                    value={location}
+                    options={locations}
+                    onChange={(_, location) => {
+                      setLocation(location)
+                      if (currentDevice)
+                        setCurrentDevice({
+                          ...currentDevice,
+                          location: location?.label,
+                          roomTag: location?.id,
+                        })
+                      setIsEdited(
+                        selectedDevice?.roomTag !== location?.id ? true : false
+                      )
+                    }}
+                    renderInput={params => (
+                      <TextField {...params} placeholder='Location...' />
+                    )}
                   />
                 </div>
                 <div className='actions'>
