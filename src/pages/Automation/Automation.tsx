@@ -1,4 +1,5 @@
 import { EventClickArg, EventContentArg } from '@fullcalendar/core/index.js'
+import { SetState, TMUIAutocompleteOption } from '../../types/generalTypes'
 import { TAutomation, TAutomationEvent } from '../../types/automationTypes'
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker'
 import { TDevice, TDeviceState } from '../../types/deviceTypes'
@@ -6,7 +7,6 @@ import { useDevices } from '../../contexts/DeviceContext'
 import interactionPlugin from '@fullcalendar/interaction'
 import { EventImpl } from '@fullcalendar/core/internal'
 import timeGridPlugin from '@fullcalendar/timegrid'
-import { SetState } from '../../types/generalTypes'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import FullCalendar from '@fullcalendar/react'
 import { useEffect, useState } from 'react'
@@ -28,9 +28,7 @@ import {
   Box,
 } from '@mui/material'
 
-const getDeviceOptions = (
-  devices: TDevice[]
-): { id: number; label: string }[] => {
+const getDeviceOptions = (devices: TDevice[]): TMUIAutocompleteOption[] => {
   return devices.map(device => ({
     label: `Device ${device.deviceId}: ${device.name}`,
     id: device.deviceId,
@@ -47,6 +45,7 @@ const Automation = () => {
   const [newState, setNewState] = useState<TDeviceState[]>()
   const { devices, devicesLoaded } = useDevices()
 
+  // Modal action states
   const [detailsModalIsOpen, setDetailsModalIsOpen] = useState<boolean>(false)
   const [deleteModalIsOpen, setDeleteModalIsOpen] = useState<boolean>(false)
   const [updateModalIsOpen, setUpdateModalIsOpen] = useState<boolean>(false)
@@ -460,7 +459,7 @@ const EditAutomationBox = ({
           options={getDeviceOptions(devices)}
           getOptionDisabled={option => {
             const device = devices.find(
-              currDevice => currDevice.deviceId === option.id
+              currDevice => currDevice.deviceId === option?.id
             )
             if (!device) return true
             return !(device && Array.isArray(device.state))
