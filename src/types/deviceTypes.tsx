@@ -1,5 +1,3 @@
-import { Tag } from './generalTypes'
-
 export interface TDevice {
   deviceId: number
   name: string
@@ -13,12 +11,18 @@ export interface TDevice {
   state: TDeviceState[]
   status: 'On' | 'Off'
   faultStatus: 'Ok' | 'Fault'
-  customTags: Tag[]
-  userTags: Tag[]
+  customTags: TTag[]
+  userTags: TTag[]
 }
 
 export interface TDeviceState {
   fieldName: 'integer' | 'float' | 'string' | 'boolean'
   value?: number | string | boolean
   datatype: string
+}
+
+export interface TTag {
+  tagType: 'Room' | 'User' | 'Custom'
+  tagId: number
+  name: string
 }
