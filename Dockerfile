@@ -9,6 +9,6 @@ RUN bun install --frozen-lockfile
 COPY . .
 
 ARG PORT
-EXPOSE 3000
+EXPOSE 5173
   
-CMD ["bun", "run", "dev"]
+CMD ["bun", "run", "start"]

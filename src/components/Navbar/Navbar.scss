@@ -9,7 +9,7 @@
   display: flex;
   align-items: center;
   flex-direction: column;
-  background-color: $background-color;
+  background-color: var(--background-color);
 }
 
 .navbar-header {
@@ -32,7 +32,7 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  color: $clear-text;
+  color: var(--clear-text);
   font-size: clamp(1.3rem, 4.2vh, 2.8rem);
   font-weight: bold;
 }
@@ -61,15 +61,15 @@
   text-align: left;
   font-size: clamp(1rem, max(2.5vh, 100em), 1.5rem);
   font-weight: bold;
-  color: $grey-text;
+  color: var(--grey-text);
   text-decoration: none;
   border-radius: 0 10px 10px 0;
   transition: background-color 0.2s, color 0.2s;
 }
 
 .nav-button.active {
-  background-color: $highlight-color;
-  color: $active-color;
+  background-color: var(--highlight-color);
+  color: var(--active-color);
 }
 
 .nav-button.active div {
@@ -78,12 +78,12 @@
   min-height: inherit;
   width: 1vh;
   position: fixed;
-  background-color: $active-color;
+  background-color: var(--active-color);
 }
 
 .navbar-links a:hover {
-  background-color: $highlight-color;
-  color: $active-color;
+  background-color: var(--highlight-color);
+  color: var(--active-color);
 }
 
 .navbar-toggle {
@@ -112,8 +112,8 @@
   }
 
   .navbar-links a:hover {
-    background-color: $background-color;
-    color: $grey-text;
+    background-color: var(--background-color);
+    color: var(--grey-text);
   }
 
   .navbar-links {
@@ -162,7 +162,7 @@
     height: 4px;
     border-radius: 4px;
     transition-duration: 0.5s;
-    background-color: $active-color;
+    background-color: var(--active-color);
   }
 
   #bar1,

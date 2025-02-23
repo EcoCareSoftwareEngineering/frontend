@@ -1,4 +1,5 @@
 import PieCenterLabel from '../../components/PieCenterLabel/PieCenterLabel'
+import Dropdown from '../../components/Dropdown/Dropdown'
 import { LineChart } from '@mui/x-charts/LineChart'
 import { PieChart } from '@mui/x-charts/PieChart'
 import './Home.scss'
@@ -36,10 +37,21 @@ const tableData = [
 // Device faults?
 
 const Home = () => {
+  const handleSelect = (value: string) => {
+    console.log('Selected:', value)
+  }
+
   return (
     <div className='home'>
+      {/* Container for device usage */}
       <div className='energy-consumption'>
-        Device Usage by Location
+        <div className='header'>
+          Device Usage by Location
+          <Dropdown
+            options={['Today', 'This week', 'This month', 'This year']}
+            onSelect={handleSelect}
+          />
+        </div>
         <div className='data-container'>
           <ul className='consumption-list'>
             {tableData.map((item, index) => {
@@ -52,6 +64,7 @@ const Home = () => {
                   <PieChart
                     className='pie-chart'
                     slotProps={{ legend: { hidden: true } }}
+                    tooltip={{ trigger: 'none' }}
                     series={[
                       {
                         innerRadius: '70%',
@@ -95,6 +108,8 @@ const Home = () => {
           />
         </div>
       </div>
+
+      {/* Container for various metrics */}
     </div>
   )
 }

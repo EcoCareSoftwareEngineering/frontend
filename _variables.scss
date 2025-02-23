@@ -1,6 +1,12 @@
-$background-color: #1f2738;
-$grey-background: #29374a;
-$highlight-color: #1a2130;
-$active-color: #2992ff;
-$clear-text: #fefdff;
-$grey-text: #6b7f94;
+:root {
+  --background-color: #1f2738;
+  --grey-background: #29374a;
+  --active-color: #2786ed;
+
+  --highlight-color: #1a2130;
+  --off-color: #a72a24;
+  --on-color: #1b8f47;
+
+  --clear-text: #fefdff;
+  --grey-text: #6b7f94;
+}
