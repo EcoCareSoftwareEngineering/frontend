@@ -1,6 +1,7 @@
 import { EventClickArg, EventContentArg } from '@fullcalendar/core/index.js'
 import { SetState, TMUIAutocompleteOption } from '../../types/generalTypes'
 import { TAutomation, TAutomationEvent } from '../../types/automationTypes'
+import LoadingModal from '../../components/LoadingModal/LoadingModal'
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker'
 import { TDevice, TDeviceState } from '../../types/deviceTypes'
 import { useDevices } from '../../contexts/DeviceContext'
@@ -16,7 +17,6 @@ import dayjs, { Dayjs } from 'dayjs'
 import { API } from '../../utils'
 import './Automation.scss'
 import {
-  CircularProgress,
   FormControlLabel,
   Autocomplete,
   RadioGroup,
@@ -135,7 +135,7 @@ const Automation = () => {
   return (
     <div className='automation'>
       <h2>Automations</h2>
-      {isLoading && <CircularProgress size={100} className='loading' />}
+      <LoadingModal open={isLoading} />
       <FullCalendar
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
         navLinks={true}
