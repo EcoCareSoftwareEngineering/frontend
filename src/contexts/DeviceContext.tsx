@@ -1,5 +1,4 @@
-import { TDevice } from '../types/deviceTypes'
-import { Tag } from '../types/generalTypes'
+import { TDevice, TTag } from '../types/deviceTypes'
 import { AxiosResponse } from 'axios'
 import { API } from '../utils'
 import {
@@ -12,6 +11,7 @@ import {
 } from 'react'
 
 interface DeviceContextType {
+  tags: TTag[]
   devices: TDevice[]
   devicesLoaded: boolean
   setDevices: Dispatch<SetStateAction<TDevice[]>>
@@ -26,7 +26,7 @@ export const DeviceContext = createContext<DeviceContextType | undefined>(
 export const DeviceProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [devices, setDevicesList] = useState<TDevice[]>([])
-  const [tags, setTagsList] = useState<Tag[]>()
+  const [tags, setTagsList] = useState<TTag[]>([])
 
   const fetchTags = async () => {
     setIsLoading(true)
@@ -62,6 +62,7 @@ export const DeviceProvider = ({ children }: { children: React.ReactNode }) => {
   return (
     <DeviceContext.Provider
       value={{
+        tags,
         devices,
         devicesLoaded: !isLoading,
         setDevices: setDevicesList,
