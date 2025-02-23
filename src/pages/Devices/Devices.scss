@@ -50,6 +50,17 @@
             outline: none;
           }
 
+          .device-nav {
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--clear-text);
+
+            &:hover {
+              color: var(--active-color);
+              text-decoration: underline;
+            }
+          }
+
           .power-cell {
             justify-content: flex-end;
           }
@@ -84,16 +95,18 @@
             height: 100%;
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 0.1rem;
+            justify-content: flex-start;
 
-            div[role='button'] {
-              transition: background-color 0.1s, color 0.1s;
+            button {
+              width: 45%;
+              height: 75%;
+              display: flex;
+              min-width: unset;
               border-radius: 25px;
               align-items: center;
-              cursor: pointer;
-              display: flex;
-              height: 75%;
+              justify-content: center;
+              color: var(--clear-text);
+              transition: background-color 0.1s, color 0.1s;
 
               &:hover {
                 background: var(--highlight-color);
@@ -125,67 +138,6 @@
         }
       }
     }
-  }
-}
-
-.MuiModal-root {
-  .MuiBox-root {
-    top: 50%;
-    left: 50%;
-    width: 350px;
-    padding: 32px;
-    position: absolute;
-    border-radius: 20px;
-    transform: translate(-50%, -50%);
-    background-color: var(--background-color);
-    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
-
-    #modal-description {
-      margin-bottom: 25px;
-
-      .device-info {
-        display: grid;
-        grid-template-columns: auto 1fr;
-        margin-bottom: 15px;
-        gap: 2px 25px;
-      }
-    }
-
-    .actions {
-      justify-content: space-between;
-      display: flex;
-
-      .cancel-btn {
-        background-color: #5c6d80;
-      }
-
-      .delete-btn {
-        background-color: var(--off-color);
-      }
-
-      .update-btn {
-        background-color: var(--active-color);
-        padding-inline: 1.3rem;
-
-        i {
-          padding-right: 0.6rem;
-        }
-      }
-
-      Button {
-        color: var(--clear-text);
-        padding-inline: 0.6rem;
-        height: 40px;
-
-        i {
-          padding-right: 0.4rem;
-        }
-      }
-    }
-  }
-
-  .MuiBackdrop-root {
-    background-color: rgba(0, 0, 0, 0.1);
   }
 }
 

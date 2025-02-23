@@ -1,0 +1,170 @@
+@use '/variables' as *;
+
+.automation {
+  top: 0;
+  right: 0;
+  height: 100%;
+  display: flex;
+  position: fixed;
+  align-items: center;
+  flex-direction: column;
+  background-color: var(--background-color);
+  width: calc(100vw - clamp(min(15em, 30vh), min(15vw, 250px), 350px));
+
+  .fc {
+    width: 90%;
+    height: 85%;
+    color: var(--clear-text);
+
+    .fc-toolbar-chunk {
+      display: flex;
+
+      .fc-myCustomButton-button {
+        transition: background-color 0.1s, color 0.1s;
+        background-color: var(--active-color);
+        border: 2px solid var(--active-color);
+        color: var(--clear-text);
+        align-items: center;
+        border-radius: 5px;
+        margin-left: 25px;
+        font-weight: bold;
+        padding-block: 0;
+        display: flex;
+
+        &::before {
+          font-family: 'bootstrap-icons';
+          margin-right: 5px;
+          font-size: 1.6rem;
+          content: '\F4FE';
+        }
+
+        &:hover {
+          background-color: var(--highlight-color);
+          color: var(--active-color);
+        }
+      }
+    }
+
+    // Calendar column header
+    [role='columnheader'] div {
+      background-color: var(--highlight-color);
+      padding-block: 5px;
+
+      a {
+        color: var(--clear-text) !important;
+      }
+    }
+
+    // Calendar grid
+    [role='grid'] {
+      border: 0;
+
+      // Month view block
+      .fc-daygrid-day-frame {
+        background-color: var(--grey-background);
+        transition: background-color 0.15s;
+        cursor: pointer;
+
+        &:hover {
+          background-color: color-mix(
+            in srgb,
+            var(--grey-text) 40%,
+            transparent
+          );
+        }
+      }
+    }
+
+    // Calendar month view - day cell (Today)
+    .fc-day-today .fc-daygrid-day-frame {
+      background-color: #ae992121 !important;
+
+      &:hover {
+        background-color: color-mix(
+          in srgb,
+          var(--grey-text) 40%,
+          transparent
+        ) !important;
+      }
+    }
+
+    // Calendar month view - day cell
+    .fc-daygrid-day-number {
+      color: var(--clear-text);
+      transform: translateX(-30%);
+    }
+
+    // Calendar week/day view
+    .fc-day {
+      background-color: var(--grey-background);
+      &.fc-day-today {
+        background-color: #ae992121 !important;
+      }
+    }
+
+    .fc-timegrid-slots table tbody tr {
+      .fc-timegrid-slot-label {
+        background-color: var(--highlight-color);
+      }
+
+      .fc-timegrid-slot {
+        transition: background-color 0.1s;
+        cursor: pointer;
+
+        &:hover {
+          background-color: color-mix(
+            in srgb,
+            var(--grey-text) 40%,
+            transparent
+          );
+        }
+      }
+    }
+
+    // Calendar events
+    .fc-daygrid-day-events .fc-event {
+      background-color: var(--active-color);
+      color: var(--clear-text);
+      padding-block: 3px;
+      margin-bottom: 3px;
+      cursor: pointer;
+
+      &:hover {
+        background-color: var(--background-color);
+        transition: background-color 0.2s;
+      }
+
+      .event-content {
+        overflow: hidden;
+        text-indent: 8px;
+        text-overflow: ellipsis;
+      }
+    }
+
+    .fc-event {
+      text-indent: 4px;
+      border: 0px !important;
+    }
+
+    // Calendar scrollbar
+    .fc-scroller::-webkit-scrollbar {
+      display: none;
+    }
+  }
+}
+
+// Override FullCalendar styling
+// All grid cells
+.fc-theme-standard td,
+.fc-theme-standard th {
+  border: 0px;
+}
+
+// Grid day cell
+.fc-theme-standard td {
+  border: 2.4px solid var(--highlight-color) !important;
+}
+
+.event-actions {
+  margin-top: 20px;
+}

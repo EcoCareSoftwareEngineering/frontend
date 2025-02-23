@@ -7,7 +7,13 @@ const Navbar = () => {
   const location = useLocation()
 
   const getLinkClassName = (path: string) => {
-    return location.pathname === path ? 'nav-button active' : 'nav-button'
+    if (path !== '/') {
+      return location.pathname.includes(path)
+        ? 'nav-button active'
+        : 'nav-button'
+    } else if (path === '/') {
+      return location.pathname == '/' ? 'nav-button active' : 'nav-button'
+    }
   }
 
   const toggleMenu = () => {
@@ -74,13 +80,13 @@ const Navbar = () => {
         </li>
         <li>
           <Link
-            to='/rules'
-            className={getLinkClassName('/rules')}
+            to='/automation'
+            className={getLinkClassName('/automation')}
             onClick={() => setIsOpen(false)}
           >
             <div className='bar' />
             <i className='bi bi-calendar-week' />
-            Rules
+            Automation
           </Link>
         </li>
         <li>
