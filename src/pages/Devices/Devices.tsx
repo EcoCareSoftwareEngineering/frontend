@@ -375,7 +375,7 @@ const Devices = () => {
   ].filter(Boolean) as GridColDef[]
 
   return (
-    <div className='devices'>
+    <div className='devices page-content'>
       <LoadingModal open={!devicesLoaded || isLoading} />
       <DataGrid
         rows={devices}

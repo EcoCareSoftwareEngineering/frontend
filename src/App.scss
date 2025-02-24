@@ -11,6 +11,18 @@
   top: 43%;
 }
 
+.page-content {
+  width: calc(100vw - clamp(min(15em, 30vh), min(15vw, 250px), 350px));
+  background-color: var(--background-color);
+  flex-direction: column;
+  align-items: center;
+  position: fixed;
+  display: flex;
+  height: 100%;
+  right: 0;
+  top: 0;
+}
+
 .MuiModal-root {
   .MuiBox-root {
     top: 50%;
@@ -105,5 +117,15 @@
 
   .MuiBackdrop-root {
     background-color: rgba(0, 0, 0, 0.1);
+  }
+}
+
+@media (max-width: 768px) {
+  .page-content {
+    top: 10vh;
+    right: 1;
+    width: 100%;
+    height: 90vh;
+    position: fixed;
   }
 }

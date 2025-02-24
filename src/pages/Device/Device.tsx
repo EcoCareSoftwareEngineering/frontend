@@ -27,7 +27,7 @@ const Device = () => {
   }, [])
 
   return (
-    <div className='device'>
+    <div className='device page-content'>
       <h2>Device Details</h2>
       <p>Device ID: {id}</p>
       {device && <p>Name: {device?.name}</p>}

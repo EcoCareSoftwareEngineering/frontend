@@ -1,16 +1,6 @@
 @use '/variables' as *;
 
 .devices {
-  top: 0;
-  right: 0;
-  height: 100%;
-  display: flex;
-  position: fixed;
-  align-items: center;
-  flex-direction: column;
-  background-color: var(--background-color);
-  width: calc(100vw - clamp(min(15em, 30vh), min(15vw, 250px), 350px));
-
   .MuiDataGrid-root {
     margin-block: 12vh 3vh;
     width: 90%;
@@ -150,12 +140,6 @@
 
 @media (max-width: 768px) {
   .devices {
-    top: 10vh;
-    right: 1;
-    width: 100%;
-    height: 90vh;
-    position: fixed;
-
     .MuiDataGrid-root {
       margin-block: 3vh 3vh;
     }

@@ -133,7 +133,7 @@ const Automation = () => {
   }
 
   return (
-    <div className='automation'>
+    <div className='automation page-content'>
       <h2>Automations</h2>
       <LoadingModal open={isLoading} />
       <FullCalendar
