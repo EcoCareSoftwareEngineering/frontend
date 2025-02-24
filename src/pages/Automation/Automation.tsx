@@ -134,7 +134,13 @@ const Automation = () => {
 
   return (
     <div className='automation page-content'>
-      <h2>Automations</h2>
+      <div className='page-header'>
+        <h2 className='page-title'>Automations</h2>
+        <Button variant='contained' onClick={handleAddModalOpen}>
+          <i className='bi bi-plus-lg' />
+          Add Automation
+        </Button>
+      </div>
       <LoadingModal open={isLoading} />
       <FullCalendar
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
@@ -158,13 +164,7 @@ const Automation = () => {
         headerToolbar={{
           center: 'title',
           left: 'prev,next today',
-          right: 'dayGridMonth,timeGridWeek,timeGridDay myCustomButton',
-        }}
-        customButtons={{
-          myCustomButton: {
-            text: 'Add Automation',
-            click: () => handleAddModalOpen(),
-          },
+          right: 'dayGridMonth,timeGridWeek,timeGridDay',
         }}
       />
 

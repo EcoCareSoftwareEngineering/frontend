@@ -1,6 +1,43 @@
 @use '/variables' as *;
 
 .automation {
+  .page-header {
+    justify-content: space-between;
+    align-items: center;
+    display: flex;
+    height: 11%;
+    width: 90%;
+
+    .page-title {
+      font-size: 2.5rem;
+    }
+
+    button {
+      transition: background-color 0.1s, color 0.1s;
+      background-color: var(--active-color);
+      border: 2px solid var(--active-color);
+      color: var(--clear-text);
+      text-transform: none;
+      align-items: center;
+      border-radius: 5px;
+      padding-block: 4px;
+      font-weight: bold;
+      font-size: 1rem;
+      display: flex;
+      height: 45%;
+
+      i {
+        font-size: 1.3rem;
+        padding-right: 10px;
+      }
+
+      &:hover {
+        background-color: var(--highlight-color);
+        color: var(--active-color);
+      }
+    }
+  }
+
   .fc {
     width: 90%;
     height: 85%;
@@ -8,31 +45,6 @@
 
     .fc-toolbar-chunk {
       display: flex;
-
-      .fc-myCustomButton-button {
-        transition: background-color 0.1s, color 0.1s;
-        background-color: var(--active-color);
-        border: 2px solid var(--active-color);
-        color: var(--clear-text);
-        align-items: center;
-        border-radius: 5px;
-        margin-left: 25px;
-        font-weight: bold;
-        padding-block: 0;
-        display: flex;
-
-        &::before {
-          font-family: 'bootstrap-icons';
-          margin-right: 5px;
-          font-size: 1.6rem;
-          content: '\F4FE';
-        }
-
-        &:hover {
-          background-color: var(--highlight-color);
-          color: var(--active-color);
-        }
-      }
     }
 
     // Calendar column header
