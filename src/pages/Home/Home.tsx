@@ -42,7 +42,7 @@ const Home = () => {
   }
 
   return (
-    <div className='home'>
+    <div className='home page-content'>
       {/* Container for device usage */}
       <div className='energy-consumption'>
         <div className='header'>
