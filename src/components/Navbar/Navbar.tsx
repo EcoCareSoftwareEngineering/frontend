@@ -69,13 +69,13 @@ const Navbar = () => {
         </li>
         <li>
           <Link
-            to='/statistics'
-            className={getLinkClassName('/statistics')}
+            to='/energy'
+            className={getLinkClassName('/energy')}
             onClick={() => setIsOpen(false)}
           >
             <div className='bar' />
             <i className='bi bi-graph-up' />
-            Statistics
+            Energy
           </Link>
         </li>
         <li>

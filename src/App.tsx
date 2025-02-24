@@ -6,6 +6,7 @@ import Automation from './pages/Automation/Automation'
 import Navbar from './components/Navbar/Navbar'
 import Devices from './pages/Devices/Devices'
 import { SnackbarProvider } from 'notistack'
+import Energy from './pages/Energy/Energy'
 import Device from './pages/Device/Device'
 import Home from './pages/Home/Home'
 import utc from 'dayjs/plugin/utc'
@@ -26,6 +27,7 @@ function App() {
             <Navbar />
             <Routes>
               <Route path='/' element={<Home />} />
+              <Route path='/energy' element={<Energy />} />
               <Route path='/devices' element={<Devices />} />
               <Route path='/devices/:id' element={<Device />} />
               <Route path='/automation' element={<Automation />} />
