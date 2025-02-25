@@ -1,0 +1,12 @@
+.MuiModal-root {
+  z-index: 1400;
+
+  .MuiBackdrop-root {
+    background-color: rgba(0, 0, 0, 0.5);
+
+    .loading {
+      position: absolute;
+      top: 43%;
+    }
+  }
+}

@@ -1,22 +1,22 @@
 import { EventClickArg, EventContentArg } from '@fullcalendar/core/index.js'
 import { SetState, TMUIAutocompleteOption } from '../../types/generalTypes'
 import { TAutomation, TAutomationEvent } from '../../types/automationTypes'
+import LoadingModal from '../../components/LoadingModal/LoadingModal'
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker'
 import { TDevice, TDeviceState } from '../../types/deviceTypes'
 import { useDevices } from '../../contexts/DeviceContext'
 import interactionPlugin from '@fullcalendar/interaction'
 import { EventImpl } from '@fullcalendar/core/internal'
 import timeGridPlugin from '@fullcalendar/timegrid'
+import { useApi } from '../../contexts/ApiContext'
+import { AxiosError, AxiosResponse } from 'axios'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import FullCalendar from '@fullcalendar/react'
 import { useEffect, useState } from 'react'
 import { enqueueSnackbar } from 'notistack'
-import { AxiosResponse } from 'axios'
 import dayjs, { Dayjs } from 'dayjs'
-import { API } from '../../utils'
 import './Automation.scss'
 import {
-  CircularProgress,
   FormControlLabel,
   Autocomplete,
   RadioGroup,
@@ -44,19 +44,18 @@ const Automation = () => {
   const [selectedEvent, setSelectedEvent] = useState<EventImpl>()
   const [newState, setNewState] = useState<TDeviceState[]>()
   const { devices, devicesLoaded } = useDevices()
+  const { API, loading } = useApi()
 
   // Modal action states
   const [detailsModalIsOpen, setDetailsModalIsOpen] = useState<boolean>(false)
   const [deleteModalIsOpen, setDeleteModalIsOpen] = useState<boolean>(false)
   const [updateModalIsOpen, setUpdateModalIsOpen] = useState<boolean>(false)
   const [addModalIsOpen, setAddModalIsOpen] = useState<boolean>(false)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
 
   // Fetch all automations
   useEffect(() => {
-    setIsLoading(true)
     if (!devicesLoaded) return
-    API.get('/automations/')
+    API.get('/automations/', 'Fetch all automations request')
       .then((response: AxiosResponse) => {
         setAutomations(
           response.data.map((automation: TAutomation) => ({
@@ -65,7 +64,9 @@ const Automation = () => {
           }))
         )
       })
-      .catch(err => console.error('GET request failed', err))
+      .catch((err: AxiosError | any) => {
+        console.error('GET request failed', err)
+      })
   }, [devicesLoaded])
 
   // Format automation events for calendar
@@ -85,7 +86,6 @@ const Automation = () => {
           }
         })
       )
-      setIsLoading(false)
     }
   }, [automations])
 
@@ -96,6 +96,7 @@ const Automation = () => {
   }
 
   const handleNewStateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log(e)
     if (!selectedDevice) return
     setNewState([
       {
@@ -133,9 +134,15 @@ const Automation = () => {
   }
 
   return (
-    <div className='automation'>
-      <h2>Automations</h2>
-      {isLoading && <CircularProgress size={100} className='loading' />}
+    <div className='automation page-content'>
+      <div className='page-header'>
+        <h2 className='page-title'>Automations</h2>
+        <Button variant='contained' onClick={handleAddModalOpen}>
+          <i className='bi bi-plus-lg' />
+          Add Automation
+        </Button>
+      </div>
+      <LoadingModal open={loading} />
       <FullCalendar
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
         navLinks={true}
@@ -158,20 +165,13 @@ const Automation = () => {
         headerToolbar={{
           center: 'title',
           left: 'prev,next today',
-          right: 'dayGridMonth,timeGridWeek,timeGridDay myCustomButton',
-        }}
-        customButtons={{
-          myCustomButton: {
-            text: 'Add Automation',
-            click: () => handleAddModalOpen(),
-          },
+          right: 'dayGridMonth,timeGridWeek,timeGridDay',
         }}
       />
 
       <AddAutomationModal
         devices={devices}
         newState={newState}
-        setIsLoading={setIsLoading}
         automations={automations}
         setAutomations={setAutomations}
         selectedDate={selectedDate}
@@ -185,7 +185,6 @@ const Automation = () => {
       <UpdateAutomationModal
         devices={devices}
         newState={newState}
-        setIsLoading={setIsLoading}
         automations={automations}
         setAutomations={setAutomations}
         selectedAutomation={selectedAutomation}
@@ -210,7 +209,6 @@ const Automation = () => {
       />
       <DeleteAutomationModal
         automations={automations}
-        setIsLoading={setIsLoading}
         selectedEvent={selectedEvent}
         selectedDevice={selectedDevice}
         setAutomations={setAutomations}
@@ -225,7 +223,6 @@ const Automation = () => {
 const AddAutomationModal = ({
   devices,
   newState,
-  setIsLoading,
   automations,
   setAutomations,
   selectedDate,
@@ -238,7 +235,6 @@ const AddAutomationModal = ({
 }: {
   devices: TDevice[]
   newState: TDeviceState[] | undefined
-  setIsLoading: SetState<boolean>
   automations: TAutomation[]
   setAutomations: SetState<TAutomation[]>
   selectedDate: Dayjs | null
@@ -249,13 +245,14 @@ const AddAutomationModal = ({
   setSelectedDevice: SetState<TDevice | undefined>
   handleNewStateChange: (e: React.ChangeEvent<HTMLInputElement>) => void
 }) => {
+  const { API } = useApi()
+
   const handleAddModalClose = () => {
     setAddModalIsOpen(false)
     setSelectedDevice(undefined)
   }
 
   const handleAddModalSubmit = () => {
-    setIsLoading(true)
     const postData = {
       dateTime: selectedDate?.utc().format('YYYY-MM-DD HH:mm:ss'),
       deviceId: selectedDevice?.deviceId,
@@ -275,10 +272,11 @@ const AddAutomationModal = ({
           },
         })
       })
-      .catch(err => console.error('POST request failed', err))
+      .catch((err: AxiosError | any) => {
+        console.error('POST request failed', err)
+      })
       .finally(() => {
         handleAddModalClose()
-        setIsLoading(false)
       })
   }
 
@@ -319,7 +317,6 @@ const AddAutomationModal = ({
 const UpdateAutomationModal = ({
   devices,
   newState,
-  setIsLoading,
   automations,
   setAutomations,
   selectedDate,
@@ -333,7 +330,6 @@ const UpdateAutomationModal = ({
 }: {
   devices: TDevice[]
   newState: TDeviceState[] | undefined
-  setIsLoading: SetState<boolean>
   automations: TAutomation[]
   selectedAutomation: TAutomation | undefined
   setAutomations: SetState<TAutomation[]>
@@ -345,13 +341,14 @@ const UpdateAutomationModal = ({
   setSelectedDevice: SetState<TDevice | undefined>
   handleNewStateChange: (e: React.ChangeEvent<HTMLInputElement>) => void
 }) => {
+  const { API } = useApi()
+
   const handleUpdateModalClose = () => {
     setUpdateModalIsOpen(false)
     setSelectedDevice(undefined)
   }
 
   const handleUpdateModalSubmit = () => {
-    setIsLoading(true)
     const putData = {
       dateTime: selectedDate?.utc().format('YYYY-MM-DD HH:mm:ss'),
       newState: newState,
@@ -374,10 +371,11 @@ const UpdateAutomationModal = ({
           },
         })
       })
-      .catch(err => console.error('PUT request failed', err))
+      .catch((err: AxiosError | any) => {
+        console.error('PUT request failed', err)
+      })
       .finally(() => {
         handleUpdateModalClose()
-        setIsLoading(false)
       })
   }
 
@@ -462,7 +460,11 @@ const EditAutomationBox = ({
               currDevice => currDevice.deviceId === option?.id
             )
             if (!device) return true
-            return !(device && Array.isArray(device.state))
+            return !(
+              device &&
+              Array.isArray(device.state) &&
+              device.state.length > 0
+            )
           }}
           defaultValue={selectedDevice && getDeviceOptions([selectedDevice])[0]}
           onChange={(_, newDevice) => {
@@ -487,7 +489,7 @@ const EditAutomationBox = ({
             <Typography className='input-field-name'>
               Set device{' '}
               <span style={{ fontWeight: 'bold' }}>
-                {selectedDevice.state[0].fieldName}{' '}
+                {selectedDevice.state[0]?.fieldName}{' '}
               </span>
               to:
             </Typography>
@@ -599,7 +601,6 @@ const AutomationDetailsModal = ({
 
 const DeleteAutomationModal = ({
   automations,
-  setIsLoading,
   selectedEvent,
   setAutomations,
   selectedDevice,
@@ -609,15 +610,15 @@ const DeleteAutomationModal = ({
 }: {
   automations: TAutomation[]
   deleteModalIsOpen: boolean
-  setIsLoading: SetState<boolean>
   selectedDevice: TDevice | undefined
   selectedEvent: EventImpl | undefined
   setAutomations: SetState<TAutomation[]>
   selectedAutomation: TAutomation | undefined
   setDeleteModalIsOpen: SetState<boolean>
 }) => {
+  const { API } = useApi()
+
   const handleDeleteAutomation = (automationId?: number) => {
-    setIsLoading(true)
     API.delete(`/automations/${automationId}/`, 'Delete an automation request')
       .then((response: AxiosResponse) => {
         if (response.status == 200) {
@@ -633,9 +634,10 @@ const DeleteAutomationModal = ({
           })
         }
       })
-      .catch(err => console.error('DELETE request failed', err))
+      .catch((err: AxiosError | any) => {
+        console.error('DELETE request failed', err)
+      })
       .finally(() => {
-        setIsLoading(true)
         setDeleteModalIsOpen(false)
       })
   }

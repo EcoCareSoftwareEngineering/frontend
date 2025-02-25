@@ -1,12 +1,14 @@
+import LoadingModal from '../../components/LoadingModal/LoadingModal'
 import { TMUIAutocompleteOption } from '../../types/generalTypes'
 import { useDeferredValue, useEffect, useState } from 'react'
 import { useDevices } from '../../contexts/DeviceContext'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
-import { API, getCSSVariable } from '../../utils'
+import { useApi } from '../../contexts/ApiContext'
+import { AxiosError, AxiosResponse } from 'axios'
 import { TDevice } from '../../types/deviceTypes'
+import { getCSSVariable } from '../../utils'
 import { enqueueSnackbar } from 'notistack'
 import { Link } from 'react-router-dom'
-import { AxiosResponse } from 'axios'
 import './Devices.scss'
 import {
   useMediaQuery,
@@ -23,8 +25,8 @@ const Devices = () => {
   const [selectedDevice, setSelectedDevice] = useState<TDevice | null>(null)
   const { tags, devices, devicesLoaded, setDevices } = useDevices()
   const [currentDevice, setCurrentDevice] = useState<TDevice>()
-  const [isLoading, setIsLoading] = useState<Boolean>(false)
-  const [isEdited, setIsEdited] = useState<Boolean>(false)
+  const [isEdited, setIsEdited] = useState<boolean>(false)
+  const { API, loading } = useApi()
 
   const offColor = getCSSVariable('--off-color')
   const onColor = getCSSVariable('--on-color')
@@ -65,7 +67,6 @@ const Devices = () => {
 
   // Handle device deletion call and data grid update
   const deleteDevice = (deviceId?: number) => {
-    setIsLoading(true)
     API.delete(`/devices/${deviceId}/`)
       .then((response: any) => {
         if (response.status == 200) {
@@ -78,12 +79,13 @@ const Devices = () => {
               horizontal: 'right',
             },
           })
-          setDeleteIsClosed()
         }
       })
-      .catch(err => console.error('DELETE request failed', err))
+      .catch((err: AxiosError | any) => {
+        console.error('DELETE request failed', err)
+      })
       .finally(() => {
-        setIsLoading(false)
+        setDeleteIsClosed()
       })
   }
 
@@ -102,8 +104,8 @@ const Devices = () => {
   // Handle update device call and data grid update
   const updateDevice = (updatedDevice?: TDevice) => {
     if (!updatedDevice) return undefined
-    setIsLoading(true)
     const { location, ...postData } = updatedDevice
+
     API.put(`/devices/${updatedDevice?.deviceId}/`, postData)
       .then((response: AxiosResponse) => {
         setDevices(
@@ -121,7 +123,9 @@ const Devices = () => {
           },
         })
       })
-      .catch(err => console.error('POST request failed', err))
+      .catch((err: AxiosError | any) => {
+        console.error('POST request failed', err)
+      })
       .finally(() => {
         if (currentDevice)
           setDevices(
@@ -131,7 +135,6 @@ const Devices = () => {
                 : device
             )
           )
-        setIsLoading(false)
         setShowEdit(false)
         setIsEdited(false)
       })
@@ -374,18 +377,24 @@ const Devices = () => {
   ].filter(Boolean) as GridColDef[]
 
   return (
-    <div className='devices'>
-      {devices && devices.length > 0 && (
-        <DataGrid
-          rows={devices}
-          columns={columns}
-          paginationMode='server'
-          rowCount={devices.length}
-          getRowId={row => row.deviceId}
-          disableRowSelectionOnClick
-          disableColumnResize
-        />
-      )}
+    <div className='devices page-content'>
+      <LoadingModal open={!devicesLoaded || loading} />
+      <DataGrid
+        rows={devices}
+        columns={columns}
+        paginationMode='server'
+        rowCount={devices.length}
+        getRowId={row => row.deviceId}
+        disableRowSelectionOnClick
+        disableColumnResize
+        slots={{
+          noRowsOverlay: () => (
+            <Box>
+              <Typography>No data available</Typography>
+            </Box>
+          ),
+        }}
+      />
     </div>
   )
 }
