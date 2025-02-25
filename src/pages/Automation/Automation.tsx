@@ -298,6 +298,7 @@ const AddAutomationModal = ({
           Add Automation
         </Typography>
         <EditAutomationBox
+          adding={true}
           devices={devices}
           selectedDate={selectedDate}
           selectedDevice={selectedDevice}
@@ -397,6 +398,7 @@ const UpdateAutomationModal = ({
           Edit Automation
         </Typography>
         <EditAutomationBox
+          adding={false}
           devices={devices}
           selectedDate={selectedDate}
           selectedDevice={selectedDevice}
@@ -421,14 +423,16 @@ const UpdateAutomationModal = ({
 }
 
 const EditAutomationBox = ({
+  adding,
   devices,
   selectedDate,
   selectedDevice,
   setSelectedDate,
   setSelectedDevice,
-  handleNewStateChange,
   selectedAutomation,
+  handleNewStateChange,
 }: {
+  adding: boolean
   devices: TDevice[]
   selectedDate: Dayjs | null
   selectedAutomation?: TAutomation
@@ -453,11 +457,16 @@ const EditAutomationBox = ({
         />
       </div>
       <Typography id='modal-modal-title' fontWeight='bold' variant='h6'>
-        Input Device Details
+        {adding ? 'Input' : 'Selected'} Device Details
       </Typography>
       <div className='modal-details-container'>
-        <Typography className='field-name'>Please select a device:</Typography>
+        {adding && (
+          <Typography className='field-name'>
+            Please select a device:
+          </Typography>
+        )}
         <Autocomplete
+          readOnly={!adding}
           blurOnSelect
           autoHighlight
           options={getDeviceOptions(devices)}
