@@ -1,6 +1,6 @@
 import { TDevice, TTag } from '../types/deviceTypes'
-import { AxiosResponse } from 'axios'
-import { API } from '../utils'
+import { AxiosError, AxiosResponse } from 'axios'
+import { useApi } from './ApiContext'
 import {
   SetStateAction,
   createContext,
@@ -27,18 +27,21 @@ export const DeviceProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [devices, setDevicesList] = useState<TDevice[]>([])
   const [tags, setTagsList] = useState<TTag[]>([])
+  const { API } = useApi()
 
   const fetchTags = async () => {
     setIsLoading(true)
-    await API.get('/tags/')
+    await API.get('/tags/', 'Fetch all device tags request')
       .then((response: AxiosResponse) => {
         setTagsList(response.data)
       })
-      .catch(err => console.error('GET request failed', err))
+      .catch((err: AxiosError) => {
+        console.error('GET request failed', err)
+      })
   }
 
   const fetchDevices = async () => {
-    API.get('/devices/')
+    API.get('/devices/', 'Fetch all devices request')
       .then((response: AxiosResponse) => {
         setDevicesList(
           response.data.map((device: TDevice) => ({
@@ -47,7 +50,9 @@ export const DeviceProvider = ({ children }: { children: React.ReactNode }) => {
           }))
         )
       })
-      .catch(err => console.error('GET request failed', err))
+      .catch((err: AxiosError) => {
+        console.error('GET request failed', err)
+      })
       .finally(() => setIsLoading(false))
   }
 
@@ -74,11 +79,12 @@ export const DeviceProvider = ({ children }: { children: React.ReactNode }) => {
   )
 }
 
-// Custom hook for using the context
 export const useDevices = () => {
   const context = useContext(DeviceContext)
   if (!context) {
-    throw new Error('useDevices must be used within a DeviceProvider')
+    throw new Error(
+      'Component calling useDevices should be within a <DeviceProvider>'
+    )
   }
   return context
 }

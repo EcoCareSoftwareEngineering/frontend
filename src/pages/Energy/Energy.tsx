@@ -4,12 +4,11 @@ import { TEnergyData, TEnergyValues } from '../../types/energyTypes'
 import { PieChart } from '@mui/x-charts/PieChart'
 import { BarChart } from '@mui/x-charts/BarChart'
 import { AxiosError, AxiosResponse } from 'axios'
+import { useApi } from '../../contexts/ApiContext'
 import { useEffect, useState } from 'react'
-import { API } from '../../utils'
 import './Energy.scss'
 
 const colors = ['#07cb83', '#fbad53', '#ec443b']
-// const colors = ['#07cb83', '#ec443b', '#fbad53']
 
 const tableData = [
   {
@@ -28,10 +27,9 @@ const Energy = () => {
   const [energyGeneration, setEnergyGeneration] = useState<TEnergyValues>([])
   const [energyUsage, setEnergyUsage] = useState<TEnergyValues>([])
   const [energyData, setEnergyData] = useState<TEnergyData>()
-  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const { API, loading } = useApi()
 
   const fetchEnergyData = () => {
-    setIsLoading(true)
     API.get(
       `/energy/?startDate=2025-01-02&endDate=2025-01-02`,
       'Fetch energy usage request'
@@ -63,10 +61,11 @@ const Energy = () => {
           }
         })
       })
-      .catch((err: AxiosError) => console.log(err))
+      .catch((err: AxiosError) => {
+        console.error('GET request failed', err)
+      })
       .finally(() => {
         console.log(energyData)
-        setIsLoading(false)
       })
   }
 
@@ -128,7 +127,7 @@ const Energy = () => {
               )
             })}
           </ul>
-          {!isLoading && (
+          {!loading && (
             <BarChart
               xAxis={[
                 {
