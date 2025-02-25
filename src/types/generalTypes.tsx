@@ -7,3 +7,8 @@ export type TMUIAutocompleteOption =
     }
   | undefined
   | null
+
+export type TUserLogin = {
+  username: string
+  password: string
+}
