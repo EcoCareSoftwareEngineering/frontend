@@ -58,6 +58,7 @@ export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
       return response
     } catch (error: AxiosError | any) {
       enqueueSnackbar(`${requestDescription ?? ''} ${error.message}`, {
+        preventDuplicate: true,
         variant: 'error',
         style: {
           maxWidth: '200px',
