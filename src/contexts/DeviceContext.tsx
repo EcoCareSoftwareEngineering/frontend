@@ -27,38 +27,41 @@ export const DeviceProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [devices, setDevicesList] = useState<TDevice[]>([])
   const [tags, setTagsList] = useState<TTag[]>([])
-  const { API } = useApi()
+  const { API, isAuthenticated } = useApi()
 
   const fetchTags = async () => {
-    setIsLoading(true)
-    await API.get('/tags/', 'Fetch all device tags request')
-      .then((response: AxiosResponse) => {
-        setTagsList(response.data)
-      })
-      .catch((err: AxiosError) => {
-        console.error('GET request failed', err)
-      })
+    if (isAuthenticated) {
+      setIsLoading(true)
+      await API.get('/tags/', 'Fetch all device tags request')
+        .then((response: AxiosResponse) => {
+          setTagsList(response.data)
+        })
+        .catch((err: AxiosError) => {
+          console.error('GET request failed', err)
+        })
+    }
   }
 
   const fetchDevices = async () => {
-    API.get('/devices/', 'Fetch all devices request')
-      .then((response: AxiosResponse) => {
-        setDevicesList(
-          response.data.map((device: TDevice) => ({
-            ...device,
-            location: tags?.find(t => t.tagId === device.roomTag)?.name,
-          }))
-        )
-      })
-      .catch((err: AxiosError) => {
-        console.error('GET request failed', err)
-      })
-      .finally(() => setIsLoading(false))
+    if (isAuthenticated)
+      API.get('/devices/', 'Fetch all devices request')
+        .then((response: AxiosResponse) => {
+          setDevicesList(
+            response.data.map((device: TDevice) => ({
+              ...device,
+              location: tags?.find(t => t.tagId === device.roomTag)?.name,
+            }))
+          )
+        })
+        .catch((err: AxiosError) => {
+          console.error('GET request failed', err)
+        })
+        .finally(() => setIsLoading(false))
   }
 
   useEffect(() => {
     fetchTags()
-  }, [])
+  }, [isAuthenticated])
 
   useEffect(() => {
     if (tags && Array.isArray(tags)) fetchDevices()
