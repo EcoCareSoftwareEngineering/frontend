@@ -490,6 +490,11 @@ const EditAutomationBox = ({
           renderInput={params => (
             <TextField {...params} placeholder='Device...' />
           )}
+          sx={{
+            '& .MuiAutocomplete-popupIndicator': {
+              display: `${adding ? 'inline-flex' : 'none'}`,
+            },
+          }}
         />
       </div>
       {selectedDevice && (
