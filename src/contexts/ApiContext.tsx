@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import axios, { AxiosError, AxiosResponse } from 'axios'
 import { TUserLogin } from '../types/generalTypes'
 import { enqueueSnackbar } from 'notistack'
@@ -25,6 +25,7 @@ const BASE_URL = 'http://localhost:5000/api'
 export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [loading, setLoading] = useState(false)
+  const activeRequests = useRef(0)
 
   const TOUCHSCREEN_LOGIN = {
     username: 'touchscreen',
@@ -65,6 +66,7 @@ export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
     data?: any,
     requestDescription?: string
   ) => {
+    activeRequests.current++
     setLoading(true)
 
     try {
@@ -104,7 +106,10 @@ export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
 
       throw error
     } finally {
-      setLoading(false)
+      activeRequests.current--
+      if (activeRequests.current == 0) {
+        setLoading(false)
+      }
     }
   }
 
