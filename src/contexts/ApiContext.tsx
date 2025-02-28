@@ -73,12 +73,13 @@ export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
       // First check authentication status
       const timeout = 3000
       const startTime = Date.now()
-      while (!getIsAuthenticated() || url.includes('login')) {
-        if (Date.now() - startTime >= timeout) {
-          throw new Error('failed to load authentication token')
+      if (!url.includes('login'))
+        while (!getIsAuthenticated()) {
+          if (Date.now() - startTime >= timeout) {
+            throw new Error('failed to load authentication token')
+          }
+          await new Promise(resolve => setTimeout(resolve, 100))
         }
-        await new Promise(resolve => setTimeout(resolve, 100))
-      }
 
       // Then make request with axios
       const response = await axios({
