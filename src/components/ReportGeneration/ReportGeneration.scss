@@ -1,0 +1,66 @@
+@use '/variables' as *;
+
+// Styles for the report container
+.report-container {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  max-width: 800px;
+  margin: 0 auto;
+  background-color: var(--background-color);
+  color: var(--clear-text);
+
+  h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: var(--clear-text);
+    text-align: center;
+  }
+
+  h2 {
+    font-size: 20px;
+    margin-bottom: 10px;
+    color: var(--clear-text);
+  }
+
+  p {
+    font-size: 16px;
+    margin-bottom: 20px;
+    color: var(--grey-text);
+    line-height: 1.5;
+  }
+
+  // Styles for the charts
+  .chart-container {
+    width: 100%;
+    margin-bottom: 40px;
+
+    canvas {
+      max-width: 100%;
+      height: auto !important; // Ensure charts are responsive
+    }
+  }
+
+  // Styles for the download button
+  .download-button {
+    padding: 10px 20px;
+    background-color: var(--highlight-color);
+    color: var(--active-color);
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    display: block;
+    margin: 20px auto 0;
+    transition: background-color 0.3s ease, color 0.3s ease;
+
+    &:hover {
+      background-color: var(--active-color);
+      color: var(--highlight-color);
+    }
+
+    &:active {
+      background-color: darken(var(--active-color), 10%);
+    }
+  }
+}
+
