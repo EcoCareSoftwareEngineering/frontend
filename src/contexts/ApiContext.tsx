@@ -1,14 +1,31 @@
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import axios, { AxiosError, AxiosResponse } from 'axios'
 import { TUserLogin } from '../types/generalTypes'
 import { enqueueSnackbar } from 'notistack'
 
-const ApiContext = createContext<any>(null)
+interface ApiWrapper {
+  get: (url: string, requestDescription?: string) => Promise<any>
+  post: (url: string, data: any, requestDescription?: string) => Promise<any>
+  put: (url: string, data: any, requestDescription?: string) => Promise<any>
+  delete: (url: string, requestDescription?: string) => Promise<any>
+}
+
+interface ApiContextType {
+  API: ApiWrapper
+  loading: boolean
+  isAuthenticated: boolean
+  login: (loginDetails: TUserLogin) => void
+  logout: () => void
+}
+
+const ApiContext = createContext<ApiContextType | undefined>(undefined)
 
 const BASE_URL = 'http://localhost:5000/api'
 
 export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [loading, setLoading] = useState(false)
+  const activeRequests = useRef(0)
 
   const TOUCHSCREEN_LOGIN = {
     username: 'touchscreen',
@@ -16,25 +33,32 @@ export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   const login = (loginDetails: TUserLogin) => {
-    API.post('/accounts/login/', loginDetails).then((res: AxiosResponse) => {
-      localStorage.setItem('token', res.data.token)
-      axios.defaults.headers.common['token'] = res.data.token
-    })
+    API.post('/accounts/login/', loginDetails, 'User login request').then(
+      (res: AxiosResponse) => {
+        localStorage.setItem('token', res.data.token)
+        axios.defaults.headers.common['token'] = res.data.token
+        setIsAuthenticated(true)
+      }
+    )
   }
 
   const logout = () => {
     localStorage.removeItem('token')
   }
 
+  const getAuthToken = () => localStorage.getItem('token')
+
   useEffect(() => {
-    if (!localStorage.getItem('token')) {
+    const token = getAuthToken()
+    if (!token) {
       login(TOUCHSCREEN_LOGIN)
     } else {
-      axios.defaults.headers.common['token'] = localStorage.getItem('token')
+      axios.defaults.headers.common['token'] = token
+      setIsAuthenticated(true)
     }
   }, [])
 
-  const getAuthToken = () => localStorage.getItem('token')
+  const getIsAuthenticated = () => isAuthenticated
 
   const request = async (
     method: string,
@@ -42,21 +66,31 @@ export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
     data?: any,
     requestDescription?: string
   ) => {
+    activeRequests.current++
     setLoading(true)
 
     try {
+      // First check authentication status
+      const timeout = 3000
+      const startTime = Date.now()
+      if (!url.includes('login'))
+        while (!getIsAuthenticated()) {
+          if (Date.now() - startTime >= timeout) {
+            throw new Error('failed to load authentication token')
+          }
+          await new Promise(resolve => setTimeout(resolve, 100))
+        }
+
+      // Then make request with axios
       const response = await axios({
         method,
         url: `${BASE_URL}${url}`,
         data,
-        headers: {
-          Authorization: `Bearer ${getAuthToken()}`, // Auto-add token
-          'Content-Type': 'application/json',
-        },
       })
 
       return response
     } catch (error: AxiosError | any) {
+      // Show snackbar if error
       enqueueSnackbar(`${requestDescription ?? ''} ${error.message}`, {
         preventDuplicate: true,
         variant: 'error',
@@ -73,11 +107,14 @@ export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
 
       throw error
     } finally {
-      setLoading(false)
+      activeRequests.current--
+      if (activeRequests.current == 0) {
+        setLoading(false)
+      }
     }
   }
 
-  const API = {
+  const API: ApiWrapper = {
     get: (url: string, requestDescription?: string) =>
       request('GET', url, null, requestDescription),
     post: (url: string, data: any, requestDescription?: string) =>
@@ -89,7 +126,9 @@ export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   return (
-    <ApiContext.Provider value={{ API, loading, login, logout }}>
+    <ApiContext.Provider
+      value={{ API, loading, isAuthenticated, login, logout }}
+    >
       {children}
     </ApiContext.Provider>
   )

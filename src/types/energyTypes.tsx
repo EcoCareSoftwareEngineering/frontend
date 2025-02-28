@@ -1,7 +1,11 @@
 export interface TEnergyData {
-  energyGenerated: TEnergyValues
-  energyUsed: TEnergyValues
-  netEnergy: TEnergyValues
+  energyGenerated: number[]
+  energyUsed: number[]
+  netEnergy: number[]
 }
 
-export type TEnergyValues = number[]
+export type TEnergyValues = {
+  percentage: number
+  data: number[]
+  sum: number
+}

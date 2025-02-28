@@ -1,21 +1,25 @@
-import { EventClickArg, EventContentArg } from '@fullcalendar/core/index.js'
-import { SetState, TMUIAutocompleteOption } from '../../types/generalTypes'
 import { TAutomation, TAutomationEvent } from '../../types/automationTypes'
 import LoadingModal from '../../components/LoadingModal/LoadingModal'
-import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker'
 import { TDevice, TDeviceState } from '../../types/deviceTypes'
+import * as generalTypes from '../../types/generalTypes'
 import { useDevices } from '../../contexts/DeviceContext'
-import interactionPlugin from '@fullcalendar/interaction'
-import { EventImpl } from '@fullcalendar/core/internal'
-import timeGridPlugin from '@fullcalendar/timegrid'
 import { useApi } from '../../contexts/ApiContext'
 import { AxiosError, AxiosResponse } from 'axios'
-import dayGridPlugin from '@fullcalendar/daygrid'
-import FullCalendar from '@fullcalendar/react'
 import { useEffect, useState } from 'react'
 import { enqueueSnackbar } from 'notistack'
 import dayjs, { Dayjs } from 'dayjs'
 import './Automation.scss'
+
+// FullCalendar package imports
+import { EventClickArg, EventContentArg } from '@fullcalendar/core'
+import interactionPlugin from '@fullcalendar/interaction'
+import { EventImpl } from '@fullcalendar/core/internal'
+import timeGridPlugin from '@fullcalendar/timegrid'
+import dayGridPlugin from '@fullcalendar/daygrid'
+import FullCalendar from '@fullcalendar/react'
+
+// Material UI package imports
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker'
 import {
   FormControlLabel,
   Autocomplete,
@@ -28,7 +32,9 @@ import {
   Box,
 } from '@mui/material'
 
-const getDeviceOptions = (devices: TDevice[]): TMUIAutocompleteOption[] => {
+const getDeviceOptions = (
+  devices: TDevice[]
+): generalTypes.TMUIAutocompleteOption[] => {
   return devices.map(device => ({
     label: `Device ${device.deviceId}: ${device.name}`,
     id: device.deviceId,
@@ -236,13 +242,13 @@ const AddAutomationModal = ({
   devices: TDevice[]
   newState: TDeviceState[] | undefined
   automations: TAutomation[]
-  setAutomations: SetState<TAutomation[]>
+  setAutomations: generalTypes.SetState<TAutomation[]>
   selectedDate: Dayjs | null
-  setSelectedDate: SetState<Dayjs | null>
+  setSelectedDate: generalTypes.SetState<Dayjs | null>
   addModalIsOpen: boolean
-  setAddModalIsOpen: SetState<boolean>
+  setAddModalIsOpen: generalTypes.SetState<boolean>
   selectedDevice: TDevice | undefined
-  setSelectedDevice: SetState<TDevice | undefined>
+  setSelectedDevice: generalTypes.SetState<TDevice | undefined>
   handleNewStateChange: (e: React.ChangeEvent<HTMLInputElement>) => void
 }) => {
   const { API } = useApi()
@@ -292,6 +298,7 @@ const AddAutomationModal = ({
           Add Automation
         </Typography>
         <EditAutomationBox
+          adding={true}
           devices={devices}
           selectedDate={selectedDate}
           selectedDevice={selectedDevice}
@@ -332,13 +339,13 @@ const UpdateAutomationModal = ({
   newState: TDeviceState[] | undefined
   automations: TAutomation[]
   selectedAutomation: TAutomation | undefined
-  setAutomations: SetState<TAutomation[]>
+  setAutomations: generalTypes.SetState<TAutomation[]>
   selectedDate: Dayjs | null
-  setSelectedDate: SetState<Dayjs | null>
+  setSelectedDate: generalTypes.SetState<Dayjs | null>
   updateModalIsOpen: boolean
-  setUpdateModalIsOpen: SetState<boolean>
+  setUpdateModalIsOpen: generalTypes.SetState<boolean>
   selectedDevice: TDevice | undefined
-  setSelectedDevice: SetState<TDevice | undefined>
+  setSelectedDevice: generalTypes.SetState<TDevice | undefined>
   handleNewStateChange: (e: React.ChangeEvent<HTMLInputElement>) => void
 }) => {
   const { API } = useApi()
@@ -391,6 +398,7 @@ const UpdateAutomationModal = ({
           Edit Automation
         </Typography>
         <EditAutomationBox
+          adding={false}
           devices={devices}
           selectedDate={selectedDate}
           selectedDevice={selectedDevice}
@@ -415,20 +423,22 @@ const UpdateAutomationModal = ({
 }
 
 const EditAutomationBox = ({
+  adding,
   devices,
   selectedDate,
   selectedDevice,
   setSelectedDate,
   setSelectedDevice,
-  handleNewStateChange,
   selectedAutomation,
+  handleNewStateChange,
 }: {
+  adding: boolean
   devices: TDevice[]
   selectedDate: Dayjs | null
   selectedAutomation?: TAutomation
   selectedDevice: TDevice | undefined
-  setSelectedDate: SetState<Dayjs | null>
-  setSelectedDevice: SetState<TDevice | undefined>
+  setSelectedDate: generalTypes.SetState<Dayjs | null>
+  setSelectedDevice: generalTypes.SetState<TDevice | undefined>
   handleNewStateChange: (e: React.ChangeEvent<HTMLInputElement>) => void
 }) => {
   return (
@@ -447,11 +457,16 @@ const EditAutomationBox = ({
         />
       </div>
       <Typography id='modal-modal-title' fontWeight='bold' variant='h6'>
-        Input Device Details
+        {adding ? 'Input' : 'Selected'} Device Details
       </Typography>
       <div className='modal-details-container'>
-        <Typography className='field-name'>Please select a device:</Typography>
+        {adding && (
+          <Typography className='field-name'>
+            Please select a device:
+          </Typography>
+        )}
         <Autocomplete
+          readOnly={!adding}
           blurOnSelect
           autoHighlight
           options={getDeviceOptions(devices)}
@@ -475,6 +490,11 @@ const EditAutomationBox = ({
           renderInput={params => (
             <TextField {...params} placeholder='Device...' />
           )}
+          sx={{
+            '& .MuiAutocomplete-popupIndicator': {
+              display: `${adding ? 'inline-flex' : 'none'}`,
+            },
+          }}
         />
       </div>
       {selectedDevice && (
@@ -542,10 +562,10 @@ const AutomationDetailsModal = ({
 }: {
   detailsModalIsOpen: boolean
   handleDetailsModalClose: () => void
-  setSelectedDate: SetState<Dayjs | null>
-  setUpdateModalIsOpen: SetState<boolean>
-  setDeleteModalIsOpen: SetState<boolean>
-  setDetailsModalIsOpen: SetState<boolean>
+  setSelectedDate: generalTypes.SetState<Dayjs | null>
+  setUpdateModalIsOpen: generalTypes.SetState<boolean>
+  setDeleteModalIsOpen: generalTypes.SetState<boolean>
+  setDetailsModalIsOpen: generalTypes.SetState<boolean>
   selectedAutomation?: TAutomation
   selectedDevice?: TDevice
   selectedEvent?: EventImpl
@@ -612,9 +632,9 @@ const DeleteAutomationModal = ({
   deleteModalIsOpen: boolean
   selectedDevice: TDevice | undefined
   selectedEvent: EventImpl | undefined
-  setAutomations: SetState<TAutomation[]>
+  setAutomations: generalTypes.SetState<TAutomation[]>
   selectedAutomation: TAutomation | undefined
-  setDeleteModalIsOpen: SetState<boolean>
+  setDeleteModalIsOpen: generalTypes.SetState<boolean>
 }) => {
   const { API } = useApi()
 
