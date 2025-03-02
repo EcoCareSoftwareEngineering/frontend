@@ -12,14 +12,14 @@
     }
   }
 
-  .energy-consumption {
+  .energy-data {
     color: var(--grey-text);
     display: flex;
     flex-direction: column;
     margin-inline: 6%;
     font-weight: bold;
     width: 92%;
-    height: 55%;
+    height: 48%;
     margin-block: 3vh;
     border-radius: 10px;
     padding-block: 10px;
@@ -58,6 +58,11 @@
             svg g g g path {
               stroke: none;
             }
+          }
+
+          .net-energy.pie-chart {
+            height: 350%;
+            width: 450%;
           }
 
           .data-label {
