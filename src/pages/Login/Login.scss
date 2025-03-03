@@ -15,38 +15,79 @@
 
   .login-card {
     background-color: var(--grey-background);
+    width: clamp(230px, 30%, 300px);
+    color: var(--grey-text);
     border-radius: 25px;
     padding: 15px;
 
+    h2 {
+      color: var(--clear-text);
+      margin-top: 15px;
+      font-size: 2rem;
+    }
+
     .toggle-group {
       margin-bottom: 20px;
+
+      .MuiButtonBase-root {
+        color: var(--clear-text);
+
+        &.Mui-selected {
+          background-color: var(--active-color);
+        }
+      }
     }
 
     .login-form {
-      display: flex;
       flex-direction: column;
+      padding-top: 10px;
+      display: flex;
       gap: 15px;
+
+      .MuiFormControl-root {
+        .MuiFormLabel-root {
+          color: var(--grey-text);
+        }
+
+        .MuiInputBase-root {
+          color: var(--clear-text);
+        }
+      }
+
+      .signup-link a {
+        color: var(--active-color);
+      }
     }
 
     .pin-container {
-      display: flex;
       flex-direction: column;
-      gap: 15px;
-    }
-
-    .pin-inputs {
+      padding-bottom: 15px;
       display: flex;
-      justify-content: center;
-      gap: 10px;
-    }
+      gap: 15px;
 
-    .pin-field {
-      width: 50px !important;
+      .pin-inputs {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+
+        .MuiInputBase-root {
+          color: var(--clear-text);
+        }
+      }
+
+      .pin-field {
+        width: 50px !important;
+        padding-bottom: 10px;
+      }
     }
 
     .signup-link {
       margin-top: 10px;
       font-size: 0.9rem;
+    }
+
+    .submit-btn {
+      border-radius: 10px;
     }
   }
 }

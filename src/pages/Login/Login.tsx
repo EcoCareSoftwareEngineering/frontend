@@ -5,6 +5,7 @@ import { useState, useRef } from 'react'
 import {
   ToggleButtonGroup,
   ToggleButton,
+  Typography,
   TextField,
   Button,
   Box,
@@ -90,6 +91,7 @@ const Login = () => {
   return (
     <Box className='login-container'>
       <Card className='login-card'>
+        <h2>Login</h2>
         <ToggleButtonGroup
           value={mode}
           exclusive
@@ -120,8 +122,9 @@ const Login = () => {
               onChange={handleCredentialChange}
             />
             <Button
-              variant='contained'
               color='primary'
+              variant='contained'
+              className='submit-btn'
               onClick={() => handleLogin(false)}
               fullWidth
             >
@@ -133,6 +136,7 @@ const Login = () => {
           </Box>
         ) : (
           <Box className='pin-container'>
+            <Typography>Enter your pin code</Typography>
             <Box className='pin-inputs'>
               {pin.map((digit, index) => (
                 <TextField
@@ -158,12 +162,13 @@ const Login = () => {
               ))}
             </Box>
             <Button
-              variant='contained'
-              color='primary'
               fullWidth
+              color='primary'
+              variant='contained'
+              className='submit-btn'
               onClick={() => handlePinSubmit()}
             >
-              Verify Pin
+              Sign In
             </Button>
           </Box>
         )}
