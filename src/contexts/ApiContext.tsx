@@ -7,6 +7,7 @@ import {
   Dispatch,
   useState,
   useRef,
+  useEffect,
 } from 'react'
 
 interface ApiWrapper {
@@ -26,8 +27,8 @@ interface ApiContextType {
 
 const ApiContext = createContext<ApiContextType | undefined>(undefined)
 
-// const BASE_URL = 'http://127.0.0.1:5000/api'
-const BASE_URL = 'http://192.168.0.11:5000/api'
+const BASE_URL = 'http://127.0.0.1:5000/api'
+// const BASE_URL = 'http://192.168.0.11:5000/api'
 
 export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -37,6 +38,14 @@ export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
   const logout = () => {
     localStorage.removeItem('token')
   }
+
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+    if (token) {
+      axios.defaults.headers.common['token'] = token
+      setIsAuthenticated(true)
+    }
+  }, [])
 
   const getIsAuthenticated = () => isAuthenticated
 

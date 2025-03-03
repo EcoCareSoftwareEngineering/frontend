@@ -104,7 +104,7 @@ const Login = () => {
 
   const handleSignUp = () => {
     if (userCredentials.password !== passwordCheck) {
-      enqueueSnackbar('Your passwords do not match. Please try again', {
+      enqueueSnackbar('Your passwords do not match. Try again', {
         preventDuplicate: true,
         variant: 'error',
         style: {
@@ -117,6 +117,7 @@ const Login = () => {
           horizontal: 'right',
         },
       })
+      return
     }
     API.post(
       '/accounts/signup/',
