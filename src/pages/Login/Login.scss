@@ -1,0 +1,52 @@
+@use '/variables' as *;
+
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  margin: auto;
+  text-align: center;
+  background-color: var(--background-color);
+
+  .login-card {
+    background-color: var(--grey-background);
+    border-radius: 25px;
+    padding: 15px;
+
+    .toggle-group {
+      margin-bottom: 20px;
+    }
+
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .pin-container {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .pin-inputs {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .pin-field {
+      width: 50px !important;
+    }
+
+    .signup-link {
+      margin-top: 10px;
+      font-size: 0.9rem;
+    }
+  }
+}
