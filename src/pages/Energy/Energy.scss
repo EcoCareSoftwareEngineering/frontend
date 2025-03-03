@@ -1,6 +1,6 @@
 @use '/variables' as *;
 
-.home {
+.energy {
   .header {
     display: flex;
     justify-content: space-between;
@@ -19,7 +19,7 @@
     margin-inline: 6%;
     font-weight: bold;
     width: 92%;
-    height: 48%;
+    height: 55%;
     margin-block: 3vh;
     border-radius: 10px;
     padding-block: 10px;
@@ -61,8 +61,10 @@
           }
 
           .net-energy.pie-chart {
-            height: 350%;
-            width: 450%;
+            position: absolute;
+            left: -5%;
+            height: 250%;
+            width: 130%;
           }
 
           .data-label {

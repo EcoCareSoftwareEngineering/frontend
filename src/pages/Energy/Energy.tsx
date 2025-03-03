@@ -48,11 +48,11 @@ const Energy = () => {
               const energyUse = -1 * item.energyUse
               const netEnergy = item.energyGeneration - item.energyUse
               const energyGenerated =
-                item.energyGeneration - netEnergy > 0
-                  ? item.energyGeneration
-                  : item.energyGeneration - netEnergy
+                netEnergy > 0
+                  ? item.energyGeneration - netEnergy
+                  : item.energyGeneration
               const energyUsage =
-                energyUse - netEnergy < 0 ? energyUse - netEnergy : energyUse
+                netEnergy < 0 ? energyUse - netEnergy : energyUse
               return {
                 datetime: new Date(item.datetime).toLocaleTimeString('en-GB', {
                   hour: '2-digit',
@@ -96,7 +96,7 @@ const Energy = () => {
   }
 
   return (
-    <div className='home page-content'>
+    <div className='energy page-content'>
       <LoadingModal open={loading} />
       {/* Container for device usage */}
       <div className='energy-data'>
@@ -138,7 +138,7 @@ const Energy = () => {
                 </PieCenterLabel>
               </PieChart>
               <div className='data-label'>
-                <p className='label'>Energy Generated</p>
+                <p className='label'>Generation</p>
                 <p className='details'>{`${energySums.energyGenerated.toFixed(
                   2
                 )} kWh`}</p>
@@ -173,7 +173,7 @@ const Energy = () => {
                 </PieCenterLabel>
               </PieChart>
               <div className='data-label'>
-                <p className='label'>Energy Usage</p>
+                <p className='label'>Consumption</p>
                 <p className='details'>{`${energySums.energyUsed.toFixed(
                   2
                 )} kWh`}</p>
