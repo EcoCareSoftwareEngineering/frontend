@@ -46,6 +46,20 @@ const Login = () => {
     else if (newPin.join('').length === 4) handlePinSubmit(newPin.join(''))
   }
 
+  const handleKeyDown = (
+    index: number,
+    e: React.KeyboardEvent<HTMLInputElement>
+  ) => {
+    if (e.key === 'Backspace' && pin[index] === '') {
+      if (index > 0) {
+        inputRefs.current[index - 1]?.focus()
+        const newPin = [...pin]
+        newPin[index - 1] = ''
+        setPin(newPin)
+      }
+    }
+  }
+
   // Handle submits
   const handleLogin = (localRequest: boolean) => {
     API.post(
@@ -123,12 +137,20 @@ const Login = () => {
               {pin.map((digit, index) => (
                 <TextField
                   key={index}
+                  type='tel'
                   inputRef={el => (inputRefs.current[index] = el)}
                   value={digit}
                   onChange={e => handlePinChange(index, e.target.value)}
+                  onKeyDown={e =>
+                    handleKeyDown(
+                      index,
+                      e as React.KeyboardEvent<HTMLInputElement>
+                    )
+                  }
                   variant='outlined'
                   inputProps={{
                     maxLength: 1,
+                    inputMode: 'numeric',
                     style: { textAlign: 'center', fontSize: '1.5rem' },
                   }}
                   className='pin-field'
