@@ -1,7 +1,13 @@
-import { createContext, useContext, useEffect, useRef, useState } from 'react'
-import axios, { AxiosError, AxiosResponse } from 'axios'
-import { TUserLogin } from '../types/generalTypes'
 import { enqueueSnackbar } from 'notistack'
+import axios, { AxiosError } from 'axios'
+import {
+  SetStateAction,
+  createContext,
+  useContext,
+  Dispatch,
+  useState,
+  useRef,
+} from 'react'
 
 interface ApiWrapper {
   get: (url: string, requestDescription?: string) => Promise<any>
@@ -14,49 +20,23 @@ interface ApiContextType {
   API: ApiWrapper
   loading: boolean
   isAuthenticated: boolean
-  login: (loginDetails: TUserLogin) => void
+  setIsAuthenticated: Dispatch<SetStateAction<boolean>>
   logout: () => void
 }
 
 const ApiContext = createContext<ApiContextType | undefined>(undefined)
 
-const BASE_URL = 'http://localhost:5000/api'
+// const BASE_URL = 'http://127.0.0.1:5000/api'
+const BASE_URL = 'http://192.168.0.11:5000/api'
 
 export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [loading, setLoading] = useState(false)
   const activeRequests = useRef(0)
 
-  const TOUCHSCREEN_LOGIN = {
-    username: 'touchscreen',
-    password: 'touchscreenPassword',
-  }
-
-  const login = (loginDetails: TUserLogin) => {
-    API.post('/accounts/login/', loginDetails, 'User login request').then(
-      (res: AxiosResponse) => {
-        localStorage.setItem('token', res.data.token)
-        axios.defaults.headers.common['token'] = res.data.token
-        setIsAuthenticated(true)
-      }
-    )
-  }
-
   const logout = () => {
     localStorage.removeItem('token')
   }
-
-  const getAuthToken = () => localStorage.getItem('token')
-
-  useEffect(() => {
-    const token = getAuthToken()
-    if (!token) {
-      login(TOUCHSCREEN_LOGIN)
-    } else {
-      axios.defaults.headers.common['token'] = token
-      setIsAuthenticated(true)
-    }
-  }, [])
 
   const getIsAuthenticated = () => isAuthenticated
 
@@ -73,10 +53,14 @@ export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
       // First check authentication status
       const timeout = 3000
       const startTime = Date.now()
-      if (!url.includes('login'))
+      if (
+        !url.includes('login') &&
+        !url.includes('signup') &&
+        !url.includes('unlock')
+      )
         while (!getIsAuthenticated()) {
           if (Date.now() - startTime >= timeout) {
-            throw new Error('failed to load authentication token')
+            throw new Error('Failed to load authentication token')
           }
           await new Promise(resolve => setTimeout(resolve, 100))
         }
@@ -127,7 +111,13 @@ export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <ApiContext.Provider
-      value={{ API, loading, isAuthenticated, login, logout }}
+      value={{
+        API,
+        loading,
+        isAuthenticated,
+        setIsAuthenticated,
+        logout,
+      }}
     >
       {children}
     </ApiContext.Provider>

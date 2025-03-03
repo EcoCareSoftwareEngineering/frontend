@@ -1,6 +1,6 @@
 @use '/variables' as *;
 
-.home {
+.energy {
   .header {
     display: flex;
     justify-content: space-between;
@@ -12,7 +12,7 @@
     }
   }
 
-  .energy-consumption {
+  .energy-data {
     color: var(--grey-text);
     display: flex;
     flex-direction: column;
@@ -58,6 +58,13 @@
             svg g g g path {
               stroke: none;
             }
+          }
+
+          .net-energy.pie-chart {
+            position: absolute;
+            left: -5%;
+            height: 250%;
+            width: 130%;
           }
 
           .data-label {

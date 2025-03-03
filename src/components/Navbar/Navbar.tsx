@@ -6,6 +6,10 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false)
   const location = useLocation()
 
+  const getLinkTopLevel = () => {
+    return location.pathname.includes('local') ? '/local' : '/remote'
+  }
+
   const getLinkClassName = (path: string) => {
     if (path !== '/') {
       return location.pathname.includes(path)
@@ -47,7 +51,7 @@ const Navbar = () => {
       <ul className={`navbar-links ${isOpen ? 'open' : ''}`}>
         <li>
           <Link
-            to='/'
+            to={getLinkTopLevel()}
             className={getLinkClassName('/')}
             onClick={() => setIsOpen(false)}
           >
@@ -58,7 +62,7 @@ const Navbar = () => {
         </li>
         <li>
           <Link
-            to='/devices'
+            to={`${getLinkTopLevel()}/devices`}
             className={getLinkClassName('/devices')}
             onClick={() => setIsOpen(false)}
           >
@@ -69,7 +73,7 @@ const Navbar = () => {
         </li>
         <li>
           <Link
-            to='/energy'
+            to={`${getLinkTopLevel()}/energy`}
             className={getLinkClassName('/energy')}
             onClick={() => setIsOpen(false)}
           >
@@ -80,7 +84,7 @@ const Navbar = () => {
         </li>
         <li>
           <Link
-            to='/automation'
+            to={`${getLinkTopLevel()}/automation`}
             className={getLinkClassName('/automation')}
             onClick={() => setIsOpen(false)}
           >
@@ -91,7 +95,7 @@ const Navbar = () => {
         </li>
         <li>
           <Link
-            to='/messages'
+            to={`${getLinkTopLevel()}/messages`}
             className={getLinkClassName('/messages')}
             onClick={() => setIsOpen(false)}
           >
@@ -102,7 +106,7 @@ const Navbar = () => {
         </li>
         <li>
           <Link
-            to='/settings'
+            to={`${getLinkTopLevel()}/settings`}
             className={getLinkClassName('/settings')}
             onClick={() => setIsOpen(false)}
           >

@@ -1,84 +1,107 @@
 import PieCenterLabel from '../../components/PieCenterLabel/PieCenterLabel'
+import LoadingModal from '../../components/LoadingModal/LoadingModal'
+import { TEnergySums, TEnergyValues } from '../../types/energyTypes'
 import Dropdown from '../../components/Dropdown/Dropdown'
-import { TEnergyData, TEnergyValues } from '../../types/energyTypes'
+import { useApi } from '../../contexts/ApiContext'
 import { PieChart } from '@mui/x-charts/PieChart'
 import { BarChart } from '@mui/x-charts/BarChart'
 import { AxiosError, AxiosResponse } from 'axios'
-import { useApi } from '../../contexts/ApiContext'
 import { useEffect, useState } from 'react'
 import './Energy.scss'
 
 const colors = ['#07cb83', '#fbad53', '#ec443b']
 
+const tempData = [
+  { label: 'Group A', value: 35, color: colors[2] },
+  { label: 'Group B', value: 15, color: colors[1] },
+  { label: 'Group C', value: 50, color: colors[0] },
+]
+
 const Energy = () => {
-  const [energyGeneration, setEnergyGeneration] = useState<TEnergyValues>()
-  const [energyUsage, setEnergyUsage] = useState<TEnergyValues>()
-  const [energyData, setEnergyData] = useState<TEnergyData>()
+  const [energyValues, setEnergyValues] = useState<TEnergyValues>()
+  const [energySums, setEnergySums] = useState<TEnergySums>({
+    energyGenerated: 0,
+    energyUsed: 0,
+    netEnergy: 0,
+    totalSum: 0,
+  })
+
   const { API, loading, isAuthenticated } = useApi()
 
-  const fetchEnergyData = () => {
-    if (isAuthenticated)
+  const fetchEnergyData = (startDate: Date) => {
+    if (isAuthenticated) {
+      startDate.setHours(0, 0, 0, 0)
+      const today = new Date().setHours(0, 0, 0, 0)
+      // API.get(
+      //   `/energy/?startDate=2025-01-01&endDate=${
+      //     startDate.toISOString().split('T')[0]
+      //   }`,
+      //   'Fetch energy usage request'
+      // )
       API.get(
-        `/energy/?startDate=2025-01-02&endDate=2025-01-02`,
+        `/energy/?startDate=2025-01-01&endDate=2025-01-02`,
         'Fetch energy usage request'
       )
         .then((res: AxiosResponse) => {
-          setEnergyData(() => {
-            const usageTotal = sumArrayValues(res.data.energyUsage)
-            const generatedTotal = sumArrayValues(res.data.energyGeneration)
-            const totalAll = usageTotal + generatedTotal
-            setEnergyGeneration({
-              percentage: generatedTotal / totalAll,
-              data: res.data.energyGeneration,
-              sum: generatedTotal,
+          setEnergyValues(
+            res.data.map((item: any) => {
+              const energyUse = -1 * item.energyUse
+              const netEnergy = item.energyGeneration - item.energyUse
+              const energyGenerated =
+                netEnergy > 0
+                  ? item.energyGeneration - netEnergy
+                  : item.energyGeneration
+              const energyUsage =
+                netEnergy < 0 ? energyUse - netEnergy : energyUse
+              return {
+                datetime: new Date(item.datetime).toLocaleTimeString('en-GB', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                }),
+                netEnergy: netEnergy,
+                energyUsage: energyUsage,
+                energyGenerated: energyGenerated,
+              }
             })
-            setEnergyUsage({
-              percentage: usageTotal / totalAll,
-              data: res.data.energyUsage,
-              sum: usageTotal,
-            })
+          )
+          const sums = res.data.reduce(
+            (acc: any, curr: any) => {
+              acc.energyGenerated += curr.energyGeneration
+              acc.energyUsed += curr.energyUse
+              return acc
+            },
+            { energyGenerated: 0, energyUsed: 0 }
+          )
 
-            const energyUsed = res.data.energyUsage.map(
-              (usage: number) => usage * -1
-            )
-            const netEnergy = energyUsed.map(
-              (usage: number, index: number) =>
-                usage + res.data.energyGeneration[index]
-            )
-            return {
-              energyGenerated: res.data.energyGeneration.map(
-                (value: number, index: number) =>
-                  netEnergy[index] > 0 ? value - netEnergy[index] : value
-              ),
-              energyUsed: energyUsed.map((value: number, index: number) =>
-                netEnergy[index] < 0 ? value - netEnergy[index] : value
-              ),
-              netEnergy: netEnergy,
-            }
+          setEnergySums({
+            ...sums,
+            netEnergy: sums.energyGenerated - sums.energyUsed,
+            totalSum: sums.energyGenerated + sums.energyUsed,
           })
         })
         .catch((err: AxiosError) => {
           console.error('GET request failed', err)
         })
+    }
   }
 
-  useEffect(() => {
-    fetchEnergyData()
-  }, [isAuthenticated])
+  console.log(energySums)
 
-  const sumArrayValues = (arr: number[]): number =>
-    arr.reduce((acc, num) => acc + num, 0)
+  useEffect(() => {
+    fetchEnergyData(new Date())
+  }, [isAuthenticated])
 
   const handleSelect = (value: string) => {
     console.log('Selected:', value)
   }
 
   return (
-    <div className='home page-content'>
+    <div className='energy page-content'>
+      <LoadingModal open={loading} />
       {/* Container for device usage */}
-      <div className='energy-consumption'>
+      <div className='energy-data'>
         <div className='header'>
-          Device Usage by Location
+          Energy Generation and Usage
           <Dropdown
             options={['Today', 'This week', 'This month', 'This year']}
             onSelect={handleSelect}
@@ -96,13 +119,11 @@ const Energy = () => {
                     innerRadius: '70%',
                     data: [
                       {
-                        value: energyGeneration
-                          ? energyGeneration.percentage
-                          : 0,
+                        value: energySums.energyGenerated / energySums.totalSum,
                         color: colors[0],
                       },
                       {
-                        value: energyUsage ? energyUsage.percentage : 0,
+                        value: energySums.energyUsed / energySums.totalSum,
                         color: '#3d4e69',
                       },
                     ],
@@ -111,13 +132,14 @@ const Energy = () => {
               >
                 <PieCenterLabel>
                   {(
-                    (energyGeneration ? energyGeneration.percentage : 0) * 100
+                    (energySums.energyGenerated / energySums.totalSum) *
+                    100
                   ).toFixed(0) + '%'}
                 </PieCenterLabel>
               </PieChart>
               <div className='data-label'>
-                <p className='label'>Energy Generated</p>
-                <p className='details'>{`${energyGeneration?.sum.toFixed(
+                <p className='label'>Generation</p>
+                <p className='details'>{`${energySums.energyGenerated.toFixed(
                   2
                 )} kWh`}</p>
               </div>
@@ -132,13 +154,11 @@ const Energy = () => {
                     innerRadius: '70%',
                     data: [
                       {
-                        value: energyUsage ? energyUsage.percentage : 0,
-                        color: colors[1],
+                        value: energySums.energyUsed / energySums.totalSum,
+                        color: colors[2],
                       },
                       {
-                        value: energyGeneration
-                          ? energyGeneration.percentage
-                          : 0,
+                        value: energySums.energyGenerated / energySums.totalSum,
                         color: '#3d4e69',
                       },
                     ],
@@ -146,47 +166,64 @@ const Energy = () => {
                 ]}
               >
                 <PieCenterLabel>
-                  {((energyUsage ? energyUsage.percentage : 0) * 100).toFixed(
-                    0
-                  ) + '%'}
+                  {(
+                    (energySums.energyUsed / energySums.totalSum) *
+                    100
+                  ).toFixed(0) + '%'}
                 </PieCenterLabel>
               </PieChart>
               <div className='data-label'>
-                <p className='label'>Energy Consumed</p>
-                <p className='details'>{`${energyUsage?.sum.toFixed(
+                <p className='label'>Consumption</p>
+                <p className='details'>{`${energySums.energyUsed.toFixed(
                   2
                 )} kWh`}</p>
               </div>
+            </li>
+            <li>
+              <PieChart
+                className='pie-chart net-energy'
+                series={[
+                  {
+                    innerRadius: '75%',
+                    paddingAngle: 3,
+                    startAngle: -90,
+                    endAngle: 90,
+                    data: tempData,
+                  },
+                ]}
+                slotProps={{ legend: { hidden: true } }}
+              >
+                <PieCenterLabel>
+                  {energySums.netEnergy.toFixed(2) + ' kWh'}
+                </PieCenterLabel>
+              </PieChart>
             </li>
           </ul>
           {!loading && (
             <BarChart
               xAxis={[
                 {
-                  data: Array.from(
-                    { length: energyData?.energyUsed.length ?? 0 },
-                    (_, i) => i + 1
-                  ),
                   scaleType: 'band',
+                  data: energyValues?.map(entry => entry.datetime) ?? [],
                 },
               ]}
               series={[
                 {
                   color: colors[1],
                   label: 'Net Total',
-                  data: energyData?.netEnergy ?? [],
+                  data: energyValues?.map(e => e.netEnergy) ?? [],
                   stack: 'total',
                 },
                 {
                   color: colors[0],
                   label: 'Generation',
-                  data: energyData?.energyGenerated ?? [],
+                  data: energyValues?.map(e => e.energyGenerated) ?? [],
                   stack: 'total',
                 },
                 {
                   color: colors[2],
                   label: 'Usage',
-                  data: energyData?.energyUsed ?? [],
+                  data: energyValues?.map(e => e.energyUsage) ?? [],
                   stack: 'total',
                 },
               ]}

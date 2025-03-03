@@ -1,0 +1,106 @@
+@use '/variables' as *;
+
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  margin: auto;
+  text-align: center;
+  background-color: var(--background-color);
+
+  .login-card {
+    background-color: var(--grey-background);
+    width: clamp(230px, 30%, 300px);
+    color: var(--grey-text);
+    border-radius: 25px;
+    padding: 15px;
+
+    h2 {
+      color: var(--clear-text);
+      margin-top: 15px;
+      font-size: 2rem;
+    }
+
+    .toggle-group {
+      margin-bottom: 20px;
+
+      .MuiButtonBase-root {
+        color: var(--clear-text);
+
+        &.Mui-selected {
+          background-color: var(--active-color);
+        }
+      }
+    }
+
+    .login-form {
+      flex-direction: column;
+      padding-top: 10px;
+      display: flex;
+      gap: 15px;
+
+      .MuiFormControl-root {
+        .MuiFormLabel-root {
+          color: var(--grey-text);
+        }
+
+        .MuiInputBase-root {
+          color: var(--clear-text);
+        }
+      }
+
+      .signup-link a {
+        color: var(--active-color);
+      }
+    }
+
+    .pin-container {
+      flex-direction: column;
+      padding-bottom: 15px;
+      display: flex;
+      gap: 15px;
+
+      .pin-inputs {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+
+        .MuiInputBase-root {
+          color: var(--clear-text);
+        }
+      }
+
+      .pin-field {
+        width: 50px !important;
+        padding-bottom: 10px;
+      }
+    }
+
+    .signup-link {
+      margin-top: 5px;
+      font-size: 0.9rem;
+
+      button {
+        background: none;
+        color: var(--active-color);
+        padding: 2px;
+      }
+    }
+
+    .submit-btn {
+      border-radius: 10px;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .login-container {
+    overflow: hidden;
+    height: 100dvh;
+  }
+}
