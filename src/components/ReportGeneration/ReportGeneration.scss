@@ -1,4 +1,4 @@
-@use '/variables' as *;
+@use 'variables' as *;
 
 // Styles for the report container
 .report-container {
@@ -59,8 +59,129 @@
     }
 
     &:active {
-      background-color: darken(var(--active-color), 10%);
+      transform: scale(0.98);
+      background-color: var(--active-color);
+    }
+  }
+  
+  // Styles for device fault list
+  .fault-list {
+    margin-bottom: 30px;
+    
+    .fault-item {
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      margin-bottom: 10px;
+      
+      .fault-title {
+        font-weight: bold;
+        margin-bottom: 5px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      
+      .fault-badge {
+        background-color: var(--error-color);
+        color: white;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+      }
+      
+      .fault-time {
+        color: var(--grey-text);
+        font-size: 12px;
+        margin-bottom: 5px;
+      }
+      
+      .fault-description {
+        color: var(--clear-text);
+      }
+    }
+  }
+  
+  // Styles for energy savings progress bar
+  .progress-container {
+    width: 100%;
+    height: 24px;
+    background-color: var(--background-light);
+    border-radius: 12px;
+    margin-bottom: 15px;
+    overflow: hidden;
+    
+    .progress-bar {
+      height: 100%;
+      background-color: var(--highlight-color);
+      border-radius: 12px;
+      transition: width 0.5s ease-in-out;
+    }
+  }
+  
+  // Styles for summary section
+  .summary-section {
+    background-color: var(--background-light);
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 30px;
+    
+    h2 {
+      margin-top: 0;
+    }
+    
+    .summary-highlight {
+      color: var(--highlight-color);
+      font-weight: bold;
+    }
+    
+    .error-message {
+      color: var(--error-color);
+    }
+  }
+  
+  // Media queries for responsive design
+  @media (max-width: 768px) {
+    padding: 15px;
+    
+    h1 {
+      font-size: 22px;
+    }
+    
+    h2 {
+      font-size: 18px;
+    }
+    
+    .chart-container {
+      margin-bottom: 30px;
     }
   }
 }
 
+// Styles for the time period selector
+.time-selector {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 25px;
+  
+  button {
+    padding: 8px 16px;
+    margin: 0 5px;
+    background: var(--background-light);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    cursor: pointer;
+    color: var(--clear-text);
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background-color: var(--border-color);
+    }
+    
+    &.active {
+      background-color: var(--highlight-color);
+      color: var(--active-color);
+      border-color: var(--highlight-color);
+    }
+  }
+}

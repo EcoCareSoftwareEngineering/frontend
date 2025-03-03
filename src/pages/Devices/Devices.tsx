@@ -1,3 +1,4 @@
+import ReportGeneration from '../../components/ReportGeneration/ReportGeneration'
 import LoadingModal from '../../components/LoadingModal/LoadingModal'
 import { TMUIAutocompleteOption } from '../../types/generalTypes'
 import { useDeferredValue, useEffect, useState } from 'react'
@@ -379,6 +380,12 @@ const Devices = () => {
   return (
     <div className='devices page-content'>
       <LoadingModal open={!devicesLoaded || loading} />
+      
+      <div className="devices-header">
+        <Typography variant="h4" className="page-title">Device Management</Typography>
+        <ReportGeneration />
+      </div>
+      
       <DataGrid
         rows={devices}
         columns={columns}
