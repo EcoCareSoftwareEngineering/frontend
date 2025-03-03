@@ -1,4 +1,176 @@
 @use '/variables' as *;
 
 .device {
+  &.page-content {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    color: var(--clear-text);
+    width: 90%;
+    margin: 0 auto;
+  }
+  
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    
+    h2 {
+      font-weight: bold;
+      color: var(--clear-text);
+      margin: 0;
+    }
+    
+    button {
+      display: flex;
+      align-items: center;
+      color: var(--clear-text);
+      border-color: var(--grey-text);
+      
+      &:hover {
+        color: var(--active-color);
+        border-color: var(--active-color);
+      }
+      
+      i {
+        margin-right: 8px;
+      }
+    }
+  }
+  
+  .device-description {
+    margin: 10px 0 20px;
+    color: var(--grey-text);
+  }
+  
+  .main-divider {
+    background-color: var(--grey-text);
+    margin-bottom: 20px;
+  }
+  
+  .MuiPaper-root {
+    background-color: var(--grey-background);
+    color: var(--clear-text);
+    height: 100%;
+  }
+  
+  .properties-table {
+    width: 100%;
+    border-collapse: collapse;
+    
+    th, td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid rgba(var(--grey-text-rgb), 0.3);
+    }
+    
+    th {
+      width: 35%;
+      color: var(--grey-text);
+      font-weight: normal;
+    }
+    
+    td {
+      color: var(--clear-text);
+      
+      &.status-ok {
+        color: var(--on-color);
+        font-weight: bold;
+      }
+      
+      &.status-fault {
+        color: var(--off-color);
+        font-weight: bold;
+      }
+    }
+    
+    tr:last-child {
+      th, td {
+        border-bottom: none;
+      }
+    }
+  }
+  
+  .device-control {
+    .power-control {
+      margin-bottom: 10px;
+      
+      .MuiFormControlLabel-label {
+        color: var(--clear-text);
+      }
+      
+      .MuiSwitch-root {
+        .MuiSwitch-track {
+          background-color: var(--grey-text);
+        }
+        
+        .Mui-checked {
+          color: var(--on-color);
+          
+          + .MuiSwitch-track {
+            background-color: var(--on-color);
+          }
+        }
+      }
+    }
+    
+    .state-control {
+      .MuiTextField-root {
+        margin-top: 10px;
+        
+        .MuiOutlinedInput-root {
+          background-color: var(--highlight-color);
+          
+          .MuiOutlinedInput-input {
+            color: var(--clear-text);
+          }
+          
+          .MuiOutlinedInput-notchedOutline {
+            border-color: var(--grey-text);
+          }
+          
+          &:hover .MuiOutlinedInput-notchedOutline {
+            border-color: var(--active-color);
+          }
+          
+          &.Mui-focused .MuiOutlinedInput-notchedOutline {
+            border-color: var(--active-color);
+          }
+        }
+      }
+      
+      .MuiButton-contained {
+        background-color: var(--active-color);
+        color: var(--clear-text);
+        
+        &:hover {
+          background-color: var(--hover-color);
+        }
+        
+        &.Mui-disabled {
+          background-color: rgba(var(--grey-text-rgb), 0.5);
+          color: rgba(var(--clear-text-rgb), 0.5);
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .device {
+    &.page-content {
+      width: 95%;
+    }
+    
+    .page-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 15px;
+      
+      button {
+        align-self: flex-start;
+      }
+    }
+  }
 }
