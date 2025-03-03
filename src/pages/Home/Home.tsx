@@ -2,6 +2,7 @@ import PieCenterLabel from '../../components/PieCenterLabel/PieCenterLabel'
 import Dropdown from '../../components/Dropdown/Dropdown'
 import { LineChart } from '@mui/x-charts/LineChart'
 import { PieChart } from '@mui/x-charts/PieChart'
+import { useEffect } from 'react'
 import './Home.scss'
 
 const colors = ['#07cb83', '#fbad53', '#ec443b', '#8440a0']
@@ -40,6 +41,12 @@ const Home = () => {
   const handleSelect = (value: string) => {
     console.log('Selected:', value)
   }
+
+  // Fix viewport size update styles
+  useEffect(() => {
+    document.body.style.display = 'none'
+    setTimeout(() => (document.body.style.display = 'block'), 50)
+  }, [])
 
   return (
     <div className='home page-content'>
