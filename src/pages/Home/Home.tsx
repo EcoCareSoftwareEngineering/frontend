@@ -3,6 +3,8 @@ import Dropdown from '../../components/Dropdown/Dropdown'
 import { LineChart } from '@mui/x-charts/LineChart'
 import { PieChart } from '@mui/x-charts/PieChart'
 import './Home.scss'
+import { useEffect, useState } from 'react'
+import axios from 'axios'
 
 const colors = ['#07cb83', '#fbad53', '#ec443b', '#8440a0']
 
