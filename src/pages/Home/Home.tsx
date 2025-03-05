@@ -8,29 +8,6 @@ import axios from 'axios'
 
 const colors = ['#07cb83', '#fbad53', '#ec443b', '#8440a0']
 
-const tableData = [
-  {
-    name: 'Living Room',
-    usage: 0.32,
-    data: [523, 178, 342, 610, 295, 438, 219, 587, 224, 678],
-  },
-  {
-    name: 'Hallway',
-    usage: 0.12,
-    data: [67, 243, 298, 372, 217, 266, 110, 428, 450, 189],
-  },
-  {
-    name: 'Bedroom',
-    usage: 0.16,
-    data: [275, 389, 512, 634, 421, 310, 289, 478, 660, 149],
-  },
-  {
-    name: 'Kitchen',
-    usage: 0.18,
-    data: [189, 499, 602, 287, 435, 580, 672, 214, 389, 521],
-  },
-]
-
 // HOME PAGE SHOULD SHOW THIS:
 // Device usage by room
 // Solar panel performance
@@ -39,9 +16,36 @@ const tableData = [
 // Device faults?
 
 const Home = () => {
-  const handleSelect = (value: string) => {
-    console.log('Selected:', value)
-  }
+  const [tableData, setTableData] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const rangeStart = '2024-03-01' // Example start date
+        const rangeEnd = '2024-03-10' // Example end date
+        const response = await axios.get(
+          /api/devices/usage/?rangeStart=${rangeStart}&rangeEnd=${rangeEnd}
+        )
+
+        const formattedData = response.data.map((device) => {
+          return {
+            name: Device ${device.deviceId},
+            usage: device.usage.reduce((acc, entry) => acc + entry.usage, 0) / (24 * device.usage.length), // Average daily usage percentage
+            data: device.usage.map(entry => entry.usage),
+          }
+        })
+
+        setTableData(formattedData)
+      } catch (err) {
+        setError(err.message)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
+  }, [])
 
   return (
     <div className='home page-content'>
@@ -94,16 +98,14 @@ const Home = () => {
             })}
           </ul>
           <LineChart
-            xAxis={[{ data: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] }]}
-            series={tableData.map((element, index) => {
-              return {
-                label: element.name,
-                data: element.data,
-                showMark: false,
-                color: colors[index],
-                curve: 'linear',
-              }
-            })}
+            xAxis={[{ data: [...Array(24).keys()].map(i => i + 1) }]} // 24-hour format
+            series={tableData.map((element, index) => ({
+              label: element.name,
+              data: element.data,
+              showMark: false,
+              color: colors[index % colors.length],
+              curve: 'linear',
+            }))}
             slotProps={{ legend: { hidden: true } }}
             grid={{ vertical: true, horizontal: true }}
             className='line-chart'
