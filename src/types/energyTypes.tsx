@@ -13,3 +13,11 @@ export interface TEnergySums {
   netEnergy: number
   totalSum: number
 }
+
+export interface TEnergyGoal {
+  goalId: number
+  name?: string
+  target: number
+  progress: boolean
+  date?: Date
+}
