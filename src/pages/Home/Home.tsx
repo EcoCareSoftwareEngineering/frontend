@@ -44,8 +44,11 @@ const Home = () => {
 
   // Fix viewport size update styles
   useEffect(() => {
-    document.body.style.display = 'none'
-    setTimeout(() => (document.body.style.display = 'block'), 50)
+    if (localStorage.getItem('starting')) {
+      document.body.style.display = 'none'
+      setTimeout(() => (document.body.style.display = 'block'), 50)
+      localStorage.removeItem('starting')
+    }
   }, [])
 
   return (

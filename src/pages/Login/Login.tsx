@@ -1,7 +1,7 @@
 import { useApi } from '../../contexts/ApiContext'
 import { useNavigate } from 'react-router-dom'
 import axios, { AxiosResponse } from 'axios'
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import {
   ToggleButtonGroup,
   InputAdornment,
@@ -37,6 +37,12 @@ const Login = () => {
 
   const { API, setIsAuthenticated } = useApi()
   const navigate = useNavigate()
+
+  useEffect(() => {
+    localStorage.removeItem('token')
+    localStorage.setItem('starting', 'true')
+    setIsAuthenticated(false)
+  }, [])
 
   // Handle form changes
   const handleCredentialChange = (e: React.ChangeEvent<HTMLInputElement>) => {
