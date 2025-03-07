@@ -1,11 +1,9 @@
-export type TEnergyValues = [
-  {
-    datetime: Date
-    netEnergy: number
-    energyUsage: number
-    energyGenerated: number
-  }
-]
+export type TEnergyValues = {
+  datetime: Date
+  netEnergy: number
+  energyUsage: number
+  energyGenerated: number
+}[]
 
 export interface TEnergySums {
   energyGenerated: number
