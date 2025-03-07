@@ -3,10 +3,12 @@ import LoadingModal from '../../components/LoadingModal/LoadingModal'
 import { useDeferredValue, useEffect, useState } from 'react'
 import Dropdown from '../../components/Dropdown/Dropdown'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
+import { TTimePeriod, ValidApiError } from '../../types/generalTypes'
 import { BarChart, PieChart } from '@mui/x-charts/'
 import { useApi } from '../../contexts/ApiContext'
 import { AxiosError, AxiosResponse } from 'axios'
 import { DatePicker } from '@mui/x-date-pickers'
+import { generateAllDates } from '../../utils'
 import { enqueueSnackbar } from 'notistack'
 import dayjs, { Dayjs } from 'dayjs'
 import {
@@ -46,6 +48,7 @@ const Energy = () => {
   }>({ name: '', target: undefined })
   useDeferredValue(currentGoal)
 
+  const [selectedPeriod, setSelectedPeriod] = useState<TTimePeriod>('Today')
   const [energyValues, setEnergyValues] = useState<TEnergyValues>()
   const [energyGoals, setEnergyGoals] = useState<TEnergyGoal[]>([])
   const [energySums, setEnergySums] = useState<TEnergySums>({
@@ -57,42 +60,58 @@ const Energy = () => {
 
   const { API, loading, isAuthenticated } = useApi()
 
-  const fetchEnergyData = (startDate: Date) => {
+  const fetchEnergyData = (startDate: Date, endDate: Date) => {
     if (isAuthenticated) {
-      startDate.setHours(0, 0, 0, 0)
-      const today = new Date().setHours(0, 0, 0, 0)
-      // API.get(
-      //   `/energy/?startDate=2025-01-01&endDate=${
-      //     startDate.toISOString().split('T')[0]
-      //   }`,
-      //   'Fetch energy usage request'
-      // )
+      const generatedDates = generateAllDates(startDate, endDate)
       API.get(
-        `/energy/?startDate=2025-01-01&endDate=2025-01-02`,
-        'Fetch energy usage request'
+        `/energy/?startDate=${startDate.toISOString().split('T')[0]}&endDate=${
+          endDate.toISOString().split('T')[0]
+        }`,
+        'Fetch energy usage request',
+        [404]
       )
+        // API.get(
+        //   `/energy/?startDate=2025-01-01&endDate=2025-01-02`,
+        //   'Fetch energy usage request'
+        // )
         .then((res: AxiosResponse) => {
-          setEnergyValues(
-            res.data.map((item: any) => {
-              const energyUse = -1 * item.energyUse
-              const netEnergy = item.energyGeneration - item.energyUse
-              const energyGenerated =
-                netEnergy > 0
-                  ? item.energyGeneration - netEnergy
-                  : item.energyGeneration
-              const energyUsage =
-                netEnergy < 0 ? energyUse - netEnergy : energyUse
-              return {
-                datetime: new Date(item.datetime).toLocaleTimeString('en-GB', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                }),
-                netEnergy: netEnergy,
-                energyUsage: energyUsage,
-                energyGenerated: energyGenerated,
-              }
-            })
+          const result: TEnergyValues = []
+
+          // Create a Map of API data for quick lookup
+          const apiDataMap = new Map(
+            res.data.map((item: any) => [
+              new Date(item.datetime).toISOString(),
+              item,
+            ])
           )
+
+          // Iterate over the generated datetimes
+          generatedDates.forEach(datetime => {
+            if (apiDataMap.has(datetime)) {
+              const data: any = apiDataMap.get(datetime)
+              const netEnergy = data.energyGeneration - data.energyUse
+              result.push({
+                datetime: new Date(datetime),
+                energyGenerated:
+                  netEnergy > 0
+                    ? data.energyGeneration - netEnergy
+                    : data.energyGeneration,
+                energyUsage:
+                  netEnergy < 0
+                    ? -1 * data.energyUse - netEnergy
+                    : -1 * data.energyUse,
+                netEnergy: netEnergy,
+              })
+            } else {
+              result.push({
+                datetime: new Date(datetime),
+                energyGenerated: 0,
+                energyUsage: 0,
+                netEnergy: 0,
+              })
+            }
+          })
+          setEnergyValues(result)
           const sums = res.data.reduce(
             (acc: any, curr: any) => {
               acc.energyGenerated += curr.energyGeneration
@@ -108,8 +127,35 @@ const Energy = () => {
             totalSum: sums.energyGenerated + sums.energyUsed,
           })
         })
-        .catch((err: AxiosError) => {
-          console.error('GET request failed', err)
+        .catch(err => {
+          if (err instanceof ValidApiError) {
+            setEnergyValues(
+              generatedDates.map((date: string) => ({
+                datetime: new Date(date),
+                energyGenerated: 0,
+                energyUsage: 0,
+                netEnergy: 0,
+              }))
+            )
+            enqueueSnackbar(
+              'No energy data found for the\n selected time period.',
+              {
+                preventDuplicate: true,
+                variant: 'warning',
+                style: {
+                  maxWidth: '200px',
+                  textAlign: 'left',
+                  whiteSpace: 'pre-line',
+                },
+                anchorOrigin: {
+                  vertical: 'top',
+                  horizontal: 'right',
+                },
+              }
+            )
+          } else {
+            console.error('GET request failed', err)
+          }
         })
     }
   }
@@ -129,7 +175,17 @@ const Energy = () => {
   }
 
   useEffect(() => {
-    fetchEnergyData(new Date())
+    // Create start date
+    const startDate = new Date()
+    startDate.setHours(0, 0, 0, 0)
+
+    // Create end date
+    const endDate = new Date()
+    endDate.setHours(0, 0, 0, 0)
+    endDate.setDate(endDate.getDate() + 1)
+
+    // Fetch data
+    fetchEnergyData(startDate, endDate)
     fetchEnergyGoals()
   }, [isAuthenticated])
 
@@ -279,8 +335,38 @@ const Energy = () => {
     })
   }
 
+  const handleUpdateTimePeriod = (value: TTimePeriod) => {
+    setSelectedPeriod(value)
+    const date = new Date()
+    const adjustTime = {
+      Today: () => date,
+      'Past week': () => {
+        date.setDate(date.getDate() - 7)
+        return date
+      },
+      'Past month': () => {
+        date.setMonth(date.getMonth() - 1)
+        return date
+      },
+      'Past year': () => {
+        date.setFullYear(date.getFullYear() - 1)
+        return date
+      },
+    }
+    return adjustTime[value]()
+  }
+
   const handleSelect = (value: string) => {
-    console.log('Selected:', value)
+    if (['Today', 'Past week', 'Past month', 'Past year'].includes(value)) {
+      const endDate = new Date()
+      const startDate = handleUpdateTimePeriod(value as TTimePeriod)
+      endDate.setDate(endDate.getDate() + 1)
+      startDate.setHours(0, 0, 0, 0)
+      endDate.setHours(0, 0, 0, 0)
+      fetchEnergyData(startDate, endDate)
+    } else {
+      console.error('Invalid time period selected:', value)
+    }
   }
 
   const columns: GridColDef[] = [
@@ -289,6 +375,11 @@ const Energy = () => {
       headerName: 'Name',
       width: 150,
       flex: 8,
+    },
+    {
+      field: 'target',
+      headerName: 'Target',
+      width: 100,
     },
     {
       field: 'progress',
@@ -400,7 +491,7 @@ const Energy = () => {
         <div className='header'>
           Energy Generation and Usage
           <Dropdown
-            options={['Today', 'This week', 'This month', 'This year']}
+            options={['Today', 'Past week', 'Past month', 'Past year']}
             onSelect={handleSelect}
           />
         </div>

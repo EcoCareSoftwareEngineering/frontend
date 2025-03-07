@@ -4,3 +4,17 @@ export const getCSSVariable = (variable: string) => {
     .getPropertyValue(variable)
     .trim()
 }
+
+// Generate array of objects with Dates for all hour increments from start to end
+export const generateAllDates = (startDate: Date, endDate: Date) => {
+  const result = []
+  const current = new Date(startDate)
+  current.setHours(0, 0, 0, 0)
+
+  while (current < endDate) {
+    result.push(new Date(current).toISOString())
+    current.setHours(current.getHours() + 1)
+  }
+
+  return result
+}

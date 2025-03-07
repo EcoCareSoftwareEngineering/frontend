@@ -58,7 +58,7 @@ const Home = () => {
         <div className='header'>
           Device Usage by Location
           <Dropdown
-            options={['Today', 'This week', 'This month', 'This year']}
+            options={['Today', 'Past week', 'Past month', 'Past year']}
             onSelect={handleSelect}
           />
         </div>
