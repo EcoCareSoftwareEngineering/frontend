@@ -1,3 +1,4 @@
+import { ValidApiError } from '../types/generalTypes'
 import { enqueueSnackbar } from 'notistack'
 import axios, { AxiosError } from 'axios'
 import {
@@ -11,10 +12,28 @@ import {
 } from 'react'
 
 interface ApiWrapper {
-  get: (url: string, requestDescription?: string) => Promise<any>
-  post: (url: string, data: any, requestDescription?: string) => Promise<any>
-  put: (url: string, data: any, requestDescription?: string) => Promise<any>
-  delete: (url: string, requestDescription?: string) => Promise<any>
+  get: (
+    url: string,
+    requestDescription?: string,
+    validCodes?: number[]
+  ) => Promise<any>
+  post: (
+    url: string,
+    data: any,
+    requestDescription?: string,
+    validCodes?: number[]
+  ) => Promise<any>
+  put: (
+    url: string,
+    data: any,
+    requestDescription?: string,
+    validCodes?: number[]
+  ) => Promise<any>
+  delete: (
+    url: string,
+    requestDescription?: string,
+    validCodes?: number[]
+  ) => Promise<any>
 }
 
 interface ApiContextType {
@@ -53,7 +72,8 @@ export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
     method: string,
     url: string,
     data?: any,
-    requestDescription?: string
+    requestDescription?: string,
+    validStatusCodes?: number[]
   ) => {
     activeRequests.current++
     setLoading(true)
@@ -83,6 +103,14 @@ export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
 
       return response
     } catch (error: AxiosError | any) {
+      if (
+        validStatusCodes &&
+        Array.isArray(validStatusCodes) &&
+        validStatusCodes.length > 0 &&
+        validStatusCodes.includes(error.status)
+      ) {
+        throw new ValidApiError('API call valid failure')
+      }
       // Show snackbar if error
       enqueueSnackbar(`${requestDescription ?? ''} ${error.message}`, {
         preventDuplicate: true,
@@ -108,14 +136,22 @@ export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   const API: ApiWrapper = {
-    get: (url: string, requestDescription?: string) =>
-      request('GET', url, null, requestDescription),
-    post: (url: string, data: any, requestDescription?: string) =>
-      request('POST', url, data, requestDescription),
-    put: (url: string, data: any, requestDescription?: string) =>
-      request('PUT', url, data, requestDescription),
-    delete: (url: string, requestDescription?: string) =>
-      request('DELETE', url, null, requestDescription),
+    get: (url: string, requestDescription?: string, validCodes?: number[]) =>
+      request('GET', url, null, requestDescription, validCodes),
+    post: (
+      url: string,
+      data: any,
+      requestDescription?: string,
+      validCodes?: number[]
+    ) => request('POST', url, data, requestDescription, validCodes),
+    put: (
+      url: string,
+      data: any,
+      requestDescription?: string,
+      validCodes?: number[]
+    ) => request('PUT', url, data, requestDescription, validCodes),
+    delete: (url: string, requestDescription?: string, validCodes?: number[]) =>
+      request('DELETE', url, null, requestDescription, validCodes),
   }
 
   return (
