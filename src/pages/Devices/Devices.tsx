@@ -90,6 +90,44 @@ const Devices = () => {
       })
   }
 
+  // ADD device handlers
+  const [addModalIsOpen, setAddModalIsOpen] = useState<boolean>(false)
+  const [ipAddress, setIpAddress] = useState<string>('')
+
+  const handleAddModalClose = () => {
+    setAddModalIsOpen(false)
+    setIpAddress('')
+  }
+
+  const handleChangeIp = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setIpAddress(e.target.value)
+  }
+
+  const addDevice = () => {
+    API.post(
+      '/devices/',
+      { ipAddress: ipAddress },
+      'Connect new device request\n'
+    )
+      .then((response: AxiosResponse) => {
+        setDevices([...devices, { ...response.data }])
+        enqueueSnackbar('Successfully connected device', {
+          variant: 'success',
+          anchorOrigin: {
+            vertical: 'top',
+            horizontal: 'right',
+          },
+        })
+      })
+      .catch((err: AxiosError | any) => {
+        console.error('POST request failed', err)
+      })
+      .finally(() => {
+        setAddModalIsOpen(false)
+        setIpAddress('')
+      })
+  }
+
   // UPDATE device handlers
   const [showEdit, setShowEdit] = useState<boolean>(false)
   const setEditIsClosed = () => {
@@ -382,6 +420,13 @@ const Devices = () => {
   return (
     <div className='devices page-content'>
       <LoadingModal open={!devicesLoaded || loading} />
+      <div className='page-header'>
+        <h2 className='page-title'>All Devices</h2>
+        <Button variant='contained' onClick={() => setAddModalIsOpen(true)}>
+          <i className='bi bi-plus-lg' />
+          Add Device
+        </Button>
+      </div>
       <DataGrid
         rows={devices}
         columns={columns}
@@ -398,6 +443,38 @@ const Devices = () => {
           ),
         }}
       />
+      <Modal
+        open={addModalIsOpen}
+        onClose={handleAddModalClose}
+        aria-labelledby='modal-modal-title'
+        aria-describedby='modal-modal-description'
+      >
+        <Box>
+          <Typography id='modal-modal-title' fontWeight='bold' variant='h5'>
+            Add Energy Goal
+          </Typography>
+          <div className='modal-table device-info'>
+            <strong className='input-field-name'>Name:</strong>
+            <TextField
+              size='small'
+              name='name'
+              value={ipAddress}
+              placeholder='192.168.0.1'
+              onChange={handleChangeIp}
+            />
+          </div>
+          <div className='event-actions actions'>
+            <Button className='cancel-btn' onClick={handleAddModalClose}>
+              <i className='bi bi-x-lg' />
+              Cancel
+            </Button>
+            <Button className='submit-btn' onClick={addDevice}>
+              <i className='bi bi-floppy' />
+              {addModalIsOpen ? 'Create' : 'Save'}
+            </Button>
+          </div>
+        </Box>
+      </Modal>
     </div>
   )
 }

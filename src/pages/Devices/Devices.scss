@@ -2,11 +2,11 @@
 
 .devices {
   .MuiDataGrid-root {
-    margin-block: 12vh 3vh;
-    width: 90%;
-    background-color: var(--grey-background);
     border: 0;
+    width: 90%;
+    margin-bottom: 3vh;
     color: var(--clear-text);
+    background-color: var(--grey-background);
 
     div div {
       .MuiDataGrid-topContainer {
