@@ -7,7 +7,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { useApi } from '../../contexts/ApiContext'
 import { AxiosError, AxiosResponse } from 'axios'
 import { TDevice } from '../../types/deviceTypes'
-import { getCSSVariable } from '../../utils'
+import { getCSSVariable, getLinkTopLevel } from '../../utils'
 import { enqueueSnackbar } from 'notistack'
 import './Devices.scss'
 import {
@@ -207,9 +207,7 @@ const Devices = () => {
           className='device-nav'
           style={{ paddingLeft: '5px' }}
           state={{ device: params.row }}
-          to={`${useLocate.pathname.includes('local') ? '/local' : '/remote'}/${
-            params.value
-          }`}
+          to={`${getLinkTopLevel()}/devices/${params.value}`}
         >
           {params.value}
         </Link>
@@ -224,7 +222,7 @@ const Devices = () => {
         <Link
           className='device-nav'
           state={{ device: params.row }}
-          to={`/devices/${params.row.deviceId}`}
+          to={`${getLinkTopLevel()}/devices/${params.row.deviceId}`}
         >
           {params.value}
         </Link>

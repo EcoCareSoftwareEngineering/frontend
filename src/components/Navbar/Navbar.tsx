@@ -1,14 +1,11 @@
-import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { getLinkTopLevel } from '../../utils'
+import { useState } from 'react'
 import './Navbar.scss'
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false)
   const location = useLocation()
-
-  const getLinkTopLevel = () => {
-    return location.pathname.includes('local') ? '/local' : '/remote'
-  }
 
   const getLinkClassName = (path: string) => {
     if (path === window.location.pathname) {
@@ -31,7 +28,7 @@ const Navbar = () => {
       <div className='navbar-header'>
         {/* Navbar Logo */}
         <div className='navbar-logo'>
-          <Link to='/'>
+          <Link to={getLinkTopLevel()}>
             Eco<p style={{ color: '#2992ff' }}>Care</p>
           </Link>
         </div>
