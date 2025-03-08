@@ -5,6 +5,11 @@ export const getCSSVariable = (variable: string) => {
     .trim()
 }
 
+// Returns base url for local or remote view
+export const getLinkTopLevel = () => {
+  return location.pathname.includes('local') ? '/local' : '/remote'
+}
+
 // Generate array of objects with Dates for all hour increments from start to end
 export const generateAllDates = (startDate: Date, endDate: Date) => {
   const result = []
