@@ -12,3 +12,12 @@ export type TUserLogin = {
   username: string
   password: string
 }
+
+export type TTimePeriod = 'Today' | 'Past week' | 'Past month' | 'Past year'
+
+export class ValidApiError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'ValidApiError'
+  }
+}

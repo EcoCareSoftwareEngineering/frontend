@@ -1,6 +1,9 @@
 @use '/variables' as *;
 
 .energy {
+  overflow-y: auto;
+  overflow-x: hidden;
+
   .header {
     display: flex;
     justify-content: space-between;
@@ -12,21 +15,27 @@
     }
   }
 
-  .energy-data {
+  .page-card {
     color: var(--grey-text);
     display: flex;
     flex-direction: column;
     margin-inline: 6%;
     font-weight: bold;
     width: 92%;
-    height: 55%;
-    margin-block: 3vh;
+    min-height: 55vh;
+    margin-bottom: 1vh;
     border-radius: 10px;
     padding-block: 10px;
     text-align: left;
     text-indent: 20px;
     font-size: 1.1rem;
     background-color: var(--grey-background);
+
+    &.energy-goals {
+      min-height: 65vh;
+      margin-bottom: 5vh;
+      padding: 0;
+    }
 
     .data-container {
       position: relative;
@@ -60,11 +69,29 @@
             }
           }
 
-          .net-energy.pie-chart {
+          .net-energy {
             position: absolute;
-            left: -5%;
-            height: 250%;
-            width: 130%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 110%;
+            width: 100%;
+
+            .pie-chart {
+              position: sticky;
+              height: 1000%;
+              width: 100%;
+            }
+          }
+
+          .pie-center-item {
+            font-size: 1.2rem;
+            fill: var(--clear-text);
+          }
+
+          .net-energy-label {
+            font-size: 1.15rem;
+            fill: var(--grey-text);
           }
 
           .data-label {
@@ -111,10 +138,146 @@
       }
     }
   }
+
+  .energy-goals {
+    .MuiDataGrid-root {
+      background-color: var(--grey-background);
+      border: 0;
+      color: var(--clear-text);
+
+      div div {
+        .MuiDataGrid-topContainer {
+          .MuiDataGrid-columnHeaders .MuiDataGrid-row--borderBottom {
+            background-color: var(--grey-background);
+
+            .MuiDataGrid-columnHeader {
+              border: 0;
+
+              .MuiDataGrid-columnSeparator {
+                color: var(--grey-text);
+              }
+
+              div button {
+                color: var(--grey-text);
+              }
+            }
+          }
+        }
+
+        .MuiDataGrid-virtualScrollerContent {
+          [data-field='status'],
+          [data-field='faultStatus'] {
+            padding: 0;
+          }
+
+          div .MuiDataGrid-row .MuiDataGrid-cell {
+            border-color: var(--grey-text);
+
+            &:focus {
+              outline: none;
+            }
+
+            .device-nav {
+              cursor: pointer;
+              font-weight: bold;
+              color: var(--clear-text);
+
+              &:hover {
+                color: var(--active-color);
+                text-decoration: underline;
+              }
+            }
+
+            .power-cell {
+              justify-content: flex-end;
+            }
+            .fault-cell {
+              justify-content: flex-start;
+            }
+
+            .status-cell {
+              height: 100%;
+              display: flex;
+              align-items: center;
+
+              .value {
+                height: 45%;
+                display: flex;
+                min-width: 50px;
+                padding: 2px 3px;
+                align-items: center;
+                justify-content: center;
+              }
+
+              .power {
+                border-radius: 10px 0 0 10px;
+              }
+
+              .fault {
+                border-radius: 0 10px 10px 0;
+              }
+            }
+
+            .actions {
+              height: 100%;
+              display: flex;
+              align-items: center;
+              justify-content: flex-start;
+
+              button {
+                width: 45%;
+                height: 75%;
+                display: flex;
+                min-width: unset;
+                border-radius: 25px;
+                align-items: center;
+                justify-content: center;
+                color: var(--clear-text);
+                transition: background-color 0.1s, color 0.1s;
+
+                &:hover {
+                  background: var(--grey-background);
+                  color: var(--active-color);
+                }
+
+                i {
+                  padding-inline: 0.6rem;
+                }
+              }
+            }
+          }
+        }
+
+        div div {
+          border-color: var(--grey-text);
+        }
+      }
+
+      .MuiDataGrid-footerContainer {
+        border-color: var(--grey-text);
+
+        .MuiTablePagination-root {
+          background-color: var(--grey-background);
+          color: var(--grey-text) !important;
+
+          .MuiToolbar-root .MuiTablePagination-actions button {
+            color: var(--grey-text);
+          }
+        }
+      }
+
+      .MuiBox-root {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+  }
 }
 
 @media (max-width: 1300px) {
-  .home .energy-consumption .data-container {
+  .energy .energy-data .data-container {
     display: flex;
     flex-direction: column-reverse;
 
@@ -143,7 +306,7 @@
 }
 
 @media (max-width: 1200px) {
-  .home .energy-consumption {
+  .energy .energy-data {
     height: 60%;
     .data-container {
       .consumption-list {
@@ -164,35 +327,10 @@
 }
 
 @media (max-width: 768px) {
-  .home {
-    .energy-consumption {
+  .energy {
+    .energy-data {
       color: var(--grey-text);
       margin-inline: 0;
-    }
-  }
-}
-
-@media (max-width: 475px) {
-  .home .energy-consumption {
-    height: 75%;
-
-    .data-container {
-      .consumption-list {
-        grid-template-columns: repeat(1, 1fr);
-        grid-template-rows: repeat(4, 1fr);
-        padding-inline-start: 0;
-        height: 50%;
-        top: -3.5%;
-
-        li {
-          height: 90%;
-          margin-bottom: 10px;
-        }
-      }
-
-      .line-chart {
-        height: 60%;
-      }
     }
   }
 }

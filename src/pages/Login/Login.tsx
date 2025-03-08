@@ -1,7 +1,7 @@
 import { useApi } from '../../contexts/ApiContext'
 import { useNavigate } from 'react-router-dom'
 import axios, { AxiosResponse } from 'axios'
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import {
   ToggleButtonGroup,
   InputAdornment,
@@ -37,6 +37,12 @@ const Login = () => {
 
   const { API, setIsAuthenticated } = useApi()
   const navigate = useNavigate()
+
+  useEffect(() => {
+    localStorage.removeItem('token')
+    localStorage.setItem('starting', 'true')
+    setIsAuthenticated(false)
+  }, [])
 
   // Handle form changes
   const handleCredentialChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -104,7 +110,7 @@ const Login = () => {
 
   const handleSignUp = () => {
     if (userCredentials.password !== passwordCheck) {
-      enqueueSnackbar('Your passwords do not match. Please try again', {
+      enqueueSnackbar('Your passwords do not match. Try again', {
         preventDuplicate: true,
         variant: 'error',
         style: {
@@ -117,6 +123,7 @@ const Login = () => {
           horizontal: 'right',
         },
       })
+      return
     }
     API.post(
       '/accounts/signup/',

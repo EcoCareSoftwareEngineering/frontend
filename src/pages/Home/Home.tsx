@@ -44,8 +44,11 @@ const Home = () => {
 
   // Fix viewport size update styles
   useEffect(() => {
-    document.body.style.display = 'none'
-    setTimeout(() => (document.body.style.display = 'block'), 50)
+    if (localStorage.getItem('starting')) {
+      document.body.style.display = 'none'
+      setTimeout(() => (document.body.style.display = 'block'), 50)
+      localStorage.removeItem('starting')
+    }
   }, [])
 
   return (
@@ -55,7 +58,7 @@ const Home = () => {
         <div className='header'>
           Device Usage by Location
           <Dropdown
-            options={['Today', 'This week', 'This month', 'This year']}
+            options={['Today', 'Past week', 'Past month', 'Past year']}
             onSelect={handleSelect}
           />
         </div>
@@ -117,6 +120,12 @@ const Home = () => {
       </div>
 
       {/* Container for various metrics */}
+      <div className='item-container'>
+        <div className='item' />
+        <div className='item' />
+        <div className='item' />
+        <div className='item' />
+      </div>
     </div>
   )
 }

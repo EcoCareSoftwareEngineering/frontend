@@ -1,22 +1,21 @@
-import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { getLinkTopLevel } from '../../utils'
+import { useState } from 'react'
 import './Navbar.scss'
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false)
   const location = useLocation()
 
-  const getLinkTopLevel = () => {
-    return location.pathname.includes('local') ? '/local' : '/remote'
-  }
-
   const getLinkClassName = (path: string) => {
-    if (path !== '/') {
+    if (path === window.location.pathname) {
+      return 'nav-button active'
+    } else if (path !== getLinkTopLevel()) {
       return location.pathname.includes(path)
         ? 'nav-button active'
         : 'nav-button'
-    } else if (path === '/') {
-      return location.pathname == '/' ? 'nav-button active' : 'nav-button'
+    } else {
+      return 'nav-button'
     }
   }
 
@@ -29,7 +28,7 @@ const Navbar = () => {
       <div className='navbar-header'>
         {/* Navbar Logo */}
         <div className='navbar-logo'>
-          <Link to='/'>
+          <Link to={getLinkTopLevel()}>
             Eco<p style={{ color: '#2992ff' }}>Care</p>
           </Link>
         </div>
@@ -52,7 +51,7 @@ const Navbar = () => {
         <li>
           <Link
             to={getLinkTopLevel()}
-            className={getLinkClassName('/')}
+            className={getLinkClassName(getLinkTopLevel())}
             onClick={() => setIsOpen(false)}
           >
             <div className='bar' />
