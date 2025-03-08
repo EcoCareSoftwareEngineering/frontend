@@ -18,8 +18,8 @@
     flex-direction: column;
     margin-inline: 6%;
     font-weight: bold;
-    width: 92%;
-    height: 55%;
+    width: 93%;
+    height: 60%;
     margin-block: 3vh;
     border-radius: 10px;
     padding-block: 10px;
@@ -102,6 +102,26 @@
           display: 'none';
         }
       }
+    }
+  }
+
+  .item-container {
+    display: flex;
+    width: 93%;
+    height: 29%;
+    margin-bottom: 3vh;
+    gap: 20px;
+
+    .item {
+      flex: 1;
+      border-radius: 10px;
+      padding-block: 10px;
+      text-align: left;
+      text-indent: 20px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: var(--grey-text);
+      background-color: var(--grey-background);
     }
   }
 }

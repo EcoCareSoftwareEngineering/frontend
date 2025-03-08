@@ -120,6 +120,12 @@ const Home = () => {
       </div>
 
       {/* Container for various metrics */}
+      <div className='item-container'>
+        <div className='item' />
+        <div className='item' />
+        <div className='item' />
+        <div className='item' />
+      </div>
     </div>
   )
 }
