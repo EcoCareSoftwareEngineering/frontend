@@ -273,8 +273,8 @@ const AddAutomationModal = ({
         enqueueSnackbar('Successfully added automation', {
           variant: 'success',
           anchorOrigin: {
-            vertical: 'top',
-            horizontal: 'right',
+            vertical: 'bottom',
+            horizontal: 'center',
           },
         })
       })
@@ -373,8 +373,8 @@ const UpdateAutomationModal = ({
         enqueueSnackbar('Successfully updated automation', {
           variant: 'success',
           anchorOrigin: {
-            vertical: 'top',
-            horizontal: 'right',
+            vertical: 'bottom',
+            horizontal: 'center',
           },
         })
       })
@@ -648,8 +648,8 @@ const DeleteAutomationModal = ({
           enqueueSnackbar('Successfully deleted automation', {
             variant: 'success',
             anchorOrigin: {
-              vertical: 'top',
-              horizontal: 'right',
+              vertical: 'bottom',
+              horizontal: 'center',
             },
           })
         }

@@ -148,8 +148,8 @@ const Energy = () => {
                   whiteSpace: 'pre-line',
                 },
                 anchorOrigin: {
-                  vertical: 'top',
-                  horizontal: 'right',
+                  vertical: 'bottom',
+                  horizontal: 'center',
                 },
               }
             )
@@ -253,8 +253,8 @@ const Energy = () => {
         enqueueSnackbar('Successfully added energy goal', {
           variant: 'success',
           anchorOrigin: {
-            vertical: 'top',
-            horizontal: 'right',
+            vertical: 'bottom',
+            horizontal: 'center',
           },
         })
       })
@@ -285,8 +285,8 @@ const Energy = () => {
           enqueueSnackbar('Successfully updated energy goal', {
             variant: 'success',
             anchorOrigin: {
-              vertical: 'top',
-              horizontal: 'right',
+              vertical: 'bottom',
+              horizontal: 'center',
             },
           })
         })
@@ -309,8 +309,8 @@ const Energy = () => {
           enqueueSnackbar('Successfully deleted energy goal', {
             variant: 'success',
             anchorOrigin: {
-              vertical: 'top',
-              horizontal: 'right',
+              vertical: 'bottom',
+              horizontal: 'center',
             },
           })
         })

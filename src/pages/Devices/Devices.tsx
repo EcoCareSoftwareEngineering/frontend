@@ -1,5 +1,6 @@
 import LoadingModal from '../../components/LoadingModal/LoadingModal'
 import { TMUIAutocompleteOption } from '../../types/generalTypes'
+import { getCSSVariable, getLinkTopLevel } from '../../utils'
 import { useDeferredValue, useEffect, useState } from 'react'
 import { useDevices } from '../../contexts/DeviceContext'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
@@ -7,7 +8,6 @@ import { Link, useLocation } from 'react-router-dom'
 import { useApi } from '../../contexts/ApiContext'
 import { AxiosError, AxiosResponse } from 'axios'
 import { TDevice } from '../../types/deviceTypes'
-import { getCSSVariable, getLinkTopLevel } from '../../utils'
 import { enqueueSnackbar } from 'notistack'
 import './Devices.scss'
 import {
@@ -76,8 +76,8 @@ const Devices = () => {
           enqueueSnackbar('Successfully deleted device', {
             variant: 'success',
             anchorOrigin: {
-              vertical: 'top',
-              horizontal: 'right',
+              vertical: 'bottom',
+              horizontal: 'center',
             },
           })
         }
@@ -114,8 +114,8 @@ const Devices = () => {
         enqueueSnackbar('Successfully connected device', {
           variant: 'success',
           anchorOrigin: {
-            vertical: 'top',
-            horizontal: 'right',
+            vertical: 'bottom',
+            horizontal: 'center',
           },
         })
       })
@@ -157,8 +157,8 @@ const Devices = () => {
         enqueueSnackbar('Successfully updated device', {
           variant: 'success',
           anchorOrigin: {
-            vertical: 'top',
-            horizontal: 'right',
+            vertical: 'bottom',
+            horizontal: 'center',
           },
         })
       })
