@@ -1,49 +1,72 @@
-import { useLocation, useParams, Link } from 'react-router-dom'
+import LoadingModal from '../../components/LoadingModal/LoadingModal'
+import { useLocation, useParams, Link, useNavigate } from 'react-router-dom'
+import { TDevice, TDeviceState, TTag } from '../../types/deviceTypes'
 import { useDevices } from '../../contexts/DeviceContext'
+import Dropdown from '../../components/Dropdown/Dropdown'
+import { LineChart } from '@mui/x-charts/LineChart'
 import { useApi } from '../../contexts/ApiContext'
-import { TDevice, TDeviceState } from '../../types/deviceTypes'
+import { AxiosError, AxiosResponse } from 'axios'
 import { useEffect, useState } from 'react'
 import { enqueueSnackbar } from 'notistack'
-import { AxiosError, AxiosResponse } from 'axios'
-import LoadingModal from '../../components/LoadingModal/LoadingModal'
-import { LineChart } from '@mui/x-charts/LineChart'
-import Dropdown from '../../components/Dropdown/Dropdown'
 import dayjs from 'dayjs'
 import './Device.scss'
-
 import {
-  Typography,
-  Box,
-  Button,
-  TextField,
-  Switch,
   FormControlLabel,
-  Grid,
+  Typography,
+  TextField,
+  Button,
+  Switch,
   Paper,
-  Divider
+  Box,
 } from '@mui/material'
 
+import { getCSSVariable, getLinkTopLevel } from '../../utils'
+
 type TUsageData = {
-  deviceId: number;
-  usage: { datetime: string; usage: number }[];
+  deviceId: number
+  usage: { datetime: string; usage: number }[]
 }
 
+const colors = [getCSSVariable('--active-color')]
+
+const tableData = [
+  {
+    name: 'Living Room',
+    usage: 0.32,
+    data: [523, 178, 342, 610, 295, 438, 219, 587, 224, 678],
+  },
+  // {
+  //   name: 'Hallway',
+  //   usage: 0.12,
+  //   data: [67, 243, 298, 372, 217, 266, 110, 428, 450, 189],
+  // },
+  // {
+  //   name: 'Bedroom',
+  //   usage: 0.16,
+  //   data: [275, 389, 512, 634, 421, 310, 289, 478, 660, 149],
+  // },
+  // {
+  //   name: 'Kitchen',
+  //   usage: 0.18,
+  //   data: [189, 499, 602, 287, 435, 580, 672, 214, 389, 521],
+  // },
+]
+
 const Device = () => {
-  const { devices, devicesLoaded } = useDevices()
+  const { devices, setDevices, devicesLoaded } = useDevices()
+  const { API, isAuthenticated, loading } = useApi()
   const { id } = useParams()
-  const { API, loading } = useApi()
 
   const [device, setDevice] = useState<TDevice>()
   const [updating, setUpdating] = useState<boolean>(false)
   const [stateValue, setStateValue] = useState<string>('')
+  const [currentStateValue, setCurrentStateValue] = useState<string>('')
   const [powerVisualState, setPowerVisualState] = useState<'On' | 'Off'>('Off')
   const [usageData, setUsageData] = useState<number[]>([])
-  const [xAxisLabels, setXAxisLabels] = useState<number[]>([])
   const [timeRange, setTimeRange] = useState<string>('Today')
-  const [loadingUsage, setLoadingUsage] = useState<boolean>(false)
   const deviceId = id ? parseInt(id, 10) : null
   const location = useLocation()
-
+  const navigate = useNavigate()
 
   useEffect(() => {
     const cachedDevice = location.state?.device
@@ -51,7 +74,9 @@ const Device = () => {
       setDevice(cachedDevice)
       setPowerVisualState(cachedDevice.status)
       if (cachedDevice.state && cachedDevice.state.length > 0) {
-        setStateValue(String(cachedDevice.state[0].value || ''))
+        const value = String(cachedDevice.state[0].value || '')
+        setStateValue(value)
+        setCurrentStateValue(value)
       }
     } else if (deviceId && devices.length > 0) {
       const foundDevice = devices.find(device => device.deviceId === deviceId)
@@ -59,311 +84,358 @@ const Device = () => {
         setDevice(foundDevice)
         setPowerVisualState(foundDevice.status)
         if (foundDevice.state && foundDevice.state.length > 0) {
-          setStateValue(String(foundDevice.state[0].value || ''))
+          const value = String(foundDevice.state[0].value || '')
+          setStateValue(value)
+          setCurrentStateValue(value)
         }
       }
     }
-  }, [deviceId, devices, location.state])
+  }, [deviceId, location.state])
 
-  useEffect(() => {
-    if (!deviceId) return
-    
-    fetchUsageData(timeRange)
-  }, [deviceId, timeRange])
-  
-  const fetchUsageData = (range: string) => {
-    if (!deviceId) return
-    
-    setLoadingUsage(true)
-    
-    const endDate = dayjs().format('YYYY-MM-DD')
-    let startDate
-    
-    switch (range) {
-      case 'Today':
-        startDate = dayjs().format('YYYY-MM-DD')
-        break
-      case 'This week':
-        startDate = dayjs().subtract(7, 'day').format('YYYY-MM-DD')
-        break
-      case 'This month':
-        startDate = dayjs().subtract(30, 'day').format('YYYY-MM-DD')
-        break
-      case 'This year':
-        startDate = dayjs().subtract(365, 'day').format('YYYY-MM-DD')
-        break
-      default:
-        startDate = dayjs().format('YYYY-MM-DD')
-    }
-    
-    API.get(`/devices/usage/?rangeStart=${startDate}&rangeEnd=${endDate}`, 'Fetch device usage')
+  // useEffect(() => {
+  //   if (deviceId && isAuthenticated)
+  // }, [deviceId, isAuthenticated, timeRange])
+
+  const updateDevice = (putData: TDevice | any) => {
+    setUpdating(true)
+    API.put(`/devices/${deviceId}/`, putData, 'Update device state')
       .then((response: AxiosResponse) => {
-        console.log('got stuff')
-
-        const data = response.data as TUsageData[]
-        
-        const deviceData = data.find(d => d.deviceId === deviceId)
-        
-        if (deviceData && deviceData.usage.length > 0) {
-          const usageValues = deviceData.usage.map(item => item.usage)
-          
-          const labels = Array.from({ length: usageValues.length }, (_, i) => i + 1)
-          
-          setUsageData(usageValues)
-          setXAxisLabels(labels)
-        } else {
-          setUsageData([])
-          setXAxisLabels([])
+        const updatedDevice = {
+          ...response.data,
+          location: device?.location,
         }
-      })
-      .catch((err: AxiosError | any) => {
-        console.error('GET request failed', err)
-        
-        const sampleData = Array.from({ length: 10 }, () => Math.floor(Math.random() * 50) + 10)
-        const sampleLabels = Array.from({ length: sampleData.length }, (_, i) => i + 1)
-        
-        setUsageData(sampleData)
-        setXAxisLabels(sampleLabels)
-      })
-      .finally(() => {
-        setLoadingUsage(false)
-      })
-  }
-  
-  const handleTimeRangeChange = (value: string) => {
-    setTimeRange(value)
-  }
+        setDevice(updatedDevice)
+        if (device && device.state.length > 0) {
+          setStateValue(response.data.state[0].value)
+        }
+        setPowerVisualState(response.data.status)
+        setDevices(
+          devices.map(d =>
+            d.deviceId === response.data.deviceId ? { ...updatedDevice } : d
+          )
+        )
 
-  const togglePower = () => {
-    if (!device || updating) return
-    
-    setUpdating(true)
-    
-    const newStatus = device.status === 'On' ? 'Off' : 'On'
-    
-    API.put(`/devices/${deviceId}/`, { status: newStatus }, 'Update device status')
-      .then((response: AxiosResponse) => {
-        setPowerVisualState(newStatus)
-        
-        setDevice(prevDevice => {
-          if (!prevDevice) return prevDevice
-          return {
-            ...prevDevice,
-            status: newStatus
-          }
-        })
-        
-        enqueueSnackbar(`Device power turned ${newStatus}`, {
-          variant: 'success',
-          anchorOrigin: {
-            vertical: 'top',
-            horizontal: 'right',
-          },
-        })
-      })
-      .catch((err: AxiosError | any) => {
-        console.error('PUT request failed', err)
-        enqueueSnackbar('Failed to update device power', {
-          variant: 'error',
-          anchorOrigin: {
-            vertical: 'top',
-            horizontal: 'right',
-          },
-        })
-      })
-      .finally(() => {
-        setUpdating(false)
-      })
-  }
-
-  const updateDeviceState = () => {
-    if (!device || !device.state || device.state.length === 0) return
-    
-    setUpdating(true)
-    
-    let typedValue: string | number | boolean = stateValue
-    const datatype = device.state[0].datatype
-    
-    if (datatype === 'integer') {
-      typedValue = parseInt(stateValue, 10)
-    } else if (datatype === 'float') {
-      typedValue = parseFloat(stateValue)
-    } else if (datatype === 'boolean') {
-      typedValue = stateValue.toLowerCase() === 'true'
-    }
-    
-    const newState = [{
-      ...device.state[0],
-      value: typedValue
-    }]
-    
-    API.put(`/devices/${deviceId}/`, { state: newState }, 'Update device state')
-      .then((response: AxiosResponse) => {
-        setDevice(prevDevice => {
-          if (!prevDevice) return prevDevice
-          return {
-            ...prevDevice,
-            state: newState
-          }
-        })
-        
         enqueueSnackbar('Device state updated successfully', {
           variant: 'success',
           anchorOrigin: {
-            vertical: 'top',
-            horizontal: 'right',
+            vertical: 'bottom',
+            horizontal: 'center',
           },
         })
+        navigate(location.pathname, { state: { device: updatedDevice } })
       })
       .catch((err: AxiosError | any) => {
         console.error('PUT request failed', err)
-        enqueueSnackbar('Failed to update device state', {
-          variant: 'error',
-          anchorOrigin: {
-            vertical: 'top',
-            horizontal: 'right',
-          },
-        })
       })
       .finally(() => {
         setUpdating(false)
       })
   }
 
-  if (!devicesLoaded || loading) {
-    return <LoadingModal open={!devicesLoaded || loading} />
+  const getFormattedStateValue = () => {
+    switch (device?.state[0].datatype) {
+      case 'integer':
+        return parseInt(currentStateValue)
+      case 'float':
+        return parseFloat(currentStateValue)
+      case 'boolean':
+        return currentStateValue == 'On' ? true : false
+      default:
+        return currentStateValue
+    }
   }
 
-  if (!device) {
-    return (
-      <div className="device page-content">
-        <div className="page-header">
-          <Typography variant="h4" component="h2">Device Info</Typography>
-          <Button component={Link} to="/devices" variant="outlined">
-            <i className="bi bi-arrow-left" />
-            Back
-          </Button>
-        </div>
-        <Typography variant="body1">
-          The device with ID {id} could not be found.
-        </Typography>
-      </div>
-    )
+  const handleUpdateDeviceState = () => {
+    if (device) {
+      const devicePutData = {
+        ...device,
+        state: [{ ...device?.state[0], value: getFormattedStateValue() }],
+      }
+      updateDevice(devicePutData)
+    }
+  }
+
+  const handleUpdateDevicePower = () => {
+    if (device) {
+      const devicePutData = {
+        ...device,
+        status: device.status == 'On' ? 'Off' : 'On',
+      }
+      updateDevice(devicePutData)
+    }
   }
 
   return (
-    <div className="device page-content">
-      <div className="page-header">
-        <div className="header-left"></div>
-        <Typography variant="h4" component="h2" className="page-title">Device Info</Typography>
-        <div className="header-right">
-          <Button component={Link} to="/devices" variant="outlined">
-            <i className="bi bi-arrow-left" />
-            Back
-          </Button>
-        </div>
+    <div className='device page-content'>
+      <LoadingModal open={!devicesLoaded || loading} />
+      <div className='page-header'>
+        <h2 className='page-title'>{`Devices - ${device?.name}`}</h2>
+        <Button
+          onClick={() => {
+            navigate(`${getLinkTopLevel()}/devices`)
+          }}
+          variant='contained'
+        >
+          <i className='bi bi-arrow-left' />
+          Back
+        </Button>
       </div>
-      
-      <Divider className="main-divider" />
-      
-      <Grid container spacing={3}>
-        {/* Device Properties Table - Left Side */}
-        <Grid item xs={12} md={6}>
-          <Paper elevation={2} className="device-properties">
+
+      <div className='device-grid-container'>
+        {/* Device Properties */}
+        <div className='device-grid-item'>
+          <Paper elevation={2} className='device-properties'>
             <Box p={3}>
-              <table className="properties-table">
+              <Typography variant='h5' gutterBottom>
+                Device Properties
+              </Typography>
+              <table className='properties-table'>
                 <tbody>
                   <tr>
                     <th>Name</th>
-                    <td>{device.name}</td>
+                    <td>{device?.name}</td>
                   </tr>
                   <tr>
                     <th>Description</th>
-                    <td>{device.description || "No description"}</td>
+                    <td>{device?.description || 'No description'}</td>
                   </tr>
                   <tr>
                     <th>Location</th>
-                    <td>{device.location || "Not assigned"}</td>
-                  </tr>
-                  <tr>
-                    <th>Unlocked</th>
-                    <td>{device.unlocked ? "Yes" : "No"}</td>
+                    <td>{device?.location || 'Not assigned'}</td>
                   </tr>
                   <tr>
                     <th>IP Address</th>
-                    <td>{device.ipAddress || "Not available"}</td>
+                    <td>{device?.ipAddress || 'Not available'}</td>
+                  </tr>
+                  <tr>
+                    <th>Unlocked</th>
+                    <td>{device?.unlocked ? 'Yes' : 'No'}</td>
                   </tr>
                   <tr>
                     <th>PIN Enabled</th>
-                    <td>{device.pinEnabled ? "Yes" : "No"}</td>
+                    <td>{device?.pinEnabled ? 'Yes' : 'No'}</td>
                   </tr>
                   <tr>
                     <th>Fault Status</th>
-                    <td className={device.faultStatus === 'Ok' ? 'status-ok' : 'status-fault'}>
-                      {device.faultStatus}
+                    <td
+                      className={
+                        device?.faultStatus === 'Ok'
+                          ? 'status-ok'
+                          : 'status-fault'
+                      }
+                    >
+                      {device?.faultStatus}
                     </td>
                   </tr>
                 </tbody>
               </table>
             </Box>
           </Paper>
-        </Grid>
-        
-        {/* Device Control - Right Side */}
-        <Grid item xs={12} md={6}>
-          <Paper elevation={2} className="device-control">
+        </div>
+
+        {/* Device Tags */}
+        <div className='device-grid-item'>
+          <Paper elevation={2} className='device-tags'>
             <Box p={3}>
-              {/* Power Toggle */}
-              <Box className="power-control">
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={powerVisualState === 'On'}
-                      onChange={togglePower}
-                      disabled={updating}
-                    />
-                  }
-                  label={`Power: ${powerVisualState}`}
-                />
-              </Box>
-              
-              <Divider sx={{ my: 3 }} />
-              
-              {/* State Control */}
-              {device.state && device.state.length > 0 ? (
-                <Box className="state-control">
-                  <Typography variant="body1" gutterBottom>
-                    {device.state[0].fieldName} ({device.state[0].datatype}):
+              <Typography variant='h5' gutterBottom>
+                Device Tags
+              </Typography>
+
+              {device?.customTags && device.customTags.length > 0 ? (
+                <div className='tags-section'>
+                  <Typography variant='subtitle2' gutterBottom>
+                    Custom Tags
                   </Typography>
-                  
-                  <TextField
-                    fullWidth
-                    value={stateValue}
-                    onChange={(e) => setStateValue(e.target.value)}
-                    placeholder={`Enter ${device.state[0].datatype} value`}
-                    variant="outlined"
-                    size="small"
-                    margin="normal"
-                  />
-                  
-                  <Button
-                    variant="contained"
-                    onClick={updateDeviceState}
-                    disabled={updating}
-                    sx={{ mt: 2 }}
-                  >
-                    Set State
-                  </Button>
-                </Box>
+                  <table className='tags-table'>
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {device.customTags.map(tag => (
+                        <tr key={`custom-${tag.tagId}`}>
+                          <td>{tag.tagId}</td>
+                          <td>{tag.name}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               ) : (
-                <Typography variant="body1">
-                  This device does not have any controllable state.
+                <Typography variant='body2' className='no-tags'>
+                  No custom tags assigned
+                </Typography>
+              )}
+
+              {device?.userTags && device.userTags.length > 0 ? (
+                <div className='tags-section'>
+                  <Typography variant='subtitle2' gutterBottom sx={{ mt: 2 }}>
+                    User Tags
+                  </Typography>
+                  <table className='tags-table'>
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {device.userTags.map(tag => (
+                        <tr key={`user-${tag.tagId}`}>
+                          <td>{tag.tagId}</td>
+                          <td>{tag.name}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <Typography variant='body2' className='no-tags'>
+                  No user tags assigned
+                </Typography>
+              )}
+
+              {device?.roomTag ? (
+                <div className='tags-section'>
+                  <Typography variant='body1' gutterBottom sx={{ mt: 2 }}>
+                    Room Tag
+                  </Typography>
+                  <table className='tags-table'>
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>{device.roomTag}</td>
+                        <td>{device.location || 'Room'}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <Typography variant='body2' className='no-tags'>
+                  No room tag assigned
                 </Typography>
               )}
             </Box>
           </Paper>
-        </Grid>
-      </Grid>
+        </div>
+
+        {/* Device Control */}
+        <div className='device-grid-item'>
+          <Paper elevation={2} className='device-control'>
+            <Box p={3}>
+              <Typography variant='h5' gutterBottom>
+                Device Control
+              </Typography>
+              <table className='properties-table'>
+                <tbody>
+                  <tr>
+                    <th>Power</th>
+                    <td>
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            checked={powerVisualState === 'On'}
+                            onChange={handleUpdateDevicePower}
+                            disabled={updating}
+                          />
+                        }
+                        label={powerVisualState}
+                      />
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              {device?.state && device?.state.length > 0 ? (
+                <table>
+                  <tbody>
+                    <tr>
+                      <th>
+                        Current {device?.state[0].fieldName} (
+                        {device?.state[0].datatype})
+                      </th>
+                      <td>
+                        <p
+                          style={{
+                            marginBlock: '2px',
+                            marginLeft: '6%',
+                          }}
+                        >
+                          {stateValue}
+                        </p>
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>
+                        New {device?.state[0].fieldName} (
+                        {device?.state[0].datatype})
+                      </th>
+                      <td>
+                        <TextField
+                          fullWidth
+                          value={currentStateValue}
+                          onChange={e => setCurrentStateValue(e.target.value)}
+                          placeholder={`Enter ${device?.state[0].datatype} value`}
+                          variant='outlined'
+                          size='small'
+                        />
+                      </td>
+                    </tr>
+                    <tr>
+                      <Button
+                        variant='contained'
+                        onClick={handleUpdateDeviceState}
+                        className='update-btn'
+                        disabled={updating}
+                        sx={{ mt: 2 }}
+                      >
+                        Set State
+                      </Button>
+                    </tr>
+                  </tbody>
+                </table>
+              ) : (
+                <Typography sx={{ mt: 2, width: '100%' }}>
+                  This device does not have a controllable state.
+                </Typography>
+              )}
+            </Box>
+          </Paper>
+        </div>
+      </div>
+
+      <div className='device-usage-container'>
+        <div className='header'>
+          Device Usage by Location
+          <Dropdown
+            options={['Today', 'Past week', 'Past month', 'Past year']}
+            onSelect={() => console.log('ad')}
+          />
+        </div>
+        <div className='data-container'>
+          <LineChart
+            xAxis={[{ data: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] }]}
+            series={tableData.map((element, index) => {
+              return {
+                label: element.name,
+                data: element.data,
+                showMark: false,
+                color: colors[index],
+                curve: 'linear',
+              }
+            })}
+            slotProps={{ legend: { hidden: true } }}
+            grid={{ vertical: true, horizontal: true }}
+            className='line-chart'
+          />
+        </div>
+      </div>
     </div>
   )
 }

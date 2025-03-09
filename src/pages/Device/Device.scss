@@ -4,244 +4,181 @@
   &.page-content {
     display: flex;
     flex-direction: column;
-    gap: 15px;
     color: var(--clear-text);
-  }
-  
-  // Centered header with right-aligned button
-  .page-header {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    align-items: center;
-    width: 90%;
-    margin: 20px auto;
 
-    .header-left {
-      // Empty space to balance the layout
-    }
-
-    .page-title {
-      font-size: 2.2rem;
-      text-align: center;
-      margin: 0;
-      color: var(--clear-text);
-    }
-
-    .header-right {
+    .device-grid-container {
       display: flex;
-      justify-content: flex-end;
-    }
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      width: 93%;
+      margin-bottom: 1.5rem;
 
-    button {
-      transition: background-color 0.1s, color 0.1s;
-      background-color: var(--active-color);
-      border: 2px solid var(--active-color);
-      color: var(--clear-text);
-      text-transform: none;
-      align-items: center;
-      border-radius: 5px;
-      padding-block: 4px;
-      font-weight: bold;
-      display: flex;
-
-      i {
-        padding-right: 10px;
+      h5,
+      p {
+        font-weight: bold;
+        color: var(--clear-text);
       }
 
-      &:hover {
-        background-color: var(--highlight-color);
-        color: var(--active-color);
+      .device-grid-item {
+        background-color: var(--grey-background);
+        border-radius: 10px;
+        min-width: 300px;
+        flex: 1;
+
+        .MuiPaper-root {
+          border-radius: 10px;
+          --Paper-shadow: none !important;
+          background-color: var(--grey-background);
+        }
+
+        .properties-table,
+        .device-control,
+        .tags-table {
+          width: 100%;
+          color: var(--clear-text);
+          border-collapse: collapse;
+
+          th,
+          td {
+            padding: 0.5rem;
+            text-align: left;
+            border-bottom: 1px solid var(--grey-text);
+
+            input {
+              color: var(--clear-text);
+            }
+          }
+
+          th {
+            font-weight: 600;
+            width: 40%;
+          }
+
+          .status-ok {
+            color: #4caf50;
+            font-weight: 600;
+          }
+
+          .status-fault {
+            color: #f44336;
+            font-weight: 600;
+          }
+        }
+
+        .state-values {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+          margin: 1rem 0;
+        }
+
+        .current-state,
+        .new-state {
+          padding: 0.5rem;
+          // background-color: #f5f5f5;
+          border-radius: 4px;
+        }
+
+        .tags-section {
+          margin-bottom: 1rem;
+        }
+
+        .no-tags {
+          color: var(--grey-text);
+          font-style: italic;
+          margin: 0.5rem 0;
+        }
       }
     }
-  }
 
-  .main-divider {
-    width: 90%;
-    margin: 0 auto 20px;
-    background-color: var(--grey-text);
-    opacity: 0.5;
-  }
-
-  // Container for the main content
-  .MuiGrid-container {
-    width: 90%;
-    margin: 0 auto;
-  }
-  
-  // Properties table styling
-  .properties-table {
-    width: 100%;
-    border-collapse: collapse;
-    
-    th, td {
-      padding: 12px 10px;
-      border-bottom: 1px solid rgba(var(--grey-text-rgb), 0.2);
-    }
-    
-    th {
-      width: 40%;
+    .device-usage-container {
       color: var(--grey-text);
-      white-space: nowrap;
-      padding-right: 20px;
-      font-weight: normal;
-    }
-    
-    td {
-      color: var(--clear-text);
-      
-      &.status-ok {
-        color: var(--on-color);
-        font-weight: bold;
-      }
-      
-      &.status-fault {
-        color: var(--off-color);
-        font-weight: bold;
-      }
-    }
-    
-    tr:last-child {
-      th, td {
-        border-bottom: none;
-      }
-    }
-    
-    tr:hover {
-      background-color: rgba(var(--highlight-color-rgb), 0.1);
-    }
-  }
-  
-  // Paper styling
-  .MuiPaper-root {
-    background-color: var(--grey-background);
-    color: var(--clear-text);
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-    
-    &:hover {
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
-    }
-  }
-  
-  // Device control styling
-  .device-control {
-    .power-control {
-      margin: 15px 0;
-      
-      .MuiFormControlLabel-label {
-        color: var(--clear-text);
-        font-size: 1.1rem;
-      }
-      
-      .MuiSwitch-root {
-        .MuiSwitch-track {
-          background-color: var(--grey-text);
-        }
-        
-        .Mui-checked {
-          color: var(--on-color);
-          
-          + .MuiSwitch-track {
-            background-color: var(--on-color);
-            opacity: 0.6;
-          }
+      display: flex;
+      flex-direction: column;
+      margin-inline: 6%;
+      font-weight: bold;
+      width: 93%;
+      height: 60%;
+      margin-bottom: 3vh;
+      border-radius: 10px;
+      padding-block: 10px;
+      text-align: left;
+      text-indent: 20px;
+      font-size: 1.1rem;
+      background-color: var(--grey-background);
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+
+        .dropdown {
+          margin-inline-end: 1%;
         }
       }
-    }
-    
-    .MuiDivider-root {
-      background-color: var(--grey-text);
-      opacity: 0.5;
-    }
-    
-    .state-control {
-      margin-top: 15px;
-      
-      .MuiTypography-body1 {
-        color: var(--clear-text);
-        margin-bottom: 10px;
-        font-size: 1.1rem;
-      }
-      
-      .MuiTextField-root {
-        margin-top: 10px;
-        margin-bottom: 20px;
-        
-        .MuiOutlinedInput-root {
-          background-color: var(--highlight-color);
-          
-          .MuiOutlinedInput-input {
-            color: var(--clear-text);
+
+      .data-container {
+        position: relative;
+        display: flex;
+        width: 100%;
+        height: 100%;
+
+        .line-chart {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          right: 0;
+
+          .MuiChartsAxis-line {
+            stroke: var(--background-color);
           }
-          
-          .MuiOutlinedInput-notchedOutline {
-            border-color: var(--grey-text);
+
+          .MuiChartsAxis-tickLabel {
+            fill: var(--grey-text);
           }
-          
-          &:hover .MuiOutlinedInput-notchedOutline {
-            border-color: var(--active-color);
+
+          .MuiChartsAxis-tick {
+            fill: var(--grey-background);
+            display: 'none';
           }
-          
-          &.Mui-focused .MuiOutlinedInput-notchedOutline {
-            border-color: var(--active-color);
-          }
-        }
-      }
-      
-      .MuiButton-contained {
-        background-color: var(--active-color);
-        color: var(--clear-text);
-        font-weight: bold;
-        padding: 8px 16px;
-        border-radius: 5px;
-        text-transform: none;
-        transition: background-color 0.1s, color 0.1s;
-        
-        &:hover {
-          background-color: var(--highlight-color);
-          color: var(--active-color);
-        }
-        
-        &.Mui-disabled {
-          background-color: rgba(var(--grey-text-rgb), 0.5);
-          color: rgba(var(--clear-text-rgb), 0.5);
         }
       }
     }
   }
-  
+
   // Device usage graph
   .device-usage {
     margin-top: 20px;
-    
+
     .usage-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 16px 20px;
-      
+
       h6 {
         margin: 0;
         font-size: 1.1rem;
         font-weight: bold;
       }
-      
+
       .dropdown {
         min-width: 120px;
       }
     }
-    
+
     .usage-chart-container {
       padding: 0px;
       height: 300px;
       width: 100%;
-      
+
       // Chart container style
       > div {
         width: 100% !important;
         height: 100% !important;
       }
-      
+
       .MuiChartsAxis-line {
         stroke: var(--background-color);
       }
@@ -253,11 +190,11 @@
       .MuiChartsAxis-tick {
         fill: var(--grey-background);
       }
-      
+
       .MuiLineElement-root {
         stroke-width: 2px;
       }
-      
+
       .MuiAreaElement-root {
         opacity: 0.1;
       }
@@ -271,15 +208,15 @@
       grid-template-columns: 1fr;
       grid-template-rows: auto auto;
       gap: 15px;
-      
+
       .header-left {
         display: none;
       }
-      
+
       .page-title {
         grid-row: 1;
       }
-      
+
       .header-right {
         grid-row: 2;
         justify-content: center;
