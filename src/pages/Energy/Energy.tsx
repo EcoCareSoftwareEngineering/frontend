@@ -573,56 +573,60 @@ const Energy = () => {
                   },
                 },
               ]}
-              series={[
-                {
-                  color: colors[1],
-                  label: 'Net Total',
-                  data: energyValues?.map(e => e.netEnergy) ?? [],
-                  valueFormatter: v => {
-                    return `${v} kWh`
-                  },
-                  stack: 'total',
-                },
-                {
-                  color: colors[0],
-                  label: 'Generation',
-                  data: energyValues?.map(e => e.energyGenerated) ?? [],
-                  valueFormatter: (v, { dataIndex }) => {
-                    if (energyValues) {
-                      const netEnergy = energyValues[dataIndex].netEnergy
-                      return `${(v
-                        ? netEnergy < 0
-                          ? v
-                          : netEnergy + v
-                        : 0
-                      ).toFixed(1)} kWh`
-                    }
-                    return v + 'kWh'
-                  },
-                  stack: 'total',
-                },
-                {
-                  color: colors[2],
-                  label: 'Usage',
-                  data: energyValues?.map(e => e.energyUsage) ?? [],
-                  valueFormatter: (v, { dataIndex }) => {
-                    if (energyValues) {
-                      const netEnergy = energyValues[dataIndex].netEnergy
-                      return `${(v
-                        ? netEnergy > 0
-                          ? v
-                          : netEnergy + v
-                        : 0
-                      ).toFixed(1)} kWh`
-                    }
-                    return v + 'kWh'
-                  },
-                  stack: 'total',
-                },
-              ]}
+              series={
+                energyValues
+                  ? [
+                      {
+                        color: colors[1],
+                        label: 'Net Total',
+                        data: energyValues?.map(e => e.netEnergy) ?? [],
+                        valueFormatter: v => {
+                          return (v ?? 0.0).toFixed(1) + ' kWh'
+                        },
+                        stack: 'total',
+                      },
+                      {
+                        color: colors[0],
+                        label: 'Generation',
+                        data: energyValues?.map(e => e.energyGenerated) ?? [],
+                        valueFormatter: (v, { dataIndex }) => {
+                          if (energyValues) {
+                            const netEnergy = energyValues[dataIndex].netEnergy
+                            return v !== null && v !== undefined
+                              ? `${(netEnergy < 0 ? v : netEnergy + v).toFixed(
+                                  1
+                                )} kWh`
+                              : '0.0 kWh'
+                          }
+                          return '0.0 kWh'
+                        },
+
+                        stack: 'total',
+                      },
+                      {
+                        color: colors[2],
+                        label: 'Usage',
+                        data: energyValues?.map(e => e.energyUsage) ?? [],
+                        valueFormatter: (v, { dataIndex }) => {
+                          if (energyValues) {
+                            const netEnergy = energyValues[dataIndex].netEnergy
+                            return v !== null && v !== undefined
+                              ? `${(netEnergy < 0 ? v : netEnergy + v).toFixed(
+                                  1
+                                )} kWh`
+                              : '0.0 kWh'
+                          }
+                          return '0.0 kWh'
+                        },
+
+                        stack: 'total',
+                      },
+                    ]
+                  : []
+              }
               slotProps={{ legend: { hidden: true } }}
               grid={{ vertical: true, horizontal: true }}
-              className='line-chart'
+              className='bar-chart'
             />
           )}
         </div>
