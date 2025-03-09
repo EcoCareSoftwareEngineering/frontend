@@ -4,11 +4,11 @@ import { getCSSVariable, getLinkTopLevel } from '../../utils'
 import { useDeferredValue, useEffect, useState } from 'react'
 import { useDevices } from '../../contexts/DeviceContext'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
-import { Link, useLocation } from 'react-router-dom'
 import { useApi } from '../../contexts/ApiContext'
 import { AxiosError, AxiosResponse } from 'axios'
 import { TDevice } from '../../types/deviceTypes'
 import { enqueueSnackbar } from 'notistack'
+import { Link } from 'react-router-dom'
 import './Devices.scss'
 import {
   useMediaQuery,
@@ -27,7 +27,6 @@ const Devices = () => {
   const [currentDevice, setCurrentDevice] = useState<TDevice>()
   const [isEdited, setIsEdited] = useState<boolean>(false)
   const { API, loading } = useApi()
-  const useLocate = useLocation()
 
   const offColor = getCSSVariable('--off-color')
   const onColor = getCSSVariable('--on-color')
