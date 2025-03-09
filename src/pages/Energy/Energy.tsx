@@ -1,14 +1,13 @@
 import PieCenterLabel from '../../components/PieCenterLabel/PieCenterLabel'
+import { ValidApiError, TTimeSelection } from '../../types/generalTypes'
 import LoadingModal from '../../components/LoadingModal/LoadingModal'
 import { useDeferredValue, useEffect, useState } from 'react'
 import Dropdown from '../../components/Dropdown/Dropdown'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
-import { TTimePeriod, ValidApiError } from '../../types/generalTypes'
 import { BarChart, PieChart } from '@mui/x-charts/'
 import { useApi } from '../../contexts/ApiContext'
 import { AxiosError, AxiosResponse } from 'axios'
 import { DatePicker } from '@mui/x-date-pickers'
-import { generateAllDates } from '../../utils'
 import { enqueueSnackbar } from 'notistack'
 import dayjs, { Dayjs } from 'dayjs'
 import {
@@ -26,6 +25,7 @@ import {
   Box,
 } from '@mui/material'
 import './Energy.scss'
+import { getTimePeriodForSelection } from '../../utils'
 
 const colors = ['#07cb83', '#fbad53', '#ec443b']
 
@@ -48,7 +48,7 @@ const Energy = () => {
   }>({ name: '', target: undefined })
   useDeferredValue(currentGoal)
 
-  const [selectedPeriod, setSelectedPeriod] = useState<TTimePeriod>('Today')
+  const [selectedPeriod, setSelectedPeriod] = useState<TTimeSelection>('Today')
   const [energyValues, setEnergyValues] = useState<TEnergyValues>()
   const [energyGoals, setEnergyGoals] = useState<TEnergyGoal[]>([])
   const [energySums, setEnergySums] = useState<TEnergySums>({
@@ -60,57 +60,39 @@ const Energy = () => {
 
   const { API, loading, isAuthenticated } = useApi()
 
-  const fetchEnergyData = (startDate: Date, endDate: Date) => {
+  const fetchEnergyData = (
+    startDate: Date,
+    endDate: Date,
+    timeSelection: TTimeSelection
+  ) => {
     if (isAuthenticated) {
-      const generatedDates = generateAllDates(startDate, endDate)
+      const period = getTimePeriodForSelection(timeSelection)
       API.get(
         `/energy/?startDate=${startDate.toISOString().split('T')[0]}&endDate=${
           endDate.toISOString().split('T')[0]
-        }`,
+        }&timePeriod=${period}`,
         'Fetch energy usage request',
         [404]
       )
-        // API.get(
-        //   `/energy/?startDate=2025-01-01&endDate=2025-01-02`,
-        //   'Fetch energy usage request'
-        // )
         .then((res: AxiosResponse) => {
           const result: TEnergyValues = []
 
-          // Create a Map of API data for quick lookup
-          const apiDataMap = new Map(
-            res.data.map((item: any) => [
-              new Date(item.datetime).toISOString(),
-              item,
-            ])
-          )
-
-          // Iterate over the generated datetimes
-          generatedDates.forEach(datetime => {
-            if (apiDataMap.has(datetime)) {
-              const data: any = apiDataMap.get(datetime)
-              const netEnergy = data.energyGeneration - data.energyUse
-              result.push({
-                datetime: new Date(datetime),
-                energyGenerated:
-                  netEnergy > 0
-                    ? data.energyGeneration - netEnergy
-                    : data.energyGeneration,
-                energyUsage:
-                  netEnergy < 0
-                    ? -1 * data.energyUse - netEnergy
-                    : -1 * data.energyUse,
-                netEnergy: netEnergy,
-              })
-            } else {
-              result.push({
-                datetime: new Date(datetime),
-                energyGenerated: 0,
-                energyUsage: 0,
-                netEnergy: 0,
-              })
-            }
+          res.data.forEach((item: any) => {
+            const netEnergy = item.energyGeneration - item.energyUse
+            result.push({
+              datetime: new Date(item.datetime),
+              energyGenerated:
+                netEnergy > 0
+                  ? item.energyGeneration - netEnergy
+                  : item.energyGeneration,
+              energyUsage:
+                netEnergy < 0
+                  ? -1 * item.energyUse - netEnergy
+                  : -1 * item.energyUse,
+              netEnergy: netEnergy,
+            })
           })
+
           setEnergyValues(result)
           const sums = res.data.reduce(
             (acc: any, curr: any) => {
@@ -129,14 +111,6 @@ const Energy = () => {
         })
         .catch(err => {
           if (err instanceof ValidApiError) {
-            setEnergyValues(
-              generatedDates.map((date: string) => ({
-                datetime: new Date(date),
-                energyGenerated: 0,
-                energyUsage: 0,
-                netEnergy: 0,
-              }))
-            )
             enqueueSnackbar(
               'No energy data found for the\n selected time period.',
               {
@@ -176,16 +150,7 @@ const Energy = () => {
 
   useEffect(() => {
     // Create start date
-    const startDate = new Date()
-    startDate.setHours(0, 0, 0, 0)
-
-    // Create end date
-    const endDate = new Date()
-    endDate.setHours(0, 0, 0, 0)
-    endDate.setDate(endDate.getDate() + 1)
-
-    // Fetch data
-    fetchEnergyData(startDate, endDate)
+    handleSelect('Today')
     fetchEnergyGoals()
   }, [isAuthenticated])
 
@@ -335,13 +300,13 @@ const Energy = () => {
     })
   }
 
-  const handleUpdateTimePeriod = (value: TTimePeriod) => {
+  const handleUpdateTimePeriod = (value: TTimeSelection) => {
     setSelectedPeriod(value)
     const date = new Date()
     const adjustTime = {
       Today: () => date,
       'Past week': () => {
-        date.setDate(date.getDate() - 7)
+        date.setDate(date.getDate() - 6)
         return date
       },
       'Past month': () => {
@@ -359,11 +324,11 @@ const Energy = () => {
   const handleSelect = (value: string) => {
     if (['Today', 'Past week', 'Past month', 'Past year'].includes(value)) {
       const endDate = new Date()
-      const startDate = handleUpdateTimePeriod(value as TTimePeriod)
+      const startDate = handleUpdateTimePeriod(value as TTimeSelection)
       endDate.setDate(endDate.getDate() + 1)
       startDate.setHours(0, 0, 0, 0)
       endDate.setHours(0, 0, 0, 0)
-      fetchEnergyData(startDate, endDate)
+      fetchEnergyData(startDate, endDate, value as TTimeSelection)
     } else {
       console.error('Invalid time period selected:', value)
     }
@@ -511,7 +476,9 @@ const Energy = () => {
                         color: colors[0],
                       },
                       {
-                        value: energySums.energyUsed / energySums.totalSum,
+                        value: energySums.totalSum
+                          ? energySums.energyUsed / energySums.totalSum
+                          : 100,
                         color: '#3d4e69',
                       },
                     ],
@@ -519,9 +486,9 @@ const Energy = () => {
                 ]}
               >
                 <PieCenterLabel>
-                  {(
-                    (energySums.energyGenerated / energySums.totalSum) *
-                    100
+                  {(energySums.totalSum
+                    ? (energySums.energyGenerated / energySums.totalSum) * 100
+                    : 0
                   ).toFixed(0) + '%'}
                 </PieCenterLabel>
               </PieChart>
@@ -546,7 +513,9 @@ const Energy = () => {
                         color: colors[2],
                       },
                       {
-                        value: energySums.energyGenerated / energySums.totalSum,
+                        value: energySums.totalSum
+                          ? energySums.energyGenerated / energySums.totalSum
+                          : 100,
                         color: '#3d4e69',
                       },
                     ],
@@ -554,9 +523,9 @@ const Energy = () => {
                 ]}
               >
                 <PieCenterLabel>
-                  {(
-                    (energySums.energyUsed / energySums.totalSum) *
-                    100
+                  {(energySums.totalSum
+                    ? (energySums.energyUsed / energySums.totalSum) * 100
+                    : 0
                   ).toFixed(0) + '%'}
                 </PieCenterLabel>
               </PieChart>
@@ -585,10 +554,23 @@ const Energy = () => {
           </ul>
           {!loading && (
             <BarChart
+              dataset={energyValues}
               xAxis={[
                 {
                   scaleType: 'band',
                   data: energyValues?.map(entry => entry.datetime) ?? [],
+                  valueFormatter: (date: Date) => {
+                    // Format the date as needed
+                    return date.toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                    })
+                  },
+                  tickLabelStyle: {
+                    angle: 45,
+                    textAnchor: 'start',
+                    fontSize: 12,
+                  },
                 },
               ]}
               series={[
@@ -596,18 +578,45 @@ const Energy = () => {
                   color: colors[1],
                   label: 'Net Total',
                   data: energyValues?.map(e => e.netEnergy) ?? [],
+                  valueFormatter: v => {
+                    return `${v} kWh`
+                  },
                   stack: 'total',
                 },
                 {
                   color: colors[0],
                   label: 'Generation',
                   data: energyValues?.map(e => e.energyGenerated) ?? [],
+                  valueFormatter: (v, { dataIndex }) => {
+                    if (energyValues) {
+                      const netEnergy = energyValues[dataIndex].netEnergy
+                      return `${(v
+                        ? netEnergy < 0
+                          ? v
+                          : netEnergy + v
+                        : 0
+                      ).toFixed(1)} kWh`
+                    }
+                    return v + 'kWh'
+                  },
                   stack: 'total',
                 },
                 {
                   color: colors[2],
                   label: 'Usage',
                   data: energyValues?.map(e => e.energyUsage) ?? [],
+                  valueFormatter: (v, { dataIndex }) => {
+                    if (energyValues) {
+                      const netEnergy = energyValues[dataIndex].netEnergy
+                      return `${(v
+                        ? netEnergy > 0
+                          ? v
+                          : netEnergy + v
+                        : 0
+                      ).toFixed(1)} kWh`
+                    }
+                    return v + 'kWh'
+                  },
                   stack: 'total',
                 },
               ]}
