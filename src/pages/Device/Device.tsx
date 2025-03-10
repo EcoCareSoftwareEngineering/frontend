@@ -1,11 +1,6 @@
-import LoadingModal from '../../components/LoadingModal/LoadingModal'
 import { useLocation, useParams, useNavigate } from 'react-router-dom'
-import {
-  TDevice,
-  TDeviceState,
-  TDeviceUsage,
-  TTag,
-} from '../../types/deviceTypes'
+import { TDevice, TDeviceUsage, TTag } from '../../types/deviceTypes'
+import LoadingModal from '../../components/LoadingModal/LoadingModal'
 import { useDevices } from '../../contexts/DeviceContext'
 import Dropdown from '../../components/Dropdown/Dropdown'
 import { LineChart } from '@mui/x-charts/LineChart'
