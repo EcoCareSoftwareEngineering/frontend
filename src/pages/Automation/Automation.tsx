@@ -1,5 +1,6 @@
 import { TAutomation, TAutomationEvent } from '../../types/automationTypes'
 import LoadingModal from '../../components/LoadingModal/LoadingModal'
+import { TMUIAutocompleteOption } from '../../types/generalTypes'
 import { TDevice, TDeviceState } from '../../types/deviceTypes'
 import * as generalTypes from '../../types/generalTypes'
 import { useDevices } from '../../contexts/DeviceContext'
@@ -32,9 +33,7 @@ import {
   Box,
 } from '@mui/material'
 
-const getDeviceOptions = (
-  devices: TDevice[]
-): generalTypes.TMUIAutocompleteOption[] => {
+const getDeviceOptions = (devices: TDevice[]): TMUIAutocompleteOption[] => {
   return devices.map(device => ({
     label: `Device ${device.deviceId}: ${device.name}`,
     id: device.deviceId,
