@@ -127,7 +127,6 @@ const Device = () => {
       handleSelect('Today')
     }
   }, [deviceId, isAuthenticated, timeRange])
-  console.log(usageData)
 
   const handleSelect = (value: string) => {
     if (['Today', 'Past week', 'Past month', 'Past year'].includes(value)) {
@@ -211,6 +210,12 @@ const Device = () => {
     }
   }
 
+  const yAxisConfig = () => {
+    const yValues = usageData.map(d => d.usage)
+    const maxY = yValues.length > 0 ? Math.max(...yValues) : 10
+    return [{ min: 0, max: Math.max(maxY, 10) }]
+  }
+
   return (
     <div className='device page-content'>
       <LoadingModal open={!devicesLoaded || loading} />
@@ -285,21 +290,21 @@ const Device = () => {
               <h5>Device Usage</h5>
               <Dropdown
                 options={['Today', 'Past week', 'Past month', 'Past year']}
-                onSelect={() => console.log('ad')}
+                onSelect={handleSelect}
               />
             </div>
             <div className='data-container'>
               <LineChart
-                yAxis={[{ min: 0 }]}
+                yAxis={yAxisConfig()}
                 xAxis={[
                   {
                     scaleType: 'band',
                     data: usageData.map(entry => entry.datetime) ?? [],
                     valueFormatter: (date: Date) => {
-                      // Format the date as needed
                       return date.toLocaleDateString('en-US', {
+                        year: 'numeric',
                         month: 'short',
-                        day: 'numeric',
+                        // day: 'numeric',
                       })
                     },
                     tickLabelStyle: {
@@ -315,22 +320,15 @@ const Device = () => {
                         {
                           label: 'Usage',
                           data: usageData?.map(e => e.usage) ?? [],
+                          valueFormatter: v => {
+                            return (v ?? 0).toFixed(0) + ' mins'
+                          },
                           showMark: false,
                           color: colors[0],
-                          curve: 'linear',
                         },
                       ]
                     : []
                 }
-                // series={tableData.map((element, index) => {
-                //   return {
-                //     label: element.name,
-                //     data: element.data,
-                //     showMark: false,
-                //     color: colors[index],
-                //     curve: 'linear',
-                //   }
-                // })}
                 slotProps={{ legend: { hidden: true } }}
                 grid={{ vertical: true, horizontal: true }}
                 className='line-chart'
@@ -532,6 +530,7 @@ const TagsAutocomplete = ({
   const [tagName, setTagName] = useState<string>()
   const [inputValue, setInputValue] = useState('')
   const { tags, setTags, devices, setDevices } = useDevices()
+  const navigate = useNavigate()
   const { API } = useApi()
 
   useEffect(() => {
@@ -632,7 +631,6 @@ const TagsAutocomplete = ({
             .filter(t => newValue.some((val: any) => val.id == t.tagId))
             .map(tag => tag.tagId)
         : []
-    console.log(newValue, valueJson)
     const field =
       type == 'Room' ? 'roomTag' : type == 'User' ? 'userTags' : 'customTags'
     const updatedDevice = {
@@ -649,7 +647,9 @@ const TagsAutocomplete = ({
         const finalDevice = {
           ...(device as TDevice),
           ...updatedDevice,
+          location: tags.find(t => t.tagId === updatedDevice.roomTag)?.name,
         }
+        console.log(finalDevice)
         setDevice(finalDevice)
         setDevices(
           devices.map(d => (d.deviceId === res.data.deviceId ? finalDevice : d))
@@ -664,6 +664,7 @@ const TagsAutocomplete = ({
             },
           }
         )
+        navigate(location.pathname, { state: { device: finalDevice } })
       })
       .catch((err: AxiosError | any) => {
         console.error('POST request failed', err)
@@ -671,7 +672,6 @@ const TagsAutocomplete = ({
   }
 
   const handleCloseAddModal = () => {
-    console.log(tags)
     setTagName(undefined)
     setShowAdd(false)
   }
@@ -704,7 +704,7 @@ const TagsAutocomplete = ({
             <Chip label={option?.label} {...getTagProps({ index })} />
           ))
         }
-        renderOption={(props, option, { selected }) => {
+        renderOption={(props, option) => {
           return (
             <ListItem
               {...props}
@@ -783,7 +783,6 @@ const TagsAutocomplete = ({
             <ul
               {...props}
               style={{
-                // padding: '8px 0',
                 margin: 0,
                 listStyle: 'none',
               }}
