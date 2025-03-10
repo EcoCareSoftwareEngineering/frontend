@@ -1,3 +1,4 @@
+import { getTimePeriodForSelection, handleUpdateTimePeriod } from '../../utils'
 import PieCenterLabel from '../../components/PieCenterLabel/PieCenterLabel'
 import { ValidApiError, TTimeSelection } from '../../types/generalTypes'
 import LoadingModal from '../../components/LoadingModal/LoadingModal'
@@ -25,7 +26,6 @@ import {
   Box,
 } from '@mui/material'
 import './Energy.scss'
-import { getTimePeriodForSelection } from '../../utils'
 
 const colors = ['#07cb83', '#fbad53', '#ec443b']
 
@@ -48,7 +48,6 @@ const Energy = () => {
   }>({ name: '', target: undefined })
   useDeferredValue(currentGoal)
 
-  const [selectedPeriod, setSelectedPeriod] = useState<TTimeSelection>('Today')
   const [energyValues, setEnergyValues] = useState<TEnergyValues>()
   const [energyGoals, setEnergyGoals] = useState<TEnergyGoal[]>([])
   const [energySums, setEnergySums] = useState<TEnergySums>({
@@ -298,27 +297,6 @@ const Energy = () => {
             : e.target.value,
       }
     })
-  }
-
-  const handleUpdateTimePeriod = (value: TTimeSelection) => {
-    setSelectedPeriod(value)
-    const date = new Date()
-    const adjustTime = {
-      Today: () => date,
-      'Past week': () => {
-        date.setDate(date.getDate() - 6)
-        return date
-      },
-      'Past month': () => {
-        date.setMonth(date.getMonth() - 1)
-        return date
-      },
-      'Past year': () => {
-        date.setFullYear(date.getFullYear() - 1)
-        return date
-      },
-    }
-    return adjustTime[value]()
   }
 
   const handleSelect = (value: string) => {
