@@ -1,0 +1,187 @@
+@use 'variables' as *;
+
+// Styles for the report container
+.report-container {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  max-width: 800px;
+  margin: 0 auto;
+  background-color: var(--background-color);
+  color: var(--clear-text);
+
+  h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: var(--clear-text);
+    text-align: center;
+  }
+
+  h2 {
+    font-size: 20px;
+    margin-bottom: 10px;
+    color: var(--clear-text);
+  }
+
+  p {
+    font-size: 16px;
+    margin-bottom: 20px;
+    color: var(--grey-text);
+    line-height: 1.5;
+  }
+
+  // Styles for the charts
+  .chart-container {
+    width: 100%;
+    margin-bottom: 40px;
+
+    canvas {
+      max-width: 100%;
+      height: auto !important; // Ensure charts are responsive
+    }
+  }
+
+  // Styles for the download button
+  .download-button {
+    padding: 10px 20px;
+    background-color: var(--highlight-color);
+    color: var(--active-color);
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    display: block;
+    margin: 20px auto 0;
+    transition: background-color 0.3s ease, color 0.3s ease;
+
+    &:hover {
+      background-color: var(--active-color);
+      color: var(--highlight-color);
+    }
+
+    &:active {
+      transform: scale(0.98);
+      background-color: var(--active-color);
+    }
+  }
+  
+  // Styles for device fault list
+  .fault-list {
+    margin-bottom: 30px;
+    
+    .fault-item {
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      margin-bottom: 10px;
+      
+      .fault-title {
+        font-weight: bold;
+        margin-bottom: 5px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      
+      .fault-badge {
+        background-color: var(--error-color);
+        color: white;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+      }
+      
+      .fault-time {
+        color: var(--grey-text);
+        font-size: 12px;
+        margin-bottom: 5px;
+      }
+      
+      .fault-description {
+        color: var(--clear-text);
+      }
+    }
+  }
+  
+  // Styles for energy savings progress bar
+  .progress-container {
+    width: 100%;
+    height: 24px;
+    background-color: var(--background-light);
+    border-radius: 12px;
+    margin-bottom: 15px;
+    overflow: hidden;
+    
+    .progress-bar {
+      height: 100%;
+      background-color: var(--highlight-color);
+      border-radius: 12px;
+      transition: width 0.5s ease-in-out;
+    }
+  }
+  
+  // Styles for summary section
+  .summary-section {
+    background-color: var(--background-light);
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 30px;
+    
+    h2 {
+      margin-top: 0;
+    }
+    
+    .summary-highlight {
+      color: var(--highlight-color);
+      font-weight: bold;
+    }
+    
+    .error-message {
+      color: var(--error-color);
+    }
+  }
+  
+  // Media queries for responsive design
+  @media (max-width: 768px) {
+    padding: 15px;
+    
+    h1 {
+      font-size: 22px;
+    }
+    
+    h2 {
+      font-size: 18px;
+    }
+    
+    .chart-container {
+      margin-bottom: 30px;
+    }
+  }
+}
+
+// Styles for the time period selector
+.time-selector {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 25px;
+  
+  button {
+    padding: 8px 16px;
+    margin: 0 5px;
+    background: var(--background-light);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    cursor: pointer;
+    color: var(--clear-text);
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background-color: var(--border-color);
+    }
+    
+    &.active {
+      background-color: var(--highlight-color);
+      color: var(--active-color);
+      border-color: var(--highlight-color);
+    }
+  }
+}

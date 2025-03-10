@@ -1,3 +1,4 @@
+import ReportGeneration from '../../components/ReportGeneration/ReportGeneration'
 import LoadingModal from '../../components/LoadingModal/LoadingModal'
 import { TMUIAutocompleteOption } from '../../types/generalTypes'
 import { getCSSVariable, getLinkTopLevel } from '../../utils'
@@ -431,6 +432,7 @@ const Devices = () => {
           Add Device
         </Button>
       </div>
+        
       <DataGrid
         rows={devices}
         columns={columns}
