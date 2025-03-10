@@ -1,5 +1,6 @@
-import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { getLinkTopLevel } from '../../utils'
+import { useState } from 'react'
 import './Navbar.scss'
 
 const Navbar = () => {
@@ -7,12 +8,14 @@ const Navbar = () => {
   const location = useLocation()
 
   const getLinkClassName = (path: string) => {
-    if (path !== '/') {
+    if (path === window.location.pathname) {
+      return 'nav-button active'
+    } else if (path !== getLinkTopLevel()) {
       return location.pathname.includes(path)
         ? 'nav-button active'
         : 'nav-button'
-    } else if (path === '/') {
-      return location.pathname == '/' ? 'nav-button active' : 'nav-button'
+    } else {
+      return 'nav-button'
     }
   }
 
@@ -25,7 +28,7 @@ const Navbar = () => {
       <div className='navbar-header'>
         {/* Navbar Logo */}
         <div className='navbar-logo'>
-          <Link to='/'>
+          <Link to={getLinkTopLevel()}>
             Eco<p style={{ color: '#2992ff' }}>Care</p>
           </Link>
         </div>
@@ -47,8 +50,8 @@ const Navbar = () => {
       <ul className={`navbar-links ${isOpen ? 'open' : ''}`}>
         <li>
           <Link
-            to='/'
-            className={getLinkClassName('/')}
+            to={getLinkTopLevel()}
+            className={getLinkClassName(getLinkTopLevel())}
             onClick={() => setIsOpen(false)}
           >
             <div className='bar' />
@@ -58,7 +61,7 @@ const Navbar = () => {
         </li>
         <li>
           <Link
-            to='/devices'
+            to={`${getLinkTopLevel()}/devices`}
             className={getLinkClassName('/devices')}
             onClick={() => setIsOpen(false)}
           >
@@ -69,7 +72,7 @@ const Navbar = () => {
         </li>
         <li>
           <Link
-            to='/energy'
+            to={`${getLinkTopLevel()}/energy`}
             className={getLinkClassName('/energy')}
             onClick={() => setIsOpen(false)}
           >
@@ -80,7 +83,7 @@ const Navbar = () => {
         </li>
         <li>
           <Link
-            to='/automation'
+            to={`${getLinkTopLevel()}/automation`}
             className={getLinkClassName('/automation')}
             onClick={() => setIsOpen(false)}
           >
@@ -91,7 +94,7 @@ const Navbar = () => {
         </li>
         <li>
           <Link
-            to='/messages'
+            to={`${getLinkTopLevel()}/messages`}
             className={getLinkClassName('/messages')}
             onClick={() => setIsOpen(false)}
           >
@@ -102,7 +105,7 @@ const Navbar = () => {
         </li>
         <li>
           <Link
-            to='/settings'
+            to={`${getLinkTopLevel()}/settings`}
             className={getLinkClassName('/settings')}
             onClick={() => setIsOpen(false)}
           >

@@ -2,11 +2,11 @@
 
 .devices {
   .MuiDataGrid-root {
-    margin-block: 12vh 3vh;
-    width: 90%;
-    background-color: var(--grey-background);
     border: 0;
+    width: 90%;
+    margin-bottom: 3vh;
     color: var(--clear-text);
+    background-color: var(--grey-background);
 
     div div {
       .MuiDataGrid-topContainer {
@@ -24,6 +24,16 @@
               color: var(--grey-text);
             }
           }
+        }
+      }
+
+      .MuiDataGrid-row:hover {
+        background-color: var(--grey-backdrop);
+        cursor: pointer;
+
+        .device-nav {
+          color: var(--active-color) !important;
+          text-decoration: underline;
         }
       }
 
@@ -46,8 +56,8 @@
             color: var(--clear-text);
 
             &:hover {
-              color: var(--active-color);
-              text-decoration: underline;
+              // color: var(--active-color);
+              // text-decoration: underline;
             }
           }
 

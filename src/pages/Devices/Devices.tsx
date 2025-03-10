@@ -1,15 +1,15 @@
 import ReportGeneration from '../../components/ReportGeneration/ReportGeneration'
 import LoadingModal from '../../components/LoadingModal/LoadingModal'
 import { TMUIAutocompleteOption } from '../../types/generalTypes'
+import { getCSSVariable, getLinkTopLevel } from '../../utils'
 import { useDeferredValue, useEffect, useState } from 'react'
 import { useDevices } from '../../contexts/DeviceContext'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
+import { Link, useNavigate } from 'react-router-dom'
 import { useApi } from '../../contexts/ApiContext'
 import { AxiosError, AxiosResponse } from 'axios'
 import { TDevice } from '../../types/deviceTypes'
-import { getCSSVariable } from '../../utils'
 import { enqueueSnackbar } from 'notistack'
-import { Link } from 'react-router-dom'
 import './Devices.scss'
 import {
   useMediaQuery,
@@ -28,6 +28,7 @@ const Devices = () => {
   const [currentDevice, setCurrentDevice] = useState<TDevice>()
   const [isEdited, setIsEdited] = useState<boolean>(false)
   const { API, loading } = useApi()
+  const navigate = useNavigate()
 
   const offColor = getCSSVariable('--off-color')
   const onColor = getCSSVariable('--on-color')
@@ -76,8 +77,8 @@ const Devices = () => {
           enqueueSnackbar('Successfully deleted device', {
             variant: 'success',
             anchorOrigin: {
-              vertical: 'top',
-              horizontal: 'right',
+              vertical: 'bottom',
+              horizontal: 'center',
             },
           })
         }
@@ -87,6 +88,44 @@ const Devices = () => {
       })
       .finally(() => {
         setDeleteIsClosed()
+      })
+  }
+
+  // ADD device handlers
+  const [addModalIsOpen, setAddModalIsOpen] = useState<boolean>(false)
+  const [ipAddress, setIpAddress] = useState<string>('')
+
+  const handleAddModalClose = () => {
+    setAddModalIsOpen(false)
+    setIpAddress('')
+  }
+
+  const handleChangeIp = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setIpAddress(e.target.value)
+  }
+
+  const addDevice = () => {
+    API.post(
+      '/devices/',
+      { ipAddress: ipAddress },
+      'Connect new device request\n'
+    )
+      .then((response: AxiosResponse) => {
+        setDevices([...devices, { ...response.data }])
+        enqueueSnackbar('Successfully connected device', {
+          variant: 'success',
+          anchorOrigin: {
+            vertical: 'bottom',
+            horizontal: 'center',
+          },
+        })
+      })
+      .catch((err: AxiosError | any) => {
+        console.error('POST request failed', err)
+      })
+      .finally(() => {
+        setAddModalIsOpen(false)
+        setIpAddress('')
       })
   }
 
@@ -119,8 +158,8 @@ const Devices = () => {
         enqueueSnackbar('Successfully updated device', {
           variant: 'success',
           anchorOrigin: {
-            vertical: 'top',
-            horizontal: 'right',
+            vertical: 'bottom',
+            horizontal: 'center',
           },
         })
       })
@@ -159,6 +198,12 @@ const Devices = () => {
     })
   }
 
+  const handleRowClick = (params: any) => {
+    navigate(`${getLinkTopLevel()}/devices/${params.row.deviceId}`, {
+      state: { device: params.row },
+    })
+  }
+
   const columns: GridColDef[] = [
     {
       field: 'deviceId',
@@ -169,7 +214,7 @@ const Devices = () => {
           className='device-nav'
           style={{ paddingLeft: '5px' }}
           state={{ device: params.row }}
-          to={`/devices/${params.value}`}
+          to={`${getLinkTopLevel()}/devices/${params.value}`}
         >
           {params.value}
         </Link>
@@ -184,7 +229,7 @@ const Devices = () => {
         <Link
           className='device-nav'
           state={{ device: params.row }}
-          to={`/devices/${params.row.deviceId}`}
+          to={`${getLinkTopLevel()}/devices/${params.row.deviceId}`}
         >
           {params.value}
         </Link>
@@ -380,18 +425,21 @@ const Devices = () => {
   return (
     <div className='devices page-content'>
       <LoadingModal open={!devicesLoaded || loading} />
-      
-      <div className="devices-header">
-        <Typography variant="h4" className="page-title">Device Management</Typography>
-        <ReportGeneration />
+      <div className='page-header'>
+        <h2 className='page-title'>All Devices</h2>
+        <Button variant='contained' onClick={() => setAddModalIsOpen(true)}>
+          <i className='bi bi-plus-lg' />
+          Add Device
+        </Button>
       </div>
-      
+        
       <DataGrid
         rows={devices}
         columns={columns}
         paginationMode='server'
         rowCount={devices.length}
         getRowId={row => row.deviceId}
+        onRowClick={handleRowClick}
         disableRowSelectionOnClick
         disableColumnResize
         slots={{
@@ -402,6 +450,38 @@ const Devices = () => {
           ),
         }}
       />
+      <Modal
+        open={addModalIsOpen}
+        onClose={handleAddModalClose}
+        aria-labelledby='modal-modal-title'
+        aria-describedby='modal-modal-description'
+      >
+        <Box>
+          <Typography id='modal-modal-title' fontWeight='bold' variant='h5'>
+            Add Energy Goal
+          </Typography>
+          <div className='modal-table device-info'>
+            <strong className='input-field-name'>Name:</strong>
+            <TextField
+              size='small'
+              name='name'
+              value={ipAddress}
+              placeholder='192.168.0.1'
+              onChange={handleChangeIp}
+            />
+          </div>
+          <div className='event-actions actions'>
+            <Button className='cancel-btn' onClick={handleAddModalClose}>
+              <i className='bi bi-x-lg' />
+              Cancel
+            </Button>
+            <Button className='submit-btn' onClick={addDevice}>
+              <i className='bi bi-floppy' />
+              {addModalIsOpen ? 'Create' : 'Save'}
+            </Button>
+          </div>
+        </Box>
+      </Modal>
     </div>
   )
 }

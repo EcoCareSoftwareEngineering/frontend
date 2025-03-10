@@ -1,7 +1,21 @@
-export interface TEnergyData {
-  energyGenerated: TEnergyValues
-  energyUsed: TEnergyValues
-  netEnergy: TEnergyValues
+export type TEnergyValues = {
+  datetime: Date
+  netEnergy: number
+  energyUsage: number
+  energyGenerated: number
+}[]
+
+export interface TEnergySums {
+  energyGenerated: number
+  energyUsed: number
+  netEnergy: number
+  totalSum: number
 }
 
-export type TEnergyValues = number[]
+export interface TEnergyGoal {
+  goalId: number
+  name?: string
+  target: number
+  progress: boolean
+  date?: Date
+}

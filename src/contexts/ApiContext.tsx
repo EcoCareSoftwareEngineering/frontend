@@ -1,62 +1,117 @@
-import React, { createContext, useContext, useEffect, useState } from 'react'
-import axios, { AxiosError, AxiosResponse } from 'axios'
-import { TUserLogin } from '../types/generalTypes'
+import { ValidApiError } from '../types/generalTypes'
 import { enqueueSnackbar } from 'notistack'
+import axios, { AxiosError } from 'axios'
+import {
+  SetStateAction,
+  createContext,
+  useContext,
+  Dispatch,
+  useState,
+  useRef,
+  useEffect,
+} from 'react'
 
-const ApiContext = createContext<any>(null)
+interface ApiWrapper {
+  get: (
+    url: string,
+    requestDescription?: string,
+    validCodes?: number[]
+  ) => Promise<any>
+  post: (
+    url: string,
+    data: any,
+    requestDescription?: string,
+    validCodes?: number[]
+  ) => Promise<any>
+  put: (
+    url: string,
+    data: any,
+    requestDescription?: string,
+    validCodes?: number[]
+  ) => Promise<any>
+  delete: (
+    url: string,
+    requestDescription?: string,
+    validCodes?: number[]
+  ) => Promise<any>
+}
 
-const BASE_URL = 'http://localhost:5000/api'
+interface ApiContextType {
+  API: ApiWrapper
+  loading: boolean
+  isAuthenticated: boolean
+  setIsAuthenticated: Dispatch<SetStateAction<boolean>>
+  logout: () => void
+}
+
+const ApiContext = createContext<ApiContextType | undefined>(undefined)
+
+const BASE_URL = 'http://127.0.0.1:5000/api'
+// const BASE_URL = 'http://192.168.0.11:5000/api'
 
 export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [loading, setLoading] = useState(false)
-
-  const TOUCHSCREEN_LOGIN = {
-    username: 'touchscreen',
-    password: 'touchscreenPassword',
-  }
-
-  const login = (loginDetails: TUserLogin) => {
-    API.post('/accounts/login/', loginDetails).then((res: AxiosResponse) => {
-      localStorage.setItem('token', res.data.token)
-      axios.defaults.headers.common['token'] = res.data.token
-    })
-  }
+  const activeRequests = useRef(0)
 
   const logout = () => {
     localStorage.removeItem('token')
   }
 
   useEffect(() => {
-    if (!localStorage.getItem('token')) {
-      login(TOUCHSCREEN_LOGIN)
-    } else {
-      axios.defaults.headers.common['token'] = localStorage.getItem('token')
+    const token = localStorage.getItem('token')
+    if (token) {
+      axios.defaults.headers.common['token'] = token
+      setIsAuthenticated(true)
     }
   }, [])
 
-  const getAuthToken = () => localStorage.getItem('token')
+  const getIsAuthenticated = () => isAuthenticated
 
   const request = async (
     method: string,
     url: string,
     data?: any,
-    requestDescription?: string
+    requestDescription?: string,
+    validStatusCodes?: number[]
   ) => {
+    activeRequests.current++
     setLoading(true)
 
     try {
+      // First check authentication status
+      const timeout = 3000
+      const startTime = Date.now()
+      if (
+        !url.includes('login') &&
+        !url.includes('signup') &&
+        !url.includes('unlock')
+      )
+        while (!getIsAuthenticated()) {
+          if (Date.now() - startTime >= timeout) {
+            throw new Error('Failed to load authentication token')
+          }
+          await new Promise(resolve => setTimeout(resolve, 100))
+        }
+
+      // Then make request with axios
       const response = await axios({
         method,
         url: `${BASE_URL}${url}`,
         data,
-        headers: {
-          Authorization: `Bearer ${getAuthToken()}`, // Auto-add token
-          'Content-Type': 'application/json',
-        },
       })
 
       return response
     } catch (error: AxiosError | any) {
+      if (
+        validStatusCodes &&
+        Array.isArray(validStatusCodes) &&
+        validStatusCodes.length > 0 &&
+        validStatusCodes.includes(error.status)
+      ) {
+        throw new ValidApiError('API call valid failure')
+      }
+      // Show snackbar if error
       enqueueSnackbar(`${requestDescription ?? ''} ${error.message}`, {
         preventDuplicate: true,
         variant: 'error',
@@ -66,30 +121,49 @@ export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
           whiteSpace: 'pre-line',
         },
         anchorOrigin: {
-          vertical: 'top',
-          horizontal: 'right',
+          vertical: 'bottom',
+          horizontal: 'center',
         },
       })
 
       throw error
     } finally {
-      setLoading(false)
+      activeRequests.current--
+      if (activeRequests.current == 0) {
+        setLoading(false)
+      }
     }
   }
 
-  const API = {
-    get: (url: string, requestDescription?: string) =>
-      request('GET', url, null, requestDescription),
-    post: (url: string, data: any, requestDescription?: string) =>
-      request('POST', url, data, requestDescription),
-    put: (url: string, data: any, requestDescription?: string) =>
-      request('PUT', url, data, requestDescription),
-    delete: (url: string, requestDescription?: string) =>
-      request('DELETE', url, null, requestDescription),
+  const API: ApiWrapper = {
+    get: (url: string, requestDescription?: string, validCodes?: number[]) =>
+      request('GET', url, null, requestDescription, validCodes),
+    post: (
+      url: string,
+      data: any,
+      requestDescription?: string,
+      validCodes?: number[]
+    ) => request('POST', url, data, requestDescription, validCodes),
+    put: (
+      url: string,
+      data: any,
+      requestDescription?: string,
+      validCodes?: number[]
+    ) => request('PUT', url, data, requestDescription, validCodes),
+    delete: (url: string, requestDescription?: string, validCodes?: number[]) =>
+      request('DELETE', url, null, requestDescription, validCodes),
   }
 
   return (
-    <ApiContext.Provider value={{ API, loading, login, logout }}>
+    <ApiContext.Provider
+      value={{
+        API,
+        loading,
+        isAuthenticated,
+        setIsAuthenticated,
+        logout,
+      }}
+    >
       {children}
     </ApiContext.Provider>
   )

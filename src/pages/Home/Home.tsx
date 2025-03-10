@@ -2,6 +2,7 @@ import PieCenterLabel from '../../components/PieCenterLabel/PieCenterLabel'
 import Dropdown from '../../components/Dropdown/Dropdown'
 import { LineChart } from '@mui/x-charts/LineChart'
 import { PieChart } from '@mui/x-charts/PieChart'
+import { useEffect } from 'react'
 import './Home.scss'
 
 const colors = ['#07cb83', '#fbad53', '#ec443b', '#8440a0']
@@ -41,6 +42,15 @@ const Home = () => {
     console.log('Selected:', value)
   }
 
+  // Fix viewport size update styles
+  useEffect(() => {
+    if (localStorage.getItem('starting')) {
+      document.body.style.display = 'none'
+      setTimeout(() => (document.body.style.display = 'block'), 50)
+      localStorage.removeItem('starting')
+    }
+  }, [])
+
   return (
     <div className='home page-content'>
       {/* Container for device usage */}
@@ -48,7 +58,7 @@ const Home = () => {
         <div className='header'>
           Device Usage by Location
           <Dropdown
-            options={['Today', 'This week', 'This month', 'This year']}
+            options={['Today', 'Past week', 'Past month', 'Past year']}
             onSelect={handleSelect}
           />
         </div>
@@ -110,6 +120,12 @@ const Home = () => {
       </div>
 
       {/* Container for various metrics */}
+      <div className='item-container'>
+        <div className='item' />
+        <div className='item' />
+        <div className='item' />
+        <div className='item' />
+      </div>
     </div>
   )
 }
