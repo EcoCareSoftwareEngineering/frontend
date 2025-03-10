@@ -1,6 +1,11 @@
 import LoadingModal from '../../components/LoadingModal/LoadingModal'
 import { useLocation, useParams, useNavigate } from 'react-router-dom'
-import { TDevice, TDeviceState, TTag } from '../../types/deviceTypes'
+import {
+  TDevice,
+  TDeviceState,
+  TDeviceUsage,
+  TTag,
+} from '../../types/deviceTypes'
 import { useDevices } from '../../contexts/DeviceContext'
 import Dropdown from '../../components/Dropdown/Dropdown'
 import { LineChart } from '@mui/x-charts/LineChart'
@@ -63,7 +68,7 @@ const Device = () => {
   const [stateValue, setStateValue] = useState<string>('')
   const [currentStateValue, setCurrentStateValue] = useState<string>('')
   const [powerVisualState, setPowerVisualState] = useState<'On' | 'Off'>('Off')
-  const [usageData, setUsageData] = useState<number[]>([])
+  const [usageData, setUsageData] = useState<TDeviceUsage[]>([])
   const [timeRange, setTimeRange] = useState<string>('Today')
   const deviceId = id ? parseInt(id, 10) : null
   const location = useLocation()
@@ -100,17 +105,29 @@ const Device = () => {
   ) => {
     const period = getTimePeriodForSelection(timeSelection)
     API.get(
-      `/devices/usage/?rangeStart=${
+      `/devices/usage/?deviceId=${id}&rangeStart=${
         startDate.toISOString().split('T')[0]
       }&rangeEnd=${endDate.toISOString().split('T')[0]}&timePeriod=${period}`
     )
+      .then((res: AxiosResponse) => {
+        setUsageData(
+          res.data[0].usage.map((e: any) => ({
+            datetime: new Date(e.datetime),
+            usage: e.usage,
+          }))
+        )
+      })
+      .catch((err: AxiosError | any) => {
+        console.error('GET request failed', err)
+      })
   }
 
   useEffect(() => {
     if (deviceId && isAuthenticated) {
-      handleSelect('Past year')
+      handleSelect('Today')
     }
   }, [deviceId, isAuthenticated, timeRange])
+  console.log(usageData)
 
   const handleSelect = (value: string) => {
     if (['Today', 'Past week', 'Past month', 'Past year'].includes(value)) {
@@ -273,16 +290,47 @@ const Device = () => {
             </div>
             <div className='data-container'>
               <LineChart
-                xAxis={[{ data: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] }]}
-                series={tableData.map((element, index) => {
-                  return {
-                    label: element.name,
-                    data: element.data,
-                    showMark: false,
-                    color: colors[index],
-                    curve: 'linear',
-                  }
-                })}
+                yAxis={[{ min: 0 }]}
+                xAxis={[
+                  {
+                    scaleType: 'band',
+                    data: usageData.map(entry => entry.datetime) ?? [],
+                    valueFormatter: (date: Date) => {
+                      // Format the date as needed
+                      return date.toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                      })
+                    },
+                    tickLabelStyle: {
+                      angle: 45,
+                      textAnchor: 'start',
+                      fontSize: 12,
+                    },
+                  },
+                ]}
+                series={
+                  usageData
+                    ? [
+                        {
+                          label: 'Usage',
+                          data: usageData?.map(e => e.usage) ?? [],
+                          showMark: false,
+                          color: colors[0],
+                          curve: 'linear',
+                        },
+                      ]
+                    : []
+                }
+                // series={tableData.map((element, index) => {
+                //   return {
+                //     label: element.name,
+                //     data: element.data,
+                //     showMark: false,
+                //     color: colors[index],
+                //     curve: 'linear',
+                //   }
+                // })}
                 slotProps={{ legend: { hidden: true } }}
                 grid={{ vertical: true, horizontal: true }}
                 className='line-chart'

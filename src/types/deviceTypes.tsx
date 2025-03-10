@@ -26,3 +26,8 @@ export interface TTag {
   tagId: number
   name: string
 }
+
+export interface TDeviceUsage {
+  datetime: Date
+  usage: number
+}
