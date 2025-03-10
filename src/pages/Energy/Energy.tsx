@@ -538,7 +538,6 @@ const Energy = () => {
                   scaleType: 'band',
                   data: energyValues?.map(entry => entry.datetime) ?? [],
                   valueFormatter: (date: Date) => {
-                    // Format the date as needed
                     return date.toLocaleDateString('en-US', {
                       month: 'short',
                       day: 'numeric',
