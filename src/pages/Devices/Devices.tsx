@@ -4,11 +4,11 @@ import { getCSSVariable, getLinkTopLevel } from '../../utils'
 import { useDeferredValue, useEffect, useState } from 'react'
 import { useDevices } from '../../contexts/DeviceContext'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
+import { Link, useNavigate } from 'react-router-dom'
 import { useApi } from '../../contexts/ApiContext'
 import { AxiosError, AxiosResponse } from 'axios'
 import { TDevice } from '../../types/deviceTypes'
 import { enqueueSnackbar } from 'notistack'
-import { Link } from 'react-router-dom'
 import './Devices.scss'
 import {
   useMediaQuery,
@@ -27,6 +27,7 @@ const Devices = () => {
   const [currentDevice, setCurrentDevice] = useState<TDevice>()
   const [isEdited, setIsEdited] = useState<boolean>(false)
   const { API, loading } = useApi()
+  const navigate = useNavigate()
 
   const offColor = getCSSVariable('--off-color')
   const onColor = getCSSVariable('--on-color')
@@ -193,6 +194,12 @@ const Devices = () => {
       } else if (!isEdited) setIsEdited(true)
 
       return updatedDevice
+    })
+  }
+
+  const handleRowClick = (params: any) => {
+    navigate(`${getLinkTopLevel()}/devices/${params.row.deviceId}`, {
+      state: { device: params.row },
     })
   }
 
@@ -430,6 +437,7 @@ const Devices = () => {
         paginationMode='server'
         rowCount={devices.length}
         getRowId={row => row.deviceId}
+        onRowClick={handleRowClick}
         disableRowSelectionOnClick
         disableColumnResize
         slots={{

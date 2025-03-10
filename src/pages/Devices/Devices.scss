@@ -27,6 +27,16 @@
         }
       }
 
+      .MuiDataGrid-row:hover {
+        background-color: var(--grey-backdrop);
+        cursor: pointer;
+
+        .device-nav {
+          color: var(--active-color) !important;
+          text-decoration: underline;
+        }
+      }
+
       .MuiDataGrid-virtualScrollerContent {
         [data-field='status'],
         [data-field='faultStatus'] {
@@ -46,8 +56,8 @@
             color: var(--clear-text);
 
             &:hover {
-              color: var(--active-color);
-              text-decoration: underline;
+              // color: var(--active-color);
+              // text-decoration: underline;
             }
           }
 
