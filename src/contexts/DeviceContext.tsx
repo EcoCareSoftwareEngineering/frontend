@@ -14,6 +14,7 @@ interface DeviceContextType {
   tags: TTag[]
   devices: TDevice[]
   devicesLoaded: boolean
+  setTags: Dispatch<SetStateAction<TTag[]>>
   setDevices: Dispatch<SetStateAction<TDevice[]>>
   refreshDevices: () => void
 }
@@ -75,6 +76,7 @@ export const DeviceProvider = ({ children }: { children: React.ReactNode }) => {
         devicesLoaded: !isLoading,
         setDevices: setDevicesList,
         refreshDevices: fetchDevices,
+        setTags: setTagsList,
       }}
     >
       {children}
