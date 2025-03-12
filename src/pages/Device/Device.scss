@@ -17,12 +17,20 @@
         margin-bottom: 1.5rem;
         flex-wrap: wrap;
         display: flex;
-        height: 100%;
         gap: 1.5rem;
         width: 93%;
 
+        &.container-1 {
+          flex: 2;
+        }
+
+        &.container-2 {
+          flex: 1;
+        }
+
         h5,
         p {
+          text-align: left;
           font-weight: bold;
           color: var(--clear-text);
         }
@@ -44,6 +52,11 @@
             border-radius: 10px;
             --Paper-shadow: none !important;
             background-color: var(--grey-background);
+
+            .MuiBox-root {
+              padding-top: 10px !important;
+              padding: 14px;
+            }
           }
 
           .MuiInputBase-root {
@@ -190,7 +203,7 @@
 
       .usage-header {
         justify-content: space-between;
-        padding: 12px 1.5% 16px 2%;
+        padding: 7px 1.5% 16px 2%;
         align-items: center;
         position: absolute;
         display: flex;
