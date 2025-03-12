@@ -41,7 +41,7 @@ export const getTimePeriodForSelection = (
     case 'Past month':
       return 'daily'
     case 'Past week':
-      return 'hourly'
+      return 'daily'
     default:
       return 'hourly'
   }
