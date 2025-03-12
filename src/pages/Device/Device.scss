@@ -253,6 +253,18 @@
   }
 }
 
+.MuiAutocomplete-popper {
+  .MuiPaper-root {
+    .delete-btn {
+      i {
+        padding-right: 8px;
+      }
+
+      background-color: var(--off-color) !important;
+      color: var(--clear-text) !important;
+    }
+  }
+}
 @media (max-width: 768px) {
   .device {
     .page-header {

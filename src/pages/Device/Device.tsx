@@ -11,19 +11,20 @@ import { enqueueSnackbar } from 'notistack'
 import './Device.scss'
 import {
   FormControlLabel,
+  ListItemIcon,
+  ListItemText,
+  Autocomplete,
   Typography,
   TextField,
+  Checkbox,
+  ListItem,
+  Tooltip,
   Button,
   Switch,
   Paper,
-  Box,
-  Autocomplete,
-  Chip,
-  Checkbox,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
   Modal,
+  Chip,
+  Box,
 } from '@mui/material'
 
 import {
@@ -32,29 +33,17 @@ import {
   getTimePeriodForSelection,
   handleUpdateTimePeriod,
 } from '../../utils'
+
 import {
   TMUIAutocompleteOption,
   SetState,
   TTimeSelection,
 } from '../../types/generalTypes'
 
-type TUsageData = {
-  deviceId: number
-  usage: { datetime: string; usage: number }[]
-}
-
-const colors = [getCSSVariable('--active-color')]
-
-const tableData = [
-  {
-    name: 'Living Room',
-    usage: 0.32,
-    data: [523, 178, 342, 610, 295, 438, 219, 587, 224, 678],
-  },
-]
+const lineColor = getCSSVariable('--active-color')
 
 const Device = () => {
-  const { tags, devices, setDevices, devicesLoaded } = useDevices()
+  const { devices, setDevices, devicesLoaded } = useDevices()
   const { API, isAuthenticated, loading } = useApi()
   const { id } = useParams()
 
@@ -311,7 +300,7 @@ const Device = () => {
                             return (v ?? 0).toFixed(0) + ' mins'
                           },
                           showMark: false,
-                          color: colors[0],
+                          color: lineColor,
                         },
                       ]
                     : []
@@ -519,8 +508,6 @@ const TagsAutocomplete = ({
           : options.find(
               (option: TMUIAutocompleteOption) => option?.id === device?.roomTag
             ) || null
-      console.log(device)
-      console.log('New value', newValue)
       setValue(newValue)
     }
   }, [options])
@@ -563,12 +550,21 @@ const TagsAutocomplete = ({
     )
       .then((res: AxiosResponse) => {
         const createdTag = {
-          tagId: res.data.id,
+          tagId: res.data.tagId,
           name: tagName,
           tagType: type,
         } as TTag
-        setTags([...tags, createdTag])
-        enqueueSnackbar('Successfully created new tag', {
+        const updatedTags = [...tags, createdTag]
+        setTags(updatedTags)
+        setOptions(
+          updatedTags
+            .filter(tag => tag.tagType === type)
+            .map((tag: TTag) => ({
+              id: tag.tagId,
+              label: tag.name,
+            }))
+        )
+        enqueueSnackbar(`Successfully created ${type.toLowerCase()} tag`, {
           variant: 'success',
           anchorOrigin: {
             vertical: 'bottom',
@@ -581,6 +577,27 @@ const TagsAutocomplete = ({
       })
       .finally(() => {
         handleCloseAddModal()
+      })
+  }
+
+  const handleDeleteTag = (tag: TMUIAutocompleteOption) => {
+    console.log(tag, options)
+    API.delete(
+      `/tags/${tag?.id}/`,
+      `Delete existing ${type.toLowerCase()} tag request\n`
+    )
+      .then((_: AxiosResponse) => {
+        setTags(tags.filter(t => t.tagId !== tag?.id))
+        enqueueSnackbar(`Successfully deleted ${type.toLowerCase()} tag`, {
+          variant: 'success',
+          anchorOrigin: {
+            vertical: 'bottom',
+            horizontal: 'center',
+          },
+        })
+      })
+      .catch((err: AxiosError | any) => {
+        console.error('DELETE request failed', err)
       })
   }
 
@@ -679,6 +696,18 @@ const TagsAutocomplete = ({
                 />
               </ListItemIcon>
               <ListItemText primary={option?.label} />
+              <Tooltip title={`Delete ${type.toLowerCase()} tag`}>
+                <Button
+                  className='delete-btn'
+                  onClick={event => {
+                    event.stopPropagation()
+                    handleDeleteTag(option)
+                  }}
+                >
+                  <i className='bi bi-trash' />
+                  Delete
+                </Button>
+              </Tooltip>
             </ListItem>
           )
         }}
