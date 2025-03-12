@@ -293,7 +293,12 @@ const Devices = () => {
         return (
           <div className='actions'>
             <Tooltip title='Edit device'>
-              <Button onClick={() => handleClickEdit(params.row)}>
+              <Button
+                onClick={event => {
+                  event.stopPropagation()
+                  handleClickEdit(params.row)
+                }}
+              >
                 <i className='bi bi-pencil' />
               </Button>
             </Tooltip>
@@ -371,7 +376,12 @@ const Devices = () => {
               </Box>
             </Modal>
             <Tooltip title='Delete device'>
-              <Button onClick={() => handleClickDelete(params.row)}>
+              <Button
+                onClick={event => {
+                  event.stopPropagation()
+                  handleClickDelete(params.row)
+                }}
+              >
                 <i className='bi bi-trash' />
               </Button>
             </Tooltip>
@@ -432,7 +442,7 @@ const Devices = () => {
           Add Device
         </Button>
       </div>
-        
+
       <DataGrid
         rows={devices}
         columns={columns}
