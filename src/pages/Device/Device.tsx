@@ -228,7 +228,7 @@ const Device = () => {
       </div>
 
       <div className='device-data-container'>
-        <div className='device-grid-container'>
+        <div className='device-grid-container container-1'>
           {/* Device Properties */}
           <div className='device-grid-item'>
             <Paper elevation={2} className='device-properties'>
@@ -247,16 +247,8 @@ const Device = () => {
                       <td>{device?.description || 'No description'}</td>
                     </tr>
                     <tr>
-                      <th>Location</th>
-                      <td>{device?.location || 'Not assigned'}</td>
-                    </tr>
-                    <tr>
                       <th>IP Address</th>
                       <td>{device?.ipAddress || 'Not available'}</td>
-                    </tr>
-                    <tr>
-                      <th>Unlocked</th>
-                      <td>{device?.unlocked ? 'Yes' : 'No'}</td>
                     </tr>
                     <tr>
                       <th>PIN Enabled</th>
@@ -332,7 +324,7 @@ const Device = () => {
           </div>
         </div>
 
-        <div className='device-grid-container'>
+        <div className='device-grid-container container-2'>
           {/* Device Tags */}
           <div className='device-grid-item'>
             <Paper elevation={2} className='device-tags'>
@@ -341,19 +333,19 @@ const Device = () => {
                   Device Tags
                 </Typography>
 
-                <Typography variant='h6'>Location</Typography>
+                {/* <Typography variant='h6'>Location</Typography> */}
                 <TagsAutocomplete
                   device={device}
                   setDevice={setDevice}
                   type='Room'
                 />
-                <Typography variant='h6'>User Tags</Typography>
+                {/* <Typography variant='h6'>User Tags</Typography> */}
                 <TagsAutocomplete
                   device={device}
                   setDevice={setDevice}
                   type='User'
                 />
-                <Typography variant='h6'>Custom Tags</Typography>
+                {/* <Typography variant='h6'>Custom Tags</Typography> */}
                 <TagsAutocomplete
                   device={device}
                   setDevice={setDevice}
@@ -471,26 +463,6 @@ const Device = () => {
                       <th>IP Address</th>
                       <td>{device?.ipAddress || 'Not available'}</td>
                     </tr>
-                    <tr>
-                      <th>Unlocked</th>
-                      <td>{device?.unlocked ? 'Yes' : 'No'}</td>
-                    </tr>
-                    <tr>
-                      <th>PIN Enabled</th>
-                      <td>{device?.pinEnabled ? 'Yes' : 'No'}</td>
-                    </tr>
-                    <tr>
-                      <th>Fault Status</th>
-                      <td
-                        className={
-                          device?.faultStatus === 'Ok'
-                            ? 'status-ok'
-                            : 'status-fault'
-                        }
-                      >
-                        {device?.faultStatus}
-                      </td>
-                    </tr>
                   </tbody>
                 </table>
               </Box>
@@ -511,51 +483,47 @@ const TagsAutocomplete = ({
   device: TDevice | undefined
   type: string
 }) => {
-  const [value, setValue] = useState<any>(
-    device && type != 'Room'
-      ? device[type == 'Custom' ? 'customTags' : 'userTags'].map(
-          (tag: TTag) => ({
-            label: tag.name,
-            id: tag.tagId,
-          })
-        )
-      : { id: device?.roomTag, label: device?.location ?? '' }
-  )
+  const { tags, setTags, devices, setDevices } = useDevices()
   const [showAdd, setShowAdd] = useState<boolean>(false)
   const [tagName, setTagName] = useState<string>()
   const [inputValue, setInputValue] = useState('')
-  const { tags, setTags, devices, setDevices } = useDevices()
   const navigate = useNavigate()
   const { API } = useApi()
 
+  const [value, setValue] = useState<any>(type == 'Room' ? null : [])
+  const [options, setOptions] = useState<any>()
+
   useEffect(() => {
-    if (device)
-      switch (type) {
-        case 'Custom':
-          setValue(
-            device.customTags.map((tag: TTag) => ({
-              label: tag.name,
-              id: tag.tagId,
-            }))
-          )
-          return
-        case 'User':
-          setValue(
-            device.userTags.map((tag: TTag) => ({
-              label: tag.name,
-              id: tag.tagId,
-            }))
-          )
-          return
-        default:
-          setValue(
-            device.roomTag
-              ? { id: device.roomTag, label: device.location ?? '' }
-              : undefined
-          )
-          return
-      }
-  }, [device])
+    if (!device || !tags) return
+    setOptions(
+      tags
+        .filter(tag => tag.tagType === type)
+        .map((tag: TTag) => ({
+          id: tag.tagId,
+          label: tag.name,
+        }))
+    )
+  }, [device, tags, type])
+
+  useEffect(() => {
+    if (options && device) {
+      const newValue =
+        type !== 'Room'
+          ? (device[type === 'Custom' ? 'customTags' : 'userTags']
+              .map(tagId =>
+                options.find(
+                  (option: TMUIAutocompleteOption) => option?.id === tagId
+                )
+              )
+              .filter(Boolean) as TMUIAutocompleteOption[])
+          : options.find(
+              (option: TMUIAutocompleteOption) => option?.id === device?.roomTag
+            ) || null
+      console.log(device)
+      console.log('New value', newValue)
+      setValue(newValue)
+    }
+  }, [options])
 
   const isTagSelected = (option: TMUIAutocompleteOption) => {
     if (option == null) return false
@@ -580,7 +548,6 @@ const TagsAutocomplete = ({
       newValue = option
     }
 
-    setValue(newValue)
     handleUpdateDeviceTags(newValue)
   }
 
@@ -627,7 +594,7 @@ const TagsAutocomplete = ({
             .map(tag => tag.tagId)
         : []
     const field =
-      type == 'Room' ? 'roomTag' : type == 'User' ? 'userTags' : 'customTags'
+      type == 'Room' ? 'roomTag' : type == 'User' ? 'userTag' : 'customTag'
     const updatedDevice = {
       ...device,
       [field]: valueJson,
@@ -641,10 +608,9 @@ const TagsAutocomplete = ({
         setValue(newValue)
         const finalDevice = {
           ...(device as TDevice),
-          ...updatedDevice,
+          ...res.data,
           location: tags.find(t => t.tagId === updatedDevice.roomTag)?.name,
         }
-        console.log(finalDevice)
         setDevice(finalDevice)
         setDevices(
           devices.map(d => (d.deviceId === res.data.deviceId ? finalDevice : d))
@@ -676,16 +642,12 @@ const TagsAutocomplete = ({
       <Autocomplete
         multiple={type != 'Room'}
         id='tags-autocomplete'
-        options={tags
-          .filter(tag => tag.tagType === type)
-          .map((tag: TTag) => ({
-            label: tag.name,
-            id: tag.tagId,
-          }))}
         value={value}
-        onChange={(_, option) => handleTagSelected(option)}
+        options={options}
         inputValue={inputValue}
+        onChange={(_, option) => handleTagSelected(option)}
         onInputChange={(_, newInputValue) => setInputValue(newInputValue)}
+        isOptionEqualToValue={(option, value) => option.id === value.id}
         getOptionLabel={option => (option ? option.label : '')}
         renderInput={params => (
           <TextField

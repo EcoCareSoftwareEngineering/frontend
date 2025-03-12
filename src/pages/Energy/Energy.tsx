@@ -1,6 +1,8 @@
+import DownloadReportButton from '../../components/ReportGeneration/ReportGeneration'
 import { getTimePeriodForSelection, handleUpdateTimePeriod } from '../../utils'
 import PieCenterLabel from '../../components/PieCenterLabel/PieCenterLabel'
 import { ValidApiError, TTimeSelection } from '../../types/generalTypes'
+import ReportComponent from '../../components/ReportGeneration/version2'
 import LoadingModal from '../../components/LoadingModal/LoadingModal'
 import { useDeferredValue, useEffect, useState } from 'react'
 import Dropdown from '../../components/Dropdown/Dropdown'
@@ -424,10 +426,7 @@ const Energy = () => {
       <LoadingModal open={loading} />
       <div className='page-header'>
         <h2 className='page-title'>Energy Data</h2>
-        <Button variant='contained'>
-          <i className='bi bi-clipboard-data' />
-          Generate Report
-        </Button>
+        <DownloadReportButton />
       </div>
       {/* Container for device usage */}
       <div className='energy-data page-card'>
