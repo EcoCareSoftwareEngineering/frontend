@@ -292,7 +292,6 @@ const ConnectDeviceModal = ({
         setIpAddress('')
       })
   }
-  console.log(devices)
 
   return (
     <Modal open={addModalIsOpen} onClose={handleAddModalClose}>

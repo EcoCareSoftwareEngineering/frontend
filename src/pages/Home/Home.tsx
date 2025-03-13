@@ -38,9 +38,7 @@ const tableData = [
 // Device faults?
 
 const Home = () => {
-  const handleSelect = (value: string) => {
-    console.log('Selected:', value)
-  }
+  const handleSelect = (value: string) => {}
 
   // Fix viewport size update styles
   useEffect(() => {
