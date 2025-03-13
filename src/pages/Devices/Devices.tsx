@@ -47,17 +47,10 @@ const Devices = () => {
 
   // ADD device handlers
   const [addModalIsOpen, setAddModalIsOpen] = useState<boolean>(false)
-  const [ipAddress, setIpAddress] = useState<string>('')
 
   const handleAddModalClose = () => {
     setAddModalIsOpen(false)
-    setIpAddress('')
   }
-
-  const handleChangeIp = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setIpAddress(e.target.value)
-  }
-
   // UPDATE device handlers
   const [showEdit, setShowEdit] = useState<boolean>(false)
   const handleClickEdit = (row: TDevice) => {

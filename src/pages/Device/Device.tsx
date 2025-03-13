@@ -10,7 +10,6 @@ import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { enqueueSnackbar } from 'notistack'
 import './Device.scss'
 import {
-  FormControlLabel,
   ListItemIcon,
   ListItemText,
   Autocomplete,
@@ -20,12 +19,10 @@ import {
   ListItem,
   Tooltip,
   Button,
-  Switch,
   Paper,
   Modal,
   Chip,
   Box,
-  ButtonGroup,
 } from '@mui/material'
 
 import {
@@ -576,7 +573,7 @@ const TagsAutocomplete = ({
   const { API } = useApi()
 
   const [value, setValue] = useState<any>(type == 'Room' ? null : [])
-  const [options, setOptions] = useState<any>()
+  const [options, setOptions] = useState<any>([])
 
   useEffect(() => {
     if (!device || !tags) return
