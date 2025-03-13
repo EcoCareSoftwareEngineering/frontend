@@ -101,7 +101,6 @@ const Automation = () => {
   }
 
   const handleNewStateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log(e)
     if (!selectedDevice) return
     setNewState([
       {

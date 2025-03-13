@@ -9,7 +9,6 @@ import Navbar from '../Navbar/Navbar'
 
 const AppRouter = () => {
   const location = useLocation()
-  //   console.log(location.pathname)
 
   return (
     <>
