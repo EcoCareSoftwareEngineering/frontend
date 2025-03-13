@@ -411,16 +411,7 @@ const DownloadReportButton = ({ devices }: { devices: TDevice[] }) => {
   })
   const [energyGoals, setEnergyGoals] = useState<TEnergyGoal[]>([])
   const [deviceUsage, setDeviceUsage] = useState<AllDevicesUsage>([])
-
   const { API, isAuthenticated } = useApi()
-
-  // Fetch data on component mount
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetchData('Today')
-      fetchEnergyGoal()
-    }
-  }, [isAuthenticated])
 
   // Fetch data function
   const fetchData = (timeSelection: TTimeSelection) => {
@@ -542,6 +533,8 @@ const DownloadReportButton = ({ devices }: { devices: TDevice[] }) => {
 
   const generatePDF = async () => {
     if (!reportRef.current) return
+    fetchData('Today')
+    fetchEnergyGoal()
 
     try {
       const canvas = await html2canvas(reportRef.current, {
