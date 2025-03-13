@@ -21,11 +21,11 @@
         width: 93%;
 
         &.container-1 {
-          flex: 2;
+          flex: 3;
         }
 
         &.container-2 {
-          flex: 1;
+          flex: 2;
         }
 
         h5,
@@ -36,6 +36,7 @@
         }
 
         h6 {
+          font-size: 1rem;
           text-align: left;
           padding-left: 10px;
           margin-block: 10px 5px;
@@ -67,7 +68,6 @@
             .MuiButtonBase-root {
               background-color: var(--grey-backdrop) !important;
               color: var(--clear-text) !important;
-              // color: white !important;
 
               svg {
                 color: var(--grey-text) !important;
@@ -75,12 +75,63 @@
             }
           }
 
+          .state-name {
+            border-block: 1px solid var(--grey-text);
+            padding-block: 3%;
+            font-weight: bold;
+          }
+
+          .control-buttons {
+            justify-content: space-between;
+            padding-top: 2%;
+            display: flex;
+
+            button {
+              color: var(--clear-text);
+              padding-block: 7px;
+              border-radius: 6px;
+              font-weight: bold;
+            }
+
+            .update-btn {
+              background-color: var(--active-color);
+            }
+
+            .switch-state-btn {
+              background-color: var(--grey-text);
+
+              &:disabled {
+                background-color: var(--background-color);
+                color: var(--grey-text);
+                font-weight: normal;
+              }
+
+              &.next i {
+                padding-inline: 10px 0px;
+              }
+
+              &.prev i {
+                padding-inline: 0px 10px;
+              }
+            }
+          }
+
           .properties-table,
           .device-control,
+          .control-table,
+          .actions-table,
           .tags-table {
             width: 100%;
             color: var(--clear-text);
             border-collapse: collapse;
+
+            &.properties-table td {
+              padding-block: 2.5%;
+            }
+
+            &.control-table td {
+              padding-block: 2%;
+            }
 
             th,
             td {
@@ -98,14 +149,26 @@
               width: 40%;
             }
 
-            .status-ok {
-              color: #4caf50;
-              font-weight: 600;
-            }
+            .status {
+              width: fit-content;
+              color: var(--clear-text);
+              padding-inline: 8px 12px;
+              padding-block: 1px;
+              border-radius: 10px;
 
-            .status-fault {
-              color: #f44336;
-              font-weight: 600;
+              i {
+                padding-right: 6px;
+              }
+
+              &.status-ok {
+                background-color: var(--on-color);
+                font-weight: 600;
+              }
+
+              &.status-fault {
+                background-color: var(--off-color);
+                font-weight: 600;
+              }
             }
           }
 
@@ -224,9 +287,9 @@
       .data-container {
         position: absolute;
         padding: 0px;
-        height: 93%;
+        height: 94%;
         width: 102%;
-        top: 23px;
+        top: 15px;
         left: 0;
 
         .MuiChartsAxis-line {
@@ -247,6 +310,45 @@
 
         .MuiAreaElement-root {
           opacity: 0.1;
+        }
+      }
+    }
+
+    .device-actions {
+      .buttons {
+        flex-direction: column;
+        display: flex;
+        gap: 15px;
+
+        button {
+          width: 100%;
+          font-size: 0.95rem;
+          border-radius: 8px;
+          padding-block: 10px;
+          font-weight: bolder;
+          color: var(--clear-text);
+        }
+
+        .power-btn {
+          &.on {
+            background-color: var(--off-color);
+          }
+
+          &.off {
+            background-color: var(--on-color);
+          }
+        }
+
+        .unlock-btn {
+          background-color: var(--grey-text);
+        }
+
+        .edit-btn {
+          background-color: var(--active-color);
+        }
+
+        .delete-btn {
+          background-color: var(--off-color);
         }
       }
     }
