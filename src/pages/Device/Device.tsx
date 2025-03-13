@@ -199,7 +199,7 @@ const Device = () => {
 
   const yAxisConfig = () => {
     const yValues = usageData.map(d => d.usage)
-    const maxY = yValues.length > 0 ? Math.max(...yValues) : 10
+    const maxY = yValues.length > 0 ? Math.max(...yValues) * 1.2 : 10
     return [{ min: 0, max: Math.max(maxY, 10) }]
   }
 
@@ -674,7 +674,6 @@ const TagsAutocomplete = ({
   }
 
   const handleDeleteTag = (tag: TMUIAutocompleteOption) => {
-    console.log(tag, options)
     API.delete(
       `/tags/${tag?.id}/`,
       `Delete existing ${type.toLowerCase()} tag request\n`
