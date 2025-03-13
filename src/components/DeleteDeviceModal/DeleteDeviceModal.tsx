@@ -3,10 +3,10 @@ import { useDevices } from '../../contexts/DeviceContext'
 import { useApi } from '../../contexts/ApiContext'
 import { TDevice } from '../../types/deviceTypes'
 import { Dispatch, SetStateAction } from 'react'
-import { enqueueSnackbar } from 'notistack'
-import { Navigate, useNavigate } from 'react-router-dom'
-import { AxiosError } from 'axios'
+import { useNavigate } from 'react-router-dom'
 import { getLinkTopLevel } from '../../utils'
+import { enqueueSnackbar } from 'notistack'
+import { AxiosError } from 'axios'
 
 interface DeleteDeviceModalProps {
   showDelete: boolean
