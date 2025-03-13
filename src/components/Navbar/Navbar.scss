@@ -38,12 +38,15 @@
 }
 
 .navbar-links {
-  list-style: none;
   padding: 0;
   margin: 0;
   width: 100%;
-  height: 100vh;
+  height: 86vh;
+  display: flex;
+  list-style: none;
   overflow-y: auto;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .bi {
@@ -65,6 +68,10 @@
   text-decoration: none;
   border-radius: 0 10px 10px 0;
   transition: background-color 0.2s, color 0.2s;
+}
+
+.logout-button {
+  margin-block: 10px 20px;
 }
 
 .nav-button.active {

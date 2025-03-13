@@ -48,72 +48,88 @@ const Navbar = () => {
 
       {/* Main Navigation Links */}
       <ul className={`navbar-links ${isOpen ? 'open' : ''}`}>
-        <li>
-          <Link
-            to={getLinkTopLevel()}
-            className={getLinkClassName(getLinkTopLevel())}
-            onClick={() => setIsOpen(false)}
-          >
-            <div className='bar' />
-            <i className='bi bi-house' />
-            Overview
-          </Link>
-        </li>
-        <li>
-          <Link
-            to={`${getLinkTopLevel()}/devices`}
-            className={getLinkClassName('/devices')}
-            onClick={() => setIsOpen(false)}
-          >
-            <div className='bar' />
-            <i className='bi bi-pc-display-horizontal' />
-            Devices
-          </Link>
-        </li>
-        <li>
-          <Link
-            to={`${getLinkTopLevel()}/energy`}
-            className={getLinkClassName('/energy')}
-            onClick={() => setIsOpen(false)}
-          >
-            <div className='bar' />
-            <i className='bi bi-graph-up' />
-            Energy
-          </Link>
-        </li>
-        <li>
-          <Link
-            to={`${getLinkTopLevel()}/automation`}
-            className={getLinkClassName('/automation')}
-            onClick={() => setIsOpen(false)}
-          >
-            <div className='bar' />
-            <i className='bi bi-calendar-week' />
-            Automation
-          </Link>
-        </li>
-        <li>
-          <Link
-            to={`${getLinkTopLevel()}/messages`}
-            className={getLinkClassName('/messages')}
-            onClick={() => setIsOpen(false)}
-          >
-            <div className='bar' />
-            <i className='bi bi-chat-dots' />
-            Messages
-          </Link>
-        </li>
-        <li>
-          <Link
-            to={`${getLinkTopLevel()}/settings`}
-            className={getLinkClassName('/settings')}
-            onClick={() => setIsOpen(false)}
-          >
-            <div className='bar' />
-            <i className='bi bi-gear' />
-            Settings
-          </Link>
-        </li>
+        <div className='main-links'>
+          <li>
+            <Link
+              to={getLinkTopLevel()}
+              className={getLinkClassName(getLinkTopLevel())}
+              onClick={() => setIsOpen(false)}
+            >
+              <div className='bar' />
+              <i className='bi bi-house' />
+              Overview
+            </Link>
+          </li>
+          <li>
+            <Link
+              to={`${getLinkTopLevel()}/devices`}
+              className={getLinkClassName('/devices')}
+              onClick={() => setIsOpen(false)}
+            >
+              <div className='bar' />
+              <i className='bi bi-pc-display-horizontal' />
+              Devices
+            </Link>
+          </li>
+          <li>
+            <Link
+              to={`${getLinkTopLevel()}/energy`}
+              className={getLinkClassName('/energy')}
+              onClick={() => setIsOpen(false)}
+            >
+              <div className='bar' />
+              <i className='bi bi-graph-up' />
+              Energy
+            </Link>
+          </li>
+          <li>
+            <Link
+              to={`${getLinkTopLevel()}/automation`}
+              className={getLinkClassName('/automation')}
+              onClick={() => setIsOpen(false)}
+            >
+              <div className='bar' />
+              <i className='bi bi-calendar-week' />
+              Automation
+            </Link>
+          </li>
+          <li>
+            <Link
+              to={`${getLinkTopLevel()}/messages`}
+              className={getLinkClassName('/messages')}
+              onClick={() => setIsOpen(false)}
+            >
+              <div className='bar' />
+              <i className='bi bi-chat-dots' />
+              Messages
+            </Link>
+          </li>
+          <li>
+            <Link
+              to={`${getLinkTopLevel()}/settings`}
+              className={getLinkClassName('/settings')}
+              onClick={() => setIsOpen(false)}
+            >
+              <div className='bar' />
+              <i className='bi bi-gear' />
+              Settings
+            </Link>
+          </li>
+        </div>
+        <div>
+          <li>
+            <Link to={`/`} className='nav-button logout-button'>
+              <i
+                className={`bi ${
+                  getLinkTopLevel().includes('local')
+                    ? 'bi-power'
+                    : 'bi-box-arrow-left'
+                }`}
+              />
+              {getLinkTopLevel().includes('local') ? 'Power Off' : 'Sign Out'}
+            </Link>
+          </li>
+        </div>
       </ul>
     </nav>
   )
