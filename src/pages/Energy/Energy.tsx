@@ -2,10 +2,10 @@ import DownloadReportButton from '../../components/ReportGeneration/ReportGenera
 import { getTimePeriodForSelection, handleUpdateTimePeriod } from '../../utils'
 import PieCenterLabel from '../../components/PieCenterLabel/PieCenterLabel'
 import { ValidApiError, TTimeSelection } from '../../types/generalTypes'
-import ReportComponent from '../../components/ReportGeneration/version2'
 import LoadingModal from '../../components/LoadingModal/LoadingModal'
 import { useDeferredValue, useEffect, useState } from 'react'
 import Dropdown from '../../components/Dropdown/Dropdown'
+import { useDevices } from '../../contexts/DeviceContext'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import { BarChart, PieChart } from '@mui/x-charts/'
 import { useApi } from '../../contexts/ApiContext'
@@ -60,6 +60,7 @@ const Energy = () => {
   })
 
   const { API, loading, isAuthenticated } = useApi()
+  const { devices } = useDevices()
 
   const fetchEnergyData = (
     startDate: Date,
@@ -421,7 +422,7 @@ const Energy = () => {
       <LoadingModal open={loading} />
       <div className='page-header'>
         <h2 className='page-title'>Energy Data</h2>
-        <DownloadReportButton />
+        <DownloadReportButton devices={devices} />
       </div>
       {/* Container for device usage */}
       <div className='energy-data page-card'>

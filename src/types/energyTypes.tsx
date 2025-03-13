@@ -16,6 +16,7 @@ export interface TEnergyGoal {
   goalId: number
   name?: string
   target: number
-  progress: boolean
+  progress: number
+  completed: boolean
   date?: Date
 }
