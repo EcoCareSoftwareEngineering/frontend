@@ -9,7 +9,7 @@ import { useApi } from '../../contexts/ApiContext'
 import { AxiosError, AxiosResponse } from 'axios'
 import { TDevice } from '../../types/deviceTypes'
 import { enqueueSnackbar } from 'notistack'
-import { useState } from 'react'
+import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import './Devices.scss'
 import {
   useMediaQuery,
@@ -19,13 +19,20 @@ import {
   Button,
   Modal,
   Box,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
 } from '@mui/material'
 
 const Devices = () => {
   const [selectedDevice, setSelectedDevice] = useState<TDevice | null>(null)
-  const { devices, devicesLoaded, setDevices } = useDevices()
-  const { API, loading } = useApi()
+  const { devices, devicesLoaded } = useDevices()
   const navigate = useNavigate()
+  const { loading } = useApi()
 
   const offColor = getCSSVariable('--off-color')
   const onColor = getCSSVariable('--on-color')
@@ -49,31 +56,6 @@ const Devices = () => {
 
   const handleChangeIp = (e: React.ChangeEvent<HTMLInputElement>) => {
     setIpAddress(e.target.value)
-  }
-
-  const addDevice = () => {
-    API.post(
-      '/devices/',
-      { ipAddress: ipAddress },
-      'Connect new device request\n'
-    )
-      .then((response: AxiosResponse) => {
-        setDevices([...devices, { ...response.data }])
-        enqueueSnackbar('Successfully connected device', {
-          variant: 'success',
-          anchorOrigin: {
-            vertical: 'bottom',
-            horizontal: 'center',
-          },
-        })
-      })
-      .catch((err: AxiosError | any) => {
-        console.error('POST request failed', err)
-      })
-      .finally(() => {
-        setAddModalIsOpen(false)
-        setIpAddress('')
-      })
   }
 
   // UPDATE device handlers
@@ -207,7 +189,7 @@ const Devices = () => {
         <h2 className='page-title'>All Devices</h2>
         <Button variant='contained' onClick={() => setAddModalIsOpen(true)}>
           <i className='bi bi-plus-lg' />
-          Add Device
+          Connect Device
         </Button>
       </div>
 
@@ -241,34 +223,139 @@ const Devices = () => {
           ),
         }}
       />
-      <Modal open={addModalIsOpen} onClose={handleAddModalClose}>
-        <Box>
-          <Typography id='modal-modal-title' fontWeight='bold' variant='h5'>
-            Add Energy Goal
-          </Typography>
-          <div className='modal-table device-info'>
-            <strong className='input-field-name'>Name:</strong>
-            <TextField
-              size='small'
-              name='name'
-              value={ipAddress}
-              placeholder='192.168.0.1'
-              onChange={handleChangeIp}
-            />
-          </div>
-          <div className='event-actions actions'>
-            <Button className='cancel-btn' onClick={handleAddModalClose}>
-              <i className='bi bi-x-lg' />
-              Cancel
-            </Button>
-            <Button className='submit-btn' onClick={addDevice}>
-              <i className='bi bi-floppy' />
-              {addModalIsOpen ? 'Create' : 'Save'}
-            </Button>
-          </div>
-        </Box>
-      </Modal>
+      <ConnectDeviceModal
+        addModalIsOpen={addModalIsOpen}
+        setAddModalIsOpen={setAddModalIsOpen}
+        handleAddModalClose={handleAddModalClose}
+      />
     </div>
+  )
+}
+
+interface ConnectDeviceModal {
+  addModalIsOpen: boolean
+  handleAddModalClose: () => void
+  setAddModalIsOpen: Dispatch<SetStateAction<boolean>>
+}
+
+const ConnectDeviceModal = ({
+  addModalIsOpen,
+  setAddModalIsOpen,
+  handleAddModalClose,
+}: ConnectDeviceModal) => {
+  const [unconnectedDevices, setUnconnectedDevices] = useState<TDevice[]>([])
+  const [ipAddress, setIpAddress] = useState<string>('')
+  const { devices, setDevices } = useDevices()
+  const { API } = useApi()
+
+  const handleChangeIp = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setIpAddress(e.target.value)
+  }
+
+  useEffect(() => {
+    if (addModalIsOpen)
+      API.get('/devices/new/', 'Fetch un-connected devices request')
+        .then((response: AxiosResponse) => {
+          const data =
+            response.data.length > 0
+              ? response.data
+              : [{ name: 'No un-connected devices found' }]
+          setUnconnectedDevices(data)
+        })
+        .catch((err: AxiosError) => {
+          console.error('GET request failed', err)
+        })
+  }, [addModalIsOpen])
+
+  const addDevice = () => {
+    API.post(
+      '/devices/',
+      { ipAddress: ipAddress },
+      'Connect new device request\n'
+    )
+      .then((res: AxiosResponse) => {
+        setDevices([
+          ...devices,
+          {
+            ...res.data,
+            customTags: res.data.customTags ?? [],
+            userTags: res.data.userTags ?? [],
+            roomTag: res.data.roomTag ?? undefined,
+          },
+        ])
+        enqueueSnackbar('Successfully connected device', {
+          variant: 'success',
+          anchorOrigin: {
+            vertical: 'bottom',
+            horizontal: 'center',
+          },
+        })
+      })
+      .catch((err: AxiosError | any) => {
+        console.error('POST request failed', err)
+      })
+      .finally(() => {
+        setAddModalIsOpen(false)
+        setIpAddress('')
+      })
+  }
+  console.log(devices)
+
+  return (
+    <Modal open={addModalIsOpen} onClose={handleAddModalClose}>
+      <Box className='unconnected-devices-modal'>
+        <Typography id='modal-modal-title' fontWeight='bold' variant='h5'>
+          Connect a New Device
+        </Typography>
+        <TableContainer component={Paper}>
+          <Table aria-label='simple table'>
+            <TableHead>
+              <TableRow>
+                <TableCell>Name</TableCell>
+                <TableCell align='right'>Description</TableCell>
+                <TableCell align='right'>IP Address</TableCell>
+                <TableCell align='right'>Status</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {unconnectedDevices.map(row => (
+                <TableRow
+                  key={row.name}
+                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                >
+                  <TableCell component='th' scope='row'>
+                    {row.name}
+                  </TableCell>
+                  <TableCell align='right'>{row.description}</TableCell>
+                  <TableCell align='right'>{row.ipAddress}</TableCell>
+                  <TableCell align='right'>{row.status}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+        <div className='modal-table device-info'>
+          <strong className='input-field-name'>IP Address:</strong>
+          <TextField
+            size='small'
+            name='name'
+            value={ipAddress}
+            placeholder='192.168.0.1'
+            onChange={handleChangeIp}
+          />
+        </div>
+        <div className='event-actions actions'>
+          <Button className='cancel-btn' onClick={handleAddModalClose}>
+            <i className='bi bi-x-lg' />
+            Cancel
+          </Button>
+          <Button className='submit-btn' onClick={addDevice}>
+            <i className='bi bi-floppy' />
+            {addModalIsOpen ? 'Create' : 'Save'}
+          </Button>
+        </div>
+      </Box>
+    </Modal>
   )
 }
 

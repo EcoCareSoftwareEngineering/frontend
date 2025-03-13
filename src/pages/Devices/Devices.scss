@@ -143,6 +143,20 @@
   }
 }
 
+.unconnected-devices-modal {
+  width: fit-content !important;
+
+  .MuiTableContainer-root {
+    background-color: var(--grey-background);
+    margin-block: 20px;
+
+    .MuiTableCell-root {
+      border-bottom: 1px solid var(--grey-text);
+      color: var(--clear-text);
+    }
+  }
+}
+
 @media (max-width: 768px) {
   .devices {
     .MuiDataGrid-root {
