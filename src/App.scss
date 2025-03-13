@@ -70,7 +70,7 @@
     border-radius: 20px;
     transform: translate(-50%, -50%);
     background-color: var(--background-color);
-    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 1);
 
     .modal-details-container {
       margin-block: 15px;
@@ -153,7 +153,7 @@
   }
 
   .MuiBackdrop-root {
-    background-color: rgba(0, 0, 0, 0.1);
+    background-color: rgba(0, 0, 0, 0.25);
   }
 }
 
