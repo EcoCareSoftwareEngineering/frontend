@@ -121,8 +121,8 @@ export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
           whiteSpace: 'pre-line',
         },
         anchorOrigin: {
-          vertical: 'top',
-          horizontal: 'right',
+          vertical: 'bottom',
+          horizontal: 'center',
         },
       })
 

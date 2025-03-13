@@ -11,8 +11,8 @@ export interface TDevice {
   state: TDeviceState[]
   status: 'On' | 'Off'
   faultStatus: 'Ok' | 'Fault'
-  customTags: TTag[]
-  userTags: TTag[]
+  customTags: number[]
+  userTags: number[]
 }
 
 export interface TDeviceState {
@@ -25,4 +25,9 @@ export interface TTag {
   tagType: 'Room' | 'User' | 'Custom'
   tagId: number
   name: string
+}
+
+export interface TDeviceUsage {
+  datetime: Date
+  usage: number
 }

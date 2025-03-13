@@ -1,3 +1,5 @@
+import { TTimeSelection, TTimePeriod } from './types/generalTypes'
+
 // Get SCSS variable by name
 export const getCSSVariable = (variable: string) => {
   return getComputedStyle(document.documentElement)
@@ -10,16 +12,37 @@ export const getLinkTopLevel = () => {
   return location.pathname.includes('local') ? '/local' : '/remote'
 }
 
-// Generate array of objects with Dates for all hour increments from start to end
-export const generateAllDates = (startDate: Date, endDate: Date) => {
-  const result = []
-  const current = new Date(startDate)
-  current.setHours(0, 0, 0, 0)
-
-  while (current < endDate) {
-    result.push(new Date(current).toISOString())
-    current.setHours(current.getHours() + 1)
+export const handleUpdateTimePeriod = (value: TTimeSelection) => {
+  const date = new Date()
+  const adjustTime = {
+    Today: () => date,
+    'Past week': () => {
+      date.setDate(date.getDate() - 6)
+      return date
+    },
+    'Past month': () => {
+      date.setMonth(date.getMonth() - 1)
+      return date
+    },
+    'Past year': () => {
+      date.setFullYear(date.getFullYear() - 1)
+      return date
+    },
   }
+  return adjustTime[value]()
+}
 
-  return result
+export const getTimePeriodForSelection = (
+  range: TTimeSelection
+): TTimePeriod => {
+  switch (range) {
+    case 'Past year':
+      return 'monthly'
+    case 'Past month':
+      return 'daily'
+    case 'Past week':
+      return 'daily'
+    default:
+      return 'hourly'
+  }
 }

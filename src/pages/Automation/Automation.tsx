@@ -1,5 +1,6 @@
 import { TAutomation, TAutomationEvent } from '../../types/automationTypes'
 import LoadingModal from '../../components/LoadingModal/LoadingModal'
+import { TMUIAutocompleteOption } from '../../types/generalTypes'
 import { TDevice, TDeviceState } from '../../types/deviceTypes'
 import * as generalTypes from '../../types/generalTypes'
 import { useDevices } from '../../contexts/DeviceContext'
@@ -32,9 +33,7 @@ import {
   Box,
 } from '@mui/material'
 
-const getDeviceOptions = (
-  devices: TDevice[]
-): generalTypes.TMUIAutocompleteOption[] => {
+const getDeviceOptions = (devices: TDevice[]): TMUIAutocompleteOption[] => {
   return devices.map(device => ({
     label: `Device ${device.deviceId}: ${device.name}`,
     id: device.deviceId,
@@ -273,8 +272,8 @@ const AddAutomationModal = ({
         enqueueSnackbar('Successfully added automation', {
           variant: 'success',
           anchorOrigin: {
-            vertical: 'top',
-            horizontal: 'right',
+            vertical: 'bottom',
+            horizontal: 'center',
           },
         })
       })
@@ -287,12 +286,7 @@ const AddAutomationModal = ({
   }
 
   return (
-    <Modal
-      open={addModalIsOpen}
-      onClose={handleAddModalClose}
-      aria-labelledby='modal-modal-title'
-      aria-describedby='modal-modal-description'
-    >
+    <Modal open={addModalIsOpen} onClose={handleAddModalClose}>
       <Box>
         <Typography id='modal-modal-title' fontWeight='bold' variant='h4'>
           Add Automation
@@ -373,8 +367,8 @@ const UpdateAutomationModal = ({
         enqueueSnackbar('Successfully updated automation', {
           variant: 'success',
           anchorOrigin: {
-            vertical: 'top',
-            horizontal: 'right',
+            vertical: 'bottom',
+            horizontal: 'center',
           },
         })
       })
@@ -387,12 +381,7 @@ const UpdateAutomationModal = ({
   }
 
   return (
-    <Modal
-      open={updateModalIsOpen}
-      onClose={handleUpdateModalClose}
-      aria-labelledby='modal-modal-title'
-      aria-describedby='modal-modal-description'
-    >
+    <Modal open={updateModalIsOpen} onClose={handleUpdateModalClose}>
       <Box>
         <Typography id='modal-modal-title' fontWeight='bold' variant='h4'>
           Edit Automation
@@ -582,12 +571,7 @@ const AutomationDetailsModal = ({
   }
 
   return (
-    <Modal
-      open={detailsModalIsOpen}
-      onClose={handleDetailsModalClose}
-      aria-labelledby='modal-modal-title'
-      aria-describedby='modal-modal-description'
-    >
+    <Modal open={detailsModalIsOpen} onClose={handleDetailsModalClose}>
       <Box>
         <Typography id='modal-modal-title' fontWeight='bold' variant='h5'>
           Automation Event Details
@@ -648,8 +632,8 @@ const DeleteAutomationModal = ({
           enqueueSnackbar('Successfully deleted automation', {
             variant: 'success',
             anchorOrigin: {
-              vertical: 'top',
-              horizontal: 'right',
+              vertical: 'bottom',
+              horizontal: 'center',
             },
           })
         }
@@ -663,12 +647,7 @@ const DeleteAutomationModal = ({
   }
 
   return (
-    <Modal
-      open={deleteModalIsOpen}
-      onClose={() => setDeleteModalIsOpen(false)}
-      aria-labelledby='modal-modal-title'
-      aria-describedby='modal-modal-description'
-    >
+    <Modal open={deleteModalIsOpen} onClose={() => setDeleteModalIsOpen(false)}>
       <Box>
         <Typography id='modal-modal-title' fontWeight='bold' variant='h6'>
           Delete Automation from System?

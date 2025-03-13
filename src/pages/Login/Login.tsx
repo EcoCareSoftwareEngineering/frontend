@@ -119,8 +119,8 @@ const Login = () => {
           whiteSpace: 'pre-line',
         },
         anchorOrigin: {
-          vertical: 'top',
-          horizontal: 'right',
+          vertical: 'bottom',
+          horizontal: 'center',
         },
       })
       return
@@ -139,8 +139,8 @@ const Login = () => {
           whiteSpace: 'pre-line',
         },
         anchorOrigin: {
-          vertical: 'top',
-          horizontal: 'right',
+          vertical: 'bottom',
+          horizontal: 'center',
         },
       })
       setUserCredentials({

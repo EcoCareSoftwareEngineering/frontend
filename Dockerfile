@@ -3,7 +3,7 @@ WORKDIR /frontend
 
 # Copy only the package json and lockfile
 COPY package.json bun.lockb ./
-RUN bun install --frozen-lockfile
+RUN bun install
 
 # Now copy the rest of the files
 COPY . .

@@ -1,4 +1,391 @@
 @use '/variables' as *;
 
 .device {
+  &.page-content {
+    display: flex;
+    flex-direction: column;
+    color: var(--clear-text);
+
+    .device-data-container {
+      flex-direction: column;
+      align-items: center;
+      display: flex;
+      height: 89%;
+      width: 100%;
+
+      .device-grid-container {
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        display: flex;
+        gap: 1.5rem;
+        width: 93%;
+
+        &.container-1 {
+          flex: 3;
+        }
+
+        &.container-2 {
+          flex: 2;
+        }
+
+        h5,
+        p {
+          text-align: left;
+          font-weight: bold;
+          color: var(--clear-text);
+        }
+
+        h6 {
+          font-size: 1rem;
+          text-align: left;
+          padding-left: 10px;
+          margin-block: 10px 5px;
+          color: var(--clear-text);
+        }
+
+        .device-grid-item {
+          background-color: var(--grey-background);
+          border-radius: 10px;
+          min-width: 300px;
+          flex: 1;
+
+          .MuiPaper-root {
+            border-radius: 10px;
+            --Paper-shadow: none !important;
+            background-color: var(--grey-background);
+
+            .MuiBox-root {
+              padding-top: 10px !important;
+              padding: 14px;
+            }
+          }
+
+          .MuiInputBase-root {
+            input {
+              color: var(--clear-text) !important;
+            }
+
+            .MuiButtonBase-root {
+              background-color: var(--grey-backdrop) !important;
+              color: var(--clear-text) !important;
+
+              svg {
+                color: var(--grey-text) !important;
+              }
+            }
+          }
+
+          .state-name {
+            border-block: 1px solid var(--grey-text);
+            padding-block: 3%;
+            font-weight: bold;
+          }
+
+          .control-buttons {
+            justify-content: space-between;
+            padding-top: 2%;
+            display: flex;
+
+            button {
+              color: var(--clear-text);
+              padding-block: 7px;
+              border-radius: 6px;
+              font-weight: bold;
+            }
+
+            .update-btn {
+              background-color: var(--active-color);
+            }
+
+            .switch-state-btn {
+              background-color: var(--grey-text);
+
+              &:disabled {
+                background-color: var(--background-color);
+                color: var(--grey-text);
+                font-weight: normal;
+              }
+
+              &.next i {
+                padding-inline: 10px 0px;
+              }
+
+              &.prev i {
+                padding-inline: 0px 10px;
+              }
+            }
+          }
+
+          .properties-table,
+          .device-control,
+          .control-table,
+          .actions-table,
+          .tags-table {
+            width: 100%;
+            color: var(--clear-text);
+            border-collapse: collapse;
+
+            &.properties-table td {
+              padding-block: 2.5%;
+            }
+
+            &.control-table td {
+              padding-block: 2%;
+            }
+
+            th,
+            td {
+              padding: 0.5rem;
+              text-align: left;
+              border-bottom: 1px solid var(--grey-text);
+
+              input {
+                color: var(--clear-text);
+              }
+            }
+
+            th {
+              font-weight: 600;
+              width: 40%;
+            }
+
+            .status {
+              width: fit-content;
+              color: var(--clear-text);
+              padding-inline: 8px 12px;
+              padding-block: 1px;
+              border-radius: 10px;
+
+              i {
+                padding-right: 6px;
+              }
+
+              &.status-ok {
+                background-color: var(--on-color);
+                font-weight: 600;
+              }
+
+              &.status-fault {
+                background-color: var(--off-color);
+                font-weight: 600;
+              }
+            }
+          }
+
+          .state-values {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin: 1rem 0;
+          }
+
+          .current-state,
+          .new-state {
+            padding: 0.5rem;
+            // background-color: #f5f5f5;
+            border-radius: 4px;
+          }
+
+          .tags-section {
+            margin-bottom: 1rem;
+          }
+
+          .no-tags {
+            color: var(--grey-text);
+            font-style: italic;
+            margin: 0.5rem 0;
+          }
+        }
+      }
+
+      .add-tag-btn {
+        background-color: var(--background-color) !important;
+      }
+
+      .device-usage-container {
+        color: var(--grey-text);
+        display: flex;
+        flex-direction: column;
+        margin-inline: 6%;
+        font-weight: bold;
+        width: 93%;
+        height: 60%;
+        margin-bottom: 3vh;
+        border-radius: 10px;
+        padding-block: 10px;
+        text-align: left;
+        text-indent: 20px;
+        font-size: 1.1rem;
+        background-color: var(--grey-background);
+
+        .header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          width: 100%;
+
+          .dropdown {
+            margin-inline-end: 1%;
+          }
+        }
+
+        .data-container {
+          position: relative;
+          display: flex;
+          width: 100%;
+          height: 100%;
+
+          .line-chart {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            right: 0;
+
+            .MuiChartsAxis-line {
+              stroke: var(--background-color);
+            }
+
+            .MuiChartsAxis-tickLabel {
+              fill: var(--grey-text);
+            }
+
+            .MuiChartsAxis-tick {
+              fill: var(--grey-background);
+              display: 'none';
+            }
+          }
+        }
+      }
+    }
+
+    // Device usage graph
+    .device-usage {
+      position: relative;
+      flex: 2 !important;
+      padding-left: 1.5%;
+
+      .usage-header {
+        justify-content: space-between;
+        padding: 7px 1.5% 16px 2%;
+        align-items: center;
+        position: absolute;
+        display: flex;
+        width: 97%;
+        left: 0;
+
+        h5 {
+          margin: 0;
+          font-size: 1.5rem;
+          font-weight: bold;
+        }
+
+        .dropdown {
+          min-width: 120px;
+        }
+      }
+
+      .data-container {
+        position: absolute;
+        padding: 0px;
+        height: 94%;
+        width: 102%;
+        top: 15px;
+        left: 0;
+
+        .MuiChartsAxis-line {
+          stroke: var(--background-color);
+        }
+
+        .MuiChartsAxis-tickLabel {
+          fill: var(--grey-text);
+        }
+
+        .MuiChartsAxis-tick {
+          fill: var(--grey-background);
+        }
+
+        .MuiLineElement-root {
+          stroke-width: 2px;
+        }
+
+        .MuiAreaElement-root {
+          opacity: 0.1;
+        }
+      }
+    }
+
+    .device-actions {
+      .buttons {
+        flex-direction: column;
+        display: flex;
+        gap: 15px;
+
+        button {
+          width: 100%;
+          font-size: 0.95rem;
+          border-radius: 8px;
+          padding-block: 10px;
+          font-weight: bolder;
+          color: var(--clear-text);
+        }
+
+        .power-btn {
+          &.on {
+            background-color: var(--off-color);
+          }
+
+          &.off {
+            background-color: var(--on-color);
+          }
+        }
+
+        .unlock-btn {
+          background-color: var(--grey-text);
+        }
+
+        .edit-btn {
+          background-color: var(--active-color);
+        }
+
+        .delete-btn {
+          background-color: var(--off-color);
+        }
+      }
+    }
+  }
+}
+
+.MuiAutocomplete-popper {
+  .MuiPaper-root {
+    .delete-btn {
+      i {
+        padding-right: 8px;
+      }
+
+      background-color: var(--off-color) !important;
+      color: var(--clear-text) !important;
+    }
+  }
+}
+@media (max-width: 768px) {
+  .device {
+    .page-header {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto;
+      gap: 15px;
+
+      .header-left {
+        display: none;
+      }
+
+      .page-title {
+        grid-row: 1;
+      }
+
+      .header-right {
+        grid-row: 2;
+        justify-content: center;
+      }
+    }
+  }
 }
