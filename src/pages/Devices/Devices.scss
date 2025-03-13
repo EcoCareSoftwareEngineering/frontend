@@ -54,11 +54,6 @@
             cursor: pointer;
             font-weight: bold;
             color: var(--clear-text);
-
-            &:hover {
-              // color: var(--active-color);
-              // text-decoration: underline;
-            }
           }
 
           .power-cell {
@@ -144,6 +139,20 @@
       display: flex;
       align-items: center;
       justify-content: center;
+    }
+  }
+}
+
+.unconnected-devices-modal {
+  width: fit-content !important;
+
+  .MuiTableContainer-root {
+    background-color: var(--grey-background);
+    margin-block: 20px;
+
+    .MuiTableCell-root {
+      border-bottom: 1px solid var(--grey-text);
+      color: var(--clear-text);
     }
   }
 }

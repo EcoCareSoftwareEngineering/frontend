@@ -1,97 +1,85 @@
-import { useLocation, useParams, useNavigate } from 'react-router-dom'
 import { TDevice, TDeviceUsage, TTag } from '../../types/deviceTypes'
 import LoadingModal from '../../components/LoadingModal/LoadingModal'
+import { useParams, useNavigate } from 'react-router-dom'
 import { useDevices } from '../../contexts/DeviceContext'
 import Dropdown from '../../components/Dropdown/Dropdown'
 import { LineChart } from '@mui/x-charts/LineChart'
 import { useApi } from '../../contexts/ApiContext'
 import { AxiosError, AxiosResponse } from 'axios'
-import { useEffect, useState } from 'react'
+import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { enqueueSnackbar } from 'notistack'
 import './Device.scss'
 import {
-  FormControlLabel,
-  Typography,
-  TextField,
-  Button,
-  Switch,
-  Paper,
-  Box,
-  Autocomplete,
-  Chip,
-  Checkbox,
-  ListItem,
   ListItemIcon,
   ListItemText,
+  Autocomplete,
+  Typography,
+  TextField,
+  Checkbox,
+  ListItem,
+  Tooltip,
+  Button,
+  Paper,
   Modal,
+  Chip,
+  Box,
 } from '@mui/material'
 
 import {
-  getCSSVariable,
-  getLinkTopLevel,
   getTimePeriodForSelection,
   handleUpdateTimePeriod,
+  getLinkTopLevel,
+  getCSSVariable,
 } from '../../utils'
+
 import {
-  TMUIAutocompleteOption,
   SetState,
   TTimeSelection,
+  TMUIAutocompleteOption,
 } from '../../types/generalTypes'
+import DeleteDeviceModal from '../../components/DeleteDeviceModal/DeleteDeviceModal'
+import EditDeviceModal from '../../components/EditDeviceModal/EditDeviceModal'
 
-type TUsageData = {
-  deviceId: number
-  usage: { datetime: string; usage: number }[]
-}
-
-const colors = [getCSSVariable('--active-color')]
-
-const tableData = [
-  {
-    name: 'Living Room',
-    usage: 0.32,
-    data: [523, 178, 342, 610, 295, 438, 219, 587, 224, 678],
-  },
-]
+const lineColor = getCSSVariable('--active-color')
 
 const Device = () => {
-  const { tags, devices, setDevices, devicesLoaded } = useDevices()
+  const { devices, setDevices, devicesLoaded } = useDevices()
   const { API, isAuthenticated, loading } = useApi()
   const { id } = useParams()
 
   const [device, setDevice] = useState<TDevice>()
   const [updating, setUpdating] = useState<boolean>(false)
   const [stateValue, setStateValue] = useState<string>('')
+  const [stateIndex, setStateIndex] = useState<number>(0)
   const [currentStateValue, setCurrentStateValue] = useState<string>('')
   const [powerVisualState, setPowerVisualState] = useState<'On' | 'Off'>('Off')
   const [usageData, setUsageData] = useState<TDeviceUsage[]>([])
   const [timeRange, setTimeRange] = useState<string>('Today')
   const deviceId = id ? parseInt(id, 10) : null
-  const location = useLocation()
   const navigate = useNavigate()
 
+  const [showEdit, setShowEdit] = useState<boolean>(false)
+  const [showDelete, setShowDelete] = useState<boolean>(false)
+  const setDeleteIsClosed = () => setShowDelete(false)
+  const handleClickDelete = () => {
+    setShowDelete(true)
+    setDevice(device)
+  }
+
   useEffect(() => {
-    const cachedDevice = location.state?.device
-    if (cachedDevice && cachedDevice.deviceId === deviceId) {
-      setDevice(cachedDevice)
-      setPowerVisualState(cachedDevice.status)
-      if (cachedDevice.state && cachedDevice.state.length > 0) {
-        const value = String(cachedDevice.state[0].value || '')
-        setStateValue(value)
-        setCurrentStateValue(value)
-      }
-    } else if (deviceId && devices.length > 0) {
+    if (deviceId && devices.length > 0) {
       const foundDevice = devices.find(device => device.deviceId === deviceId)
       if (foundDevice) {
         setDevice(foundDevice)
         setPowerVisualState(foundDevice.status)
         if (foundDevice.state && foundDevice.state.length > 0) {
-          const value = String(foundDevice.state[0].value || '')
+          const value = String(foundDevice.state[stateIndex].value || '')
           setStateValue(value)
           setCurrentStateValue(value)
         }
       }
     }
-  }, [deviceId, location.state])
+  }, [deviceId, devices])
 
   const fetchDeviceUsage = (
     startDate: Date,
@@ -146,7 +134,7 @@ const Device = () => {
         }
         setDevice(updatedDevice)
         if (device && device.state.length > 0) {
-          setStateValue(response.data.state[0].value)
+          setStateValue(response.data.state[stateIndex].value)
         }
         setPowerVisualState(response.data.status)
         setDevices(
@@ -156,13 +144,13 @@ const Device = () => {
         )
 
         enqueueSnackbar('Device state updated successfully', {
+          preventDuplicate: true,
           variant: 'success',
           anchorOrigin: {
             vertical: 'bottom',
             horizontal: 'center',
           },
         })
-        navigate(location.pathname, { state: { device: updatedDevice } })
       })
       .catch((err: AxiosError | any) => {
         console.error('PUT request failed', err)
@@ -189,7 +177,11 @@ const Device = () => {
     if (device) {
       const devicePutData = {
         ...device,
-        state: [{ ...device?.state[0], value: getFormattedStateValue() }],
+        state: device.state.map((state, index) =>
+          index === stateIndex
+            ? { ...state, value: getFormattedStateValue() }
+            : state
+        ),
       }
       updateDevice(devicePutData)
     }
@@ -251,20 +243,58 @@ const Device = () => {
                       <td>{device?.ipAddress || 'Not available'}</td>
                     </tr>
                     <tr>
-                      <th>PIN Enabled</th>
-                      <td>{device?.pinEnabled ? 'Yes' : 'No'}</td>
+                      <th>Location</th>
+                      <td>{device?.location || 'Not assigned'}</td>
+                    </tr>
+                    <tr>
+                      <th>Power Status</th>
+                      <td>
+                        <div
+                          className={`status ${
+                            device?.status === 'On'
+                              ? 'status-ok'
+                              : 'status-fault'
+                          }`}
+                        >
+                          <i
+                            className={`bi ${
+                              device?.status === 'On'
+                                ? 'bi-battery-full'
+                                : 'bi-power'
+                            }`}
+                          />
+                          {device?.status}
+                        </div>
+                      </td>
                     </tr>
                     <tr>
                       <th>Fault Status</th>
-                      <td
-                        className={
-                          device?.faultStatus === 'Ok'
-                            ? 'status-ok'
-                            : 'status-fault'
-                        }
-                      >
-                        {device?.faultStatus}
+                      <td>
+                        <div
+                          className={`status ${
+                            device?.faultStatus === 'Ok'
+                              ? 'status-ok'
+                              : 'status-fault'
+                          }`}
+                        >
+                          <i
+                            className={`bi ${
+                              device?.faultStatus === 'Ok'
+                                ? 'bi-check-lg'
+                                : 'bi-x-lg'
+                            }`}
+                          />
+                          {device?.faultStatus}
+                        </div>
                       </td>
+                    </tr>
+                    <tr>
+                      <th>Unlocked</th>
+                      <td>{device?.unlocked ? 'Yes' : 'No'}</td>
+                    </tr>
+                    <tr>
+                      <th>PIN Enabled</th>
+                      <td>{device?.pinEnabled ? 'Yes' : 'No'}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -311,7 +341,7 @@ const Device = () => {
                             return (v ?? 0).toFixed(0) + ' mins'
                           },
                           showMark: false,
-                          color: colors[0],
+                          color: lineColor,
                         },
                       ]
                     : []
@@ -329,23 +359,26 @@ const Device = () => {
           <div className='device-grid-item'>
             <Paper elevation={2} className='device-tags'>
               <Box p={3}>
-                <Typography variant='h5' gutterBottom>
+                <Typography
+                  variant='h5'
+                  gutterBottom
+                  sx={{ paddingBottom: '15px' }}
+                >
                   Device Tags
                 </Typography>
 
-                {/* <Typography variant='h6'>Location</Typography> */}
                 <TagsAutocomplete
                   device={device}
                   setDevice={setDevice}
                   type='Room'
                 />
-                {/* <Typography variant='h6'>User Tags</Typography> */}
+                <Typography variant='h6'>User & Custom Tags</Typography>
                 <TagsAutocomplete
                   device={device}
                   setDevice={setDevice}
                   type='User'
                 />
-                {/* <Typography variant='h6'>Custom Tags</Typography> */}
+                <div style={{ height: '10px' }} />
                 <TagsAutocomplete
                   device={device}
                   setDevice={setDevice}
@@ -359,76 +392,91 @@ const Device = () => {
           <div className='device-grid-item'>
             <Paper elevation={2} className='device-control'>
               <Box p={3}>
-                <Typography variant='h5' gutterBottom>
+                <Typography
+                  variant='h5'
+                  gutterBottom
+                  sx={{ paddingBottom: '6px' }}
+                >
                   Device Control
                 </Typography>
-                <table className='properties-table'>
-                  <tbody>
-                    <tr>
-                      <th>Power</th>
-                      <td>
-                        <FormControlLabel
-                          control={
-                            <Switch
-                              checked={powerVisualState === 'On'}
-                              onChange={handleUpdateDevicePower}
-                              disabled={updating}
-                            />
-                          }
-                          label={powerVisualState}
-                        />
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                {device?.state && device?.state.length > 0 && (
+                  <Typography className='state-name' variant='h6' gutterBottom>
+                    {`Device State ${stateIndex + 1} of ${
+                      device?.state.length
+                    } - ${device?.state[stateIndex].fieldName} (${
+                      device?.state[stateIndex].datatype
+                    })`}
+                  </Typography>
+                )}
                 {device?.state && device?.state.length > 0 ? (
-                  <table>
-                    <tbody>
-                      <tr>
-                        <th>
-                          Current {device?.state[0].fieldName} (
-                          {device?.state[0].datatype})
-                        </th>
-                        <td>
-                          <p
-                            style={{
-                              marginBlock: '2px',
-                              marginLeft: '6%',
-                            }}
-                          >
-                            {stateValue}
-                          </p>
-                        </td>
-                      </tr>
-                      <tr>
-                        <th>
-                          New {device?.state[0].fieldName} (
-                          {device?.state[0].datatype})
-                        </th>
-                        <td>
-                          <TextField
-                            fullWidth
-                            value={currentStateValue}
-                            onChange={e => setCurrentStateValue(e.target.value)}
-                            placeholder={`Enter ${device?.state[0].datatype} value`}
-                            variant='outlined'
-                            size='small'
-                          />
-                        </td>
-                      </tr>
-                      <tr>
-                        <Button
-                          variant='contained'
-                          onClick={handleUpdateDeviceState}
-                          className='update-btn'
-                          disabled={updating}
-                          sx={{ mt: 2 }}
-                        >
-                          Set State
-                        </Button>
-                      </tr>
-                    </tbody>
-                  </table>
+                  <>
+                    <table className='control-table'>
+                      <tbody>
+                        <tr>
+                          <th>Current {device?.state[stateIndex].fieldName}</th>
+                          <td>
+                            <p
+                              style={{
+                                marginBlock: '2px',
+                                marginLeft: '5%',
+                              }}
+                            >
+                              {stateValue}
+                            </p>
+                          </td>
+                        </tr>
+                        <tr>
+                          <th>New {device?.state[stateIndex].fieldName}</th>
+                          <td>
+                            <TextField
+                              fullWidth
+                              value={currentStateValue}
+                              onChange={e =>
+                                setCurrentStateValue(e.target.value)
+                              }
+                              placeholder={`Enter ${device?.state[stateIndex].datatype} value`}
+                              variant='outlined'
+                              size='small'
+                            />
+                          </td>
+                        </tr>
+                        <tr></tr>
+                      </tbody>
+                    </table>
+                    <div className='control-buttons'>
+                      <Button
+                        variant='contained'
+                        onClick={() => setStateIndex(stateIndex - 1)}
+                        className='switch-state-btn prev'
+                        disabled={updating || stateIndex == 0}
+                        sx={{ mt: 2 }}
+                      >
+                        <i className='bi bi-chevron-left' />
+                        Prev
+                      </Button>
+                      <Button
+                        variant='contained'
+                        onClick={handleUpdateDeviceState}
+                        className='update-btn'
+                        disabled={updating}
+                        sx={{ mt: 2 }}
+                      >
+                        Set State
+                      </Button>
+                      <Button
+                        variant='contained'
+                        onClick={() => setStateIndex(stateIndex + 1)}
+                        className='switch-state-btn next'
+                        disabled={
+                          updating || stateIndex == device.state.length - 1
+                        }
+                        sx={{ mt: 2 }}
+                      >
+                        Next
+                        <i className='bi bi-chevron-right' />
+                      </Button>
+                    </div>
+                  </>
                 ) : (
                   <Typography sx={{ mt: 2, width: '100%' }}>
                     This device does not have a controllable state.
@@ -438,33 +486,68 @@ const Device = () => {
             </Paper>
           </div>
 
-          {/* Device Properties */}
+          {/* Device Actions */}
           <div className='device-grid-item'>
-            <Paper elevation={2} className='device-properties'>
+            <Paper elevation={2} className='device-actions'>
               <Box p={3}>
-                <Typography variant='h5' gutterBottom>
-                  Device Properties
+                <Typography
+                  variant='h5'
+                  gutterBottom
+                  sx={{ paddingBottom: '10px' }}
+                >
+                  Device Actions
                 </Typography>
-                <table className='properties-table'>
-                  <tbody>
-                    <tr>
-                      <th>Name</th>
-                      <td>{device?.name}</td>
-                    </tr>
-                    <tr>
-                      <th>Description</th>
-                      <td>{device?.description || 'No description'}</td>
-                    </tr>
-                    <tr>
-                      <th>Location</th>
-                      <td>{device?.location || 'Not assigned'}</td>
-                    </tr>
-                    <tr>
-                      <th>IP Address</th>
-                      <td>{device?.ipAddress || 'Not available'}</td>
-                    </tr>
-                  </tbody>
-                </table>
+                <div className='buttons'>
+                  <Button
+                    disabled={updating}
+                    onClick={handleUpdateDevicePower}
+                    className={`power-btn ${powerVisualState.toLowerCase()}`}
+                  >
+                    <i className='bi bi-power' />
+                    Turn Device {powerVisualState == 'On' ? 'Off' : 'On'}
+                  </Button>
+                  <Button
+                    disabled={updating || device?.unlocked}
+                    onClick={() => setShowEdit(true)}
+                    className='unlock-btn'
+                  >
+                    <i
+                      className={`bi ${
+                        device?.unlocked ? 'bi-unlock' : 'bi-lock'
+                      }`}
+                    />
+                    {device?.unlocked ? 'Device is Unlocked' : 'Unlock Device'}
+                  </Button>
+                  <Button
+                    disabled={updating}
+                    onClick={() => setShowEdit(true)}
+                    className='edit-btn'
+                  >
+                    <i className='bi bi-pencil' />
+                    Edit Device
+                  </Button>
+                  <EditDeviceModal
+                    showEdit={showEdit}
+                    selectedDevice={device as TDevice}
+                    setShowEdit={setShowEdit}
+                  />
+                  <Button
+                    disabled={updating}
+                    onClick={handleClickDelete}
+                    className='delete-btn'
+                  >
+                    <i className='bi bi-trash' />
+                    Delete Device
+                  </Button>
+                  <DeleteDeviceModal
+                    showDelete={showDelete}
+                    setDeleteIsClosed={setDeleteIsClosed}
+                    selectedDevice={device as TDevice | null}
+                    setSelectedDevice={
+                      setDevice as Dispatch<SetStateAction<TDevice | null>>
+                    }
+                  />
+                </div>
               </Box>
             </Paper>
           </div>
@@ -487,11 +570,10 @@ const TagsAutocomplete = ({
   const [showAdd, setShowAdd] = useState<boolean>(false)
   const [tagName, setTagName] = useState<string>()
   const [inputValue, setInputValue] = useState('')
-  const navigate = useNavigate()
   const { API } = useApi()
 
   const [value, setValue] = useState<any>(type == 'Room' ? null : [])
-  const [options, setOptions] = useState<any>()
+  const [options, setOptions] = useState<any>([])
 
   useEffect(() => {
     if (!device || !tags) return
@@ -519,8 +601,6 @@ const TagsAutocomplete = ({
           : options.find(
               (option: TMUIAutocompleteOption) => option?.id === device?.roomTag
             ) || null
-      console.log(device)
-      console.log('New value', newValue)
       setValue(newValue)
     }
   }, [options])
@@ -563,12 +643,21 @@ const TagsAutocomplete = ({
     )
       .then((res: AxiosResponse) => {
         const createdTag = {
-          tagId: res.data.id,
+          tagId: res.data.tagId,
           name: tagName,
           tagType: type,
         } as TTag
-        setTags([...tags, createdTag])
-        enqueueSnackbar('Successfully created new tag', {
+        const updatedTags = [...tags, createdTag]
+        setTags(updatedTags)
+        setOptions(
+          updatedTags
+            .filter(tag => tag.tagType === type)
+            .map((tag: TTag) => ({
+              id: tag.tagId,
+              label: tag.name,
+            }))
+        )
+        enqueueSnackbar(`Successfully created ${type.toLowerCase()} tag`, {
           variant: 'success',
           anchorOrigin: {
             vertical: 'bottom',
@@ -581,6 +670,27 @@ const TagsAutocomplete = ({
       })
       .finally(() => {
         handleCloseAddModal()
+      })
+  }
+
+  const handleDeleteTag = (tag: TMUIAutocompleteOption) => {
+    console.log(tag, options)
+    API.delete(
+      `/tags/${tag?.id}/`,
+      `Delete existing ${type.toLowerCase()} tag request\n`
+    )
+      .then((_: AxiosResponse) => {
+        setTags(tags.filter(t => t.tagId !== tag?.id))
+        enqueueSnackbar(`Successfully deleted ${type.toLowerCase()} tag`, {
+          variant: 'success',
+          anchorOrigin: {
+            vertical: 'bottom',
+            horizontal: 'center',
+          },
+        })
+      })
+      .catch((err: AxiosError | any) => {
+        console.error('DELETE request failed', err)
       })
   }
 
@@ -625,7 +735,6 @@ const TagsAutocomplete = ({
             },
           }
         )
-        navigate(location.pathname, { state: { device: finalDevice } })
       })
       .catch((err: AxiosError | any) => {
         console.error('POST request failed', err)
@@ -679,6 +788,18 @@ const TagsAutocomplete = ({
                 />
               </ListItemIcon>
               <ListItemText primary={option?.label} />
+              <Tooltip title={`Delete ${type.toLowerCase()} tag`}>
+                <Button
+                  className='delete-btn'
+                  onClick={event => {
+                    event.stopPropagation()
+                    handleDeleteTag(option)
+                  }}
+                >
+                  <i className='bi bi-trash' />
+                  Delete
+                </Button>
+              </Tooltip>
             </ListItem>
           )
         }}
@@ -749,12 +870,7 @@ const TagsAutocomplete = ({
           </Paper>
         )}
       />
-      <Modal
-        open={showAdd}
-        onClose={handleCloseAddModal}
-        aria-labelledby='modal-modal-title'
-        aria-describedby='modal-modal-description'
-      >
+      <Modal open={showAdd} onClose={handleCloseAddModal}>
         <Box>
           <Typography id='modal-modal-title' fontWeight='bold' variant='h5'>
             Create New {type} Tag:

@@ -377,12 +377,7 @@ const Energy = () => {
                 <i className='bi bi-trash' />
               </Button>
             </Tooltip>
-            <Modal
-              open={deleteModalIsOpen}
-              onClose={handleDeleteModalClosed}
-              aria-labelledby='modal-modal-title'
-              aria-describedby='modal-modal-description'
-            >
+            <Modal open={deleteModalIsOpen} onClose={handleDeleteModalClosed}>
               <Box>
                 <Typography
                   id='modal-modal-title'
@@ -536,7 +531,8 @@ const Energy = () => {
                 {
                   scaleType: 'band',
                   data: energyValues?.map(entry => entry.datetime) ?? [],
-                  valueFormatter: (date: Date) => {
+                  valueFormatter: value => {
+                    const date = value instanceof Date ? value : new Date(value)
                     return date.toLocaleDateString('en-US', {
                       month: 'short',
                       day: 'numeric',
@@ -565,36 +561,20 @@ const Energy = () => {
                         color: colors[0],
                         label: 'Generation',
                         data: energyValues?.map(e => e.energyGenerated) ?? [],
-                        valueFormatter: (v, { dataIndex }) => {
-                          if (energyValues) {
-                            const netEnergy = energyValues[dataIndex].netEnergy
-                            return v !== null && v !== undefined
-                              ? `${(netEnergy < 0 ? v : netEnergy + v).toFixed(
-                                  1
-                                )} kWh`
-                              : '0.0 kWh'
-                          }
-                          return '0.0 kWh'
-                        },
-
+                        valueFormatter: v =>
+                          v !== null && v !== undefined
+                            ? `${Number(v).toFixed(1)} kWh`
+                            : '0.0 kWh',
                         stack: 'total',
                       },
                       {
                         color: colors[2],
                         label: 'Usage',
                         data: energyValues?.map(e => e.energyUsage) ?? [],
-                        valueFormatter: (v, { dataIndex }) => {
-                          if (energyValues) {
-                            const netEnergy = energyValues[dataIndex].netEnergy
-                            return v !== null && v !== undefined
-                              ? `${(netEnergy < 0 ? v : netEnergy + v).toFixed(
-                                  1
-                                )} kWh`
-                              : '0.0 kWh'
-                          }
-                          return '0.0 kWh'
-                        },
-
+                        valueFormatter: v =>
+                          v !== null && v !== undefined
+                            ? `${Number(v).toFixed(1)} kWh`
+                            : '0.0 kWh',
                         stack: 'total',
                       },
                     ]
@@ -639,8 +619,6 @@ const Energy = () => {
       <Modal
         open={addModalIsOpen || editModalIsOpen}
         onClose={addModalIsOpen ? handleAddModalClose : handleEditModalClose}
-        aria-labelledby='modal-modal-title'
-        aria-describedby='modal-modal-description'
       >
         <Box>
           <Typography id='modal-modal-title' fontWeight='bold' variant='h5'>

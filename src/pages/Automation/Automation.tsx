@@ -286,12 +286,7 @@ const AddAutomationModal = ({
   }
 
   return (
-    <Modal
-      open={addModalIsOpen}
-      onClose={handleAddModalClose}
-      aria-labelledby='modal-modal-title'
-      aria-describedby='modal-modal-description'
-    >
+    <Modal open={addModalIsOpen} onClose={handleAddModalClose}>
       <Box>
         <Typography id='modal-modal-title' fontWeight='bold' variant='h4'>
           Add Automation
@@ -386,12 +381,7 @@ const UpdateAutomationModal = ({
   }
 
   return (
-    <Modal
-      open={updateModalIsOpen}
-      onClose={handleUpdateModalClose}
-      aria-labelledby='modal-modal-title'
-      aria-describedby='modal-modal-description'
-    >
+    <Modal open={updateModalIsOpen} onClose={handleUpdateModalClose}>
       <Box>
         <Typography id='modal-modal-title' fontWeight='bold' variant='h4'>
           Edit Automation
@@ -581,12 +571,7 @@ const AutomationDetailsModal = ({
   }
 
   return (
-    <Modal
-      open={detailsModalIsOpen}
-      onClose={handleDetailsModalClose}
-      aria-labelledby='modal-modal-title'
-      aria-describedby='modal-modal-description'
-    >
+    <Modal open={detailsModalIsOpen} onClose={handleDetailsModalClose}>
       <Box>
         <Typography id='modal-modal-title' fontWeight='bold' variant='h5'>
           Automation Event Details
@@ -662,12 +647,7 @@ const DeleteAutomationModal = ({
   }
 
   return (
-    <Modal
-      open={deleteModalIsOpen}
-      onClose={() => setDeleteModalIsOpen(false)}
-      aria-labelledby='modal-modal-title'
-      aria-describedby='modal-modal-description'
-    >
+    <Modal open={deleteModalIsOpen} onClose={() => setDeleteModalIsOpen(false)}>
       <Box>
         <Typography id='modal-modal-title' fontWeight='bold' variant='h6'>
           Delete Automation from System?
