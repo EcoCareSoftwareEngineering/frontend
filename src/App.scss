@@ -157,6 +157,13 @@
   }
 }
 
+.line-chart {
+  .MuiChartsAxisHighlight-root {
+    stroke: var(--active-color) !important;
+    stroke-width: 2 !important;
+  }
+}
+
 @media (max-width: 768px) {
   .page-content {
     top: 10vh;

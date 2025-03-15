@@ -92,3 +92,19 @@ export const getFormattedDateString = (
           })
   }
 }
+
+// Get the string value of a duration in minutes
+export const formatDuration = (minutes: number | null): string => {
+  if (!minutes || minutes == null || minutes <= 0) return '0 mins'
+
+  const days = Math.floor(minutes / 1440)
+  const hours = Math.floor((minutes % 1440) / 60)
+  const mins = minutes % 60
+
+  let result = ''
+  if (days > 0) result += `${days} d `
+  if (hours > 0) result += `${hours} h `
+  if (mins > 0 || result === '') result += `${mins} m`
+
+  return result.trim()
+}
