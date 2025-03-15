@@ -27,6 +27,11 @@ export interface TTag {
   name: string
 }
 
+export interface TDeviceFaults {
+  okCount: number
+  faultCount: number
+}
+
 export interface TDeviceUsage {
   datetime: Date
   usage: number

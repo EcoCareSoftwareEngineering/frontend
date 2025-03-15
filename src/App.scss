@@ -157,6 +157,10 @@
   }
 }
 
+.pie-chart svg g g g path {
+  stroke: none !important;
+}
+
 .line-chart {
   .MuiChartsAxisHighlight-root {
     stroke: var(--active-color) !important;

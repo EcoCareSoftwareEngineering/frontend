@@ -1,18 +1,18 @@
-import {
-  formatDuration,
-  geDateRangeAndPeriod,
-  getFormattedDateString,
-} from '../../utils'
 import { TDevicesByRooms, TUsagesByRoom } from '../../types/deviceTypes'
 import { TTimePeriod, TTimeSelection } from '../../types/generalTypes'
 import PieCenterLabel from '../PieCenterLabel/PieCenterLabel'
 import { useDevices } from '../../contexts/DeviceContext'
 import { PieChart, LineChart } from '@mui/x-charts'
 import { useApi } from '../../contexts/ApiContext'
+import { AxiosError, AxiosResponse } from 'axios'
 import { useEffect, useState } from 'react'
 import Dropdown from '../Dropdown/Dropdown'
-import { AxiosResponse } from 'axios'
 import './DeviceUseByRoom.scss'
+import {
+  getFormattedDateString,
+  geDateRangeAndPeriod,
+  formatDuration,
+} from '../../utils'
 
 const colors = ['#07cb83', '#fbad53', '#ec443b', '#8440a0']
 
@@ -39,83 +39,88 @@ const DeviceUseByRoom = () => {
         startDate.toISOString().split('T')[0]
       }&rangeEnd=${endDate.toISOString().split('T')[0]}&timePeriod=${period}`,
       'Fetch devices usage by location'
-    ).then((res: AxiosResponse) => {
-      const devicesByRoom = devices.reduce((acc, { deviceId, roomTag }) => {
-        if (!roomTag || roomTag === null) return acc
-        let room = acc.find(r => r.roomTag === roomTag)
-        if (!room) {
-          room = { roomTag, devices: [] }
-          acc.push(room)
-        }
-        room.devices.push(deviceId)
-        return acc
-      }, [] as TDevicesByRooms)
+    )
+      .then((res: AxiosResponse) => {
+        const devicesByRoom = devices.reduce((acc, { deviceId, roomTag }) => {
+          if (!roomTag || roomTag === null) return acc
+          let room = acc.find(r => r.roomTag === roomTag)
+          if (!room) {
+            room = { roomTag, devices: [] }
+            acc.push(room)
+          }
+          room.devices.push(deviceId)
+          return acc
+        }, [] as TDevicesByRooms)
 
-      setRoomUsages(() => {
-        let rooms: TUsagesByRoom = devicesByRoom.map(({ roomTag, devices }) => {
-          const roomUsage = res.data.filter((d: any) =>
-            devices.includes(d.deviceId)
-          )
+        setRoomUsages(() => {
+          let rooms: TUsagesByRoom = devicesByRoom.map(
+            ({ roomTag, devices }) => {
+              const roomUsage = res.data.filter((d: any) =>
+                devices.includes(d.deviceId)
+              )
 
-          const usages = roomUsage.length
-            ? roomUsage[0].usage.map(({ datetime }: any, i: number) => ({
-                datetime: new Date(datetime),
-                usage: roomUsage.reduce(
-                  (sum: number, { usage }: any) => sum + usage[i].usage,
+              const usages = roomUsage.length
+                ? roomUsage[0].usage.map(({ datetime }: any, i: number) => ({
+                    datetime: new Date(datetime),
+                    usage: roomUsage.reduce(
+                      (sum: number, { usage }: any) => sum + usage[i].usage,
+                      0
+                    ),
+                  }))
+                : []
+
+              return {
+                roomTag,
+                label: tags.find(t => t.tagId === roomTag)?.name,
+                totalUsage: usages.reduce(
+                  (sum: number, u: any) => sum + u.usage,
                   0
                 ),
-              }))
-            : []
-
-          return {
-            roomTag,
-            label: tags.find(t => t.tagId === roomTag)?.name,
-            totalUsage: usages.reduce(
-              (sum: number, u: any) => sum + u.usage,
-              0
-            ),
-            usage: usages,
-          }
-        })
-
-        if (rooms.length > 4) {
-          rooms.sort((a, b) => a.totalUsage - b.totalUsage)
-
-          const toGroup = rooms.slice(0, rooms.length - 3)
-          const remaining = rooms.slice(-3)
-
-          const groupedUsage = toGroup.reduce(
-            (acc, room) => {
-              acc.totalUsage += room.totalUsage
-              acc.usage = acc.usage.map((u, i) => ({
-                datetime: u.datetime,
-                usage: u.usage + (room.usage[i]?.usage || 0),
-              }))
-              return acc
-            },
-            {
-              label: 'Other Rooms',
-              roomTag: -1,
-              totalUsage: 0,
-              usage: toGroup[0].usage.map(u => ({ ...u })),
+                usage: usages,
+              }
             }
           )
 
-          rooms = [...remaining, groupedUsage]
-        }
+          if (rooms.length > 4) {
+            rooms.sort((a, b) => a.totalUsage - b.totalUsage)
 
-        // Sort by total usage (descending) - keep Other  at the end
-        rooms.sort((a, b) => {
-          if (a.label === 'Other Rooms') return 1
-          if (b.label === 'Other Rooms') return -1
-          return b.totalUsage - a.totalUsage
+            const toGroup = rooms.slice(0, rooms.length - 3)
+            const remaining = rooms.slice(-3)
+
+            const groupedUsage = toGroup.reduce(
+              (acc, room) => {
+                acc.totalUsage += room.totalUsage
+                acc.usage = acc.usage.map((u, i) => ({
+                  datetime: u.datetime,
+                  usage: u.usage + (room.usage[i]?.usage || 0),
+                }))
+                return acc
+              },
+              {
+                label: 'Other Rooms',
+                roomTag: -1,
+                totalUsage: 0,
+                usage: toGroup[0].usage.map(u => ({ ...u })),
+              }
+            )
+
+            rooms = [...remaining, groupedUsage]
+          }
+
+          // Sort by total usage (descending) - keep Other  at the end
+          rooms.sort((a, b) => {
+            if (a.label === 'Other Rooms') return 1
+            if (b.label === 'Other Rooms') return -1
+            return b.totalUsage - a.totalUsage
+          })
+
+          setRoomUsageSum(rooms.reduce((sum, room) => sum + room.totalUsage, 0))
+          return rooms
         })
-
-        console.log(rooms)
-        setRoomUsageSum(rooms.reduce((sum, room) => sum + room.totalUsage, 0))
-        return rooms
       })
-    })
+      .catch((err: AxiosError) => {
+        console.error('GET request failed', err)
+      })
   }
 
   const handleSelectForDeviceUsage = (value: TTimeSelection) => {
