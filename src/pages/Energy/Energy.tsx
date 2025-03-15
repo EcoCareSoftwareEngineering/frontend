@@ -507,6 +507,7 @@ const Energy = () => {
             <li>
               <div className='net-energy'>
                 <NetEnergyDial
+                  transform='translate(125, 190)'
                   value={energySums.netEnergy.toFixed(2) + ' kWh'}
                   angle={(() => {
                     const totalEnergy =

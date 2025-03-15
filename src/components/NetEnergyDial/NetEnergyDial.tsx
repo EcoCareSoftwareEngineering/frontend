@@ -1,9 +1,19 @@
 import './NetEnergyDial.scss'
 
-const NetEnergyDial = ({ angle, value }: { angle: number; value: string }) => {
+const NetEnergyDial = ({
+  angle,
+  value,
+  transform,
+}: {
+  angle: number
+  value: string
+  transform: string
+}) => {
+  const shift = value.length * -6 + 3
+
   return (
     <svg className='pie-chart' width='1000' height='1000' viewBox='0 0 300 170'>
-      <g transform='translate(125, 190)'>
+      <g transform={transform}>
         <path
           d='M-116.438,-3.812A116.5,116.5,0,0,1,-56.525,-101.868L-43.225,-75.934A87.375,87.375,0,0,0,-87.292,-3.812Z'
           visibility='visible'
@@ -34,7 +44,7 @@ const NetEnergyDial = ({ angle, value }: { angle: number; value: string }) => {
           strokeWidth='0'
           strokeLinejoin='round'
         />
-        <text x='-48' y='-6' className='pie-center-item'>
+        <text x={shift} y='-6' className='pie-center-item'>
           {value}
         </text>
         <text x='-104' y='20' className='net-energy-label'>
