@@ -38,7 +38,7 @@ const ReportContent = React.forwardRef<HTMLDivElement, ReportContentProps>(
     const deviceFaults = devices.filter(d => d.faultStatus == 'Fault')
 
     const deviceChartData =
-      deviceUsage?.map((device: any, index: number) => ({
+      deviceUsage?.map((device: any) => ({
         id: device.deviceId,
         value: device.usage.reduce(
           (sum: number, entry: TDeviceUsage) => sum + entry.usage,
