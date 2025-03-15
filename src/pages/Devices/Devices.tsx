@@ -1,6 +1,7 @@
-import DeleteDeviceModal from '../../components/DeleteDeviceModal/DeleteDeviceModal'
-import EditDeviceModal from '../../components/EditDeviceModal/EditDeviceModal'
+import DeleteDeviceModal from '../../components/DeviceModals/DeleteDeviceModal'
+import EditDeviceModal from '../../components/DeviceModals/EditDeviceModal'
 import LoadingModal from '../../components/LoadingModal/LoadingModal'
+import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { getCSSVariable, getLinkTopLevel } from '../../utils'
 import { useDevices } from '../../contexts/DeviceContext'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
@@ -9,23 +10,22 @@ import { useApi } from '../../contexts/ApiContext'
 import { AxiosError, AxiosResponse } from 'axios'
 import { TDevice } from '../../types/deviceTypes'
 import { enqueueSnackbar } from 'notistack'
-import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import './Devices.scss'
 import {
+  TableContainer,
   useMediaQuery,
   Typography,
   TextField,
+  TableBody,
+  TableHead,
+  TableCell,
+  TableRow,
   Tooltip,
   Button,
   Modal,
-  Box,
-  Paper,
   Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
+  Paper,
+  Box,
 } from '@mui/material'
 
 const Devices = () => {

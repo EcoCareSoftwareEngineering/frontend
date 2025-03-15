@@ -1,3 +1,6 @@
+import DeleteDeviceModal from '../../components/DeviceModals/DeleteDeviceModal'
+import EditDeviceModal from '../../components/DeviceModals/EditDeviceModal'
+import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { TDevice, TDeviceUsage, TTag } from '../../types/deviceTypes'
 import LoadingModal from '../../components/LoadingModal/LoadingModal'
 import { useParams, useNavigate } from 'react-router-dom'
@@ -6,7 +9,6 @@ import Dropdown from '../../components/Dropdown/Dropdown'
 import { LineChart } from '@mui/x-charts/LineChart'
 import { useApi } from '../../contexts/ApiContext'
 import { AxiosError, AxiosResponse } from 'axios'
-import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { enqueueSnackbar } from 'notistack'
 import './Device.scss'
 import {
@@ -37,8 +39,6 @@ import {
   TTimeSelection,
   TMUIAutocompleteOption,
 } from '../../types/generalTypes'
-import DeleteDeviceModal from '../../components/DeleteDeviceModal/DeleteDeviceModal'
-import EditDeviceModal from '../../components/EditDeviceModal/EditDeviceModal'
 
 const lineColor = getCSSVariable('--active-color')
 
@@ -54,7 +54,7 @@ const Device = () => {
   const [currentStateValue, setCurrentStateValue] = useState<string>('')
   const [powerVisualState, setPowerVisualState] = useState<'On' | 'Off'>('Off')
   const [usageData, setUsageData] = useState<TDeviceUsage[]>([])
-  const [timeRange, setTimeRange] = useState<string>('Today')
+  const [timeRange, setTimeRange] = useState<TTimeSelection>('Today')
   const deviceId = id ? parseInt(id, 10) : null
   const navigate = useNavigate()
 
@@ -305,10 +305,7 @@ const Device = () => {
           <div className='device-grid-item device-usage'>
             <div className='usage-header'>
               <h5>Device Usage</h5>
-              <Dropdown
-                options={['Today', 'Past week', 'Past month', 'Past year']}
-                onSelect={handleSelect}
-              />
+              <Dropdown onSelect={handleSelect} />
             </div>
             <div className='data-container'>
               <LineChart
@@ -524,7 +521,7 @@ const Device = () => {
                     className='edit-btn'
                   >
                     <i className='bi bi-pencil' />
-                    Edit Device
+                    Edit Device Details
                   </Button>
                   <EditDeviceModal
                     showEdit={showEdit}
