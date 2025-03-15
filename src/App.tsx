@@ -1,7 +1,7 @@
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { DeviceProvider } from './contexts/DeviceContext'
-import AppRouter from './components/AppRouter/AppRouter'
+import AppRouter from './AppRouter'
 import { ApiProvider } from './contexts/ApiContext'
 import { BrowserRouter } from 'react-router-dom'
 import { SnackbarProvider } from 'notistack'
