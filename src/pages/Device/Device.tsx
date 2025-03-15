@@ -335,7 +335,7 @@ const Device = () => {
                 }
                 slotProps={{ legend: { hidden: true } }}
                 grid={{ vertical: true, horizontal: true }}
-                className='device-line-chart'
+                className='device-line-chart line-chart'
               />
             </div>
           </div>

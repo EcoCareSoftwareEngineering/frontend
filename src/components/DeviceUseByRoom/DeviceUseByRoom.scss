@@ -55,7 +55,7 @@
     }
   }
 
-  .line-chart {
+  .usage-line-chart {
     position: absolute;
     width: calc(100% - max(20%, 200px));
     height: 100%;
@@ -72,6 +72,11 @@
     .MuiChartsAxis-tick {
       fill: var(--grey-background);
       display: 'none';
+    }
+
+    .MuiChartsAxisHighlight-root {
+      stroke: var(--active-color);
+      stroke-width: 2;
     }
   }
 }

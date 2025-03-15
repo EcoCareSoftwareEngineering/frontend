@@ -1,4 +1,8 @@
-import { geDateRangeAndPeriod, getFormattedDateString } from '../../utils'
+import {
+  formatDuration,
+  geDateRangeAndPeriod,
+  getFormattedDateString,
+} from '../../utils'
 import { TDevicesByRooms, TUsagesByRoom } from '../../types/deviceTypes'
 import { TTimePeriod, TTimeSelection } from '../../types/generalTypes'
 import PieCenterLabel from '../PieCenterLabel/PieCenterLabel'
@@ -175,7 +179,7 @@ const DeviceUseByRoom = () => {
                 </PieChart>
                 <div className='data-label'>
                   <p className='label'>{item.label}</p>
-                  <p className='details'>{`${item.totalUsage} kWh`}</p>
+                  <p className='details'>{formatDuration(item.totalUsage)}</p>
                 </div>
               </li>
             )
@@ -202,6 +206,7 @@ const DeviceUseByRoom = () => {
             return {
               label: element.label,
               data: element.usage.map(e => e.usage) ?? [],
+              valueFormatter: v => formatDuration(v),
               showMark: false,
               color: colors[index],
               curve: 'linear',
@@ -209,7 +214,7 @@ const DeviceUseByRoom = () => {
           })}
           slotProps={{ legend: { hidden: true } }}
           grid={{ vertical: true, horizontal: true }}
-          className='line-chart'
+          className='usage-line-chart line-chart'
         />
       </div>
     </>
