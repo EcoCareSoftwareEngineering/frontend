@@ -1,0 +1,17 @@
+@use '/variables' as *;
+
+.pie-chart {
+  position: sticky;
+  height: 1000%;
+  width: 100%;
+
+  .pie-center-item {
+    font-size: 1.2rem;
+    fill: var(--clear-text);
+  }
+
+  .net-energy-label {
+    font-size: 1.15rem;
+    fill: var(--grey-text);
+  }
+}
