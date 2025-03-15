@@ -524,6 +524,7 @@ const Energy = () => {
           {!loading && (
             <BarChart
               dataset={energyValues}
+              yAxis={[{ label: 'kWh' }]}
               xAxis={[
                 {
                   scaleType: 'band',

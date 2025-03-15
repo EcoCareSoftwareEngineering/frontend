@@ -132,7 +132,7 @@ const DeviceUseByRoom = () => {
   const yAxisConfig = () => {
     const yValues = roomUsages[0]?.usage.map(d => d.usage) ?? []
     const maxY = yValues.length > 0 ? Math.max(...yValues) * 1.2 : 10
-    return [{ min: 0, max: Math.max(maxY, 10) }]
+    return [{ min: 0, max: Math.max(maxY, 10), label: 'Minutes' }]
   }
 
   return (

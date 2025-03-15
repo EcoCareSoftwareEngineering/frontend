@@ -32,6 +32,11 @@ export interface TDeviceFaults {
   faultCount: number
 }
 
+export interface TDevicePower {
+  powerOn: number
+  powerOff: number
+}
+
 export interface TDeviceUsage {
   datetime: Date
   usage: number

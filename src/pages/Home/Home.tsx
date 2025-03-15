@@ -1,23 +1,18 @@
 import DeviceUseByRoom from '../../components/DeviceUseByRoom/DeviceUseByRoom'
+import PieCenterLabel from '../../components/PieCenterLabel/PieCenterLabel'
 import NetEnergyDial from '../../components/NetEnergyDial/NetEnergyDial'
 import { TTimePeriod, TTimeSelection } from '../../types/generalTypes'
+import { TDeviceFaults, TDevicePower } from '../../types/deviceTypes'
 import LoadingModal from '../../components/LoadingModal/LoadingModal'
+import { TEnergyGoal, TEnergySums } from '../../types/energyTypes'
+import { geDateRangeAndPeriod, getCSSVariable } from '../../utils'
 import { useDevices } from '../../contexts/DeviceContext'
 import Dropdown from '../../components/Dropdown/Dropdown'
-import { TDeviceFaults } from '../../types/deviceTypes'
-import { TEnergySums } from '../../types/energyTypes'
-import { geDateRangeAndPeriod } from '../../utils'
 import { useApi } from '../../contexts/ApiContext'
 import { AxiosError, AxiosResponse } from 'axios'
 import { useEffect, useState } from 'react'
 import { PieChart } from '@mui/x-charts'
 import './Home.scss'
-import PieCenterLabel from '../../components/PieCenterLabel/PieCenterLabel'
-
-// HOME PAGE SHOULD SHOW THIS:
-// Thermostat temp
-// Device faults
-// Next highest goal
 
 const Home = () => {
   const [energySums, setEnergySums] = useState<TEnergySums>({
@@ -28,12 +23,20 @@ const Home = () => {
   })
 
   const [deviceFaults, setDeviceFaults] = useState<TDeviceFaults>({
-    okCount: 1,
+    okCount: 0,
     faultCount: 0,
   })
+  const [devicePower, setDevicePower] = useState<TDevicePower>({
+    powerOn: 0,
+    powerOff: 0,
+  })
+  const [energyGoal, setEnergyGoal] = useState<TEnergyGoal>()
 
-  const { API, loading, isAuthenticated } = useApi()
   const { devices, devicesLoaded } = useDevices()
+  const { API, loading } = useApi()
+
+  const activeColor = getCSSVariable('--active-color')
+  const inactiveColor = getCSSVariable('--inactive-color')
 
   // Fix viewport size update styles
   useEffect(() => {
@@ -45,19 +48,42 @@ const Home = () => {
   }, [])
 
   useEffect(() => {
-    if (isAuthenticated) {
-      handleSelectNetEnergy('Today')
-    }
+    handleSelectNetEnergy('Today')
+  }, [])
+
+  useEffect(() => {
+    API.get('/goals/', 'Fetch energy goals request')
+      .then((res: AxiosResponse) => {
+        const data = res.data.map((goal: TEnergyGoal) => ({
+          ...goal,
+          percentage: goal.progress / goal.target,
+        }))
+        setEnergyGoal(
+          data.reduce(
+            (max: any, item: any) =>
+              item.percentage > max.percentage ? item : max,
+            data[0]
+          )
+        )
+      })
+      .catch((err: AxiosError) => {
+        console.error('GET request failed', err)
+      })
   }, [])
 
   useEffect(() => {
     if (devicesLoaded) {
-      const data = {
+      const faultData = {
         okCount: devices.filter(d => d.faultStatus == 'Ok').length,
         faultCount: devices.filter(d => d.faultStatus == 'Fault').length,
       }
-      if (data.okCount + data.faultCount == 0) data.okCount = 1
-      setDeviceFaults(data)
+      setDeviceFaults(faultData)
+
+      const powerData = {
+        powerOn: devices.filter(d => d.status == 'On').length,
+        powerOff: devices.filter(d => d.status == 'Off').length,
+      }
+      setDevicePower(powerData)
     }
   }, [devicesLoaded])
 
@@ -130,15 +156,22 @@ const Home = () => {
         </div>
 
         {/* Device Faults */}
-        <div className='item device-faults'>
-          <div className='header'>Device Faults</div>
-          <div className='device-faults-data'>
+        <div className='item pie-item'>
+          <div className='header'>
+            Device Faults
+            <Dropdown
+              onSelect={() => {
+                console.warn('Fault logs not implemented')
+              }}
+            />
+          </div>
+          <div className='pie-data'>
             <PieChart
               className='pie-chart'
               slotProps={{ legend: { hidden: true } }}
               series={[
                 {
-                  innerRadius: '70%',
+                  innerRadius: '75%',
                   data: [
                     {
                       label: 'Status: Ok',
@@ -155,23 +188,110 @@ const Home = () => {
               ]}
             >
               <PieCenterLabel>
-                {`${((deviceFaults.okCount / devices.length) * 100).toFixed(
-                  0
-                )}% `}
+                {`${(
+                  (!isNaN(deviceFaults.okCount / devices.length)
+                    ? deviceFaults.okCount / devices.length
+                    : 0) * 100
+                ).toFixed(0)}% `}
               </PieCenterLabel>
             </PieChart>
             <div className='data-label'>
               <p className='label'>
                 {`Device Faults:
-                ${deviceFaults.faultCount == 0 ? 'all devices normal' : ''}`}
+                ${
+                  deviceFaults.faultCount == 0
+                    ? 'all devices normal'
+                    : 'faults occurred'
+                }`}
               </p>
-              <p className='details'>{`Active: ${deviceFaults.okCount}`}</p>
+              <p className='details'>{`Normal: ${deviceFaults.okCount}`}</p>
               <p className='details'>{`Faults: ${deviceFaults.faultCount}`}</p>
             </div>
           </div>
         </div>
-        <div className='item'> </div>
-        <div className='item'> </div>
+
+        {/* Device Status */}
+        <div className='item pie-item'>
+          <div className='header'>Device Power Status</div>
+          <div className='pie-data'>
+            <PieChart
+              className='pie-chart'
+              slotProps={{ legend: { hidden: true } }}
+              series={[
+                {
+                  innerRadius: '75%',
+                  data: [
+                    {
+                      label: 'Power: On',
+                      value: devicePower.powerOn,
+                      color: '#07cb83',
+                    },
+                    {
+                      label: 'Power: Off',
+                      value: devicePower.powerOff,
+                      color: '#ec443b',
+                    },
+                  ],
+                },
+              ]}
+            >
+              <PieCenterLabel>
+                {`${(
+                  (!isNaN(devicePower.powerOn / devices.length)
+                    ? devicePower.powerOn / devices.length
+                    : 0) * 100
+                ).toFixed(0)}% `}
+              </PieCenterLabel>
+            </PieChart>
+            <div className='data-label'>
+              <p className='label'>Device Power:</p>
+              <p className='details'>{`Power On: ${devicePower.powerOn}`}</p>
+              <p className='details'>{`Power Off: ${devicePower.powerOff}`}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Progress to next energy goal */}
+        <div className='item pie-item'>
+          <div className='header'>Next Energy Milestone</div>
+          <div className='pie-data'>
+            <PieChart
+              className='pie-chart'
+              tooltip={{ trigger: 'none' }}
+              slotProps={{ legend: { hidden: true } }}
+              series={[
+                {
+                  innerRadius: '75%',
+                  data: [
+                    {
+                      label: 'Progress',
+                      value: energyGoal?.progress ?? 0,
+                      color: activeColor,
+                    },
+                    {
+                      value: energyGoal
+                        ? energyGoal?.target - energyGoal?.progress
+                        : 1,
+                      color: inactiveColor,
+                    },
+                  ],
+                },
+              ]}
+            >
+              <PieCenterLabel>
+                {`${(
+                  (energyGoal ? energyGoal?.progress / energyGoal?.target : 0) *
+                  100
+                ).toFixed(0)}% `}
+              </PieCenterLabel>
+            </PieChart>
+            <div className='data-label'>
+              <p className='label'>Energy Goal:</p>
+              <p className='details'>{`Target: ${energyGoal?.target} kWh`}</p>
+              <p className='details'>{`Progress: ${energyGoal?.progress} kWh`}</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )

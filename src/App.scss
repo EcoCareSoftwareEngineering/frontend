@@ -168,6 +168,15 @@
   }
 }
 
+.MuiChartsAxis-label text {
+  fill: var(--grey-text) !important;
+  font-size: 1rem !important;
+}
+
+.line-chart .MuiChartsAxis-directionY .MuiChartsAxis-label {
+  transform: translateY(40%) !important;
+}
+
 @media (max-width: 768px) {
   .page-content {
     top: 10vh;
