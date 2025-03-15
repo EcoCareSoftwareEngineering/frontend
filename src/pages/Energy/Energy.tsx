@@ -1,7 +1,6 @@
 import DownloadReportButton from '../../components/ReportGeneration/ReportGeneration'
-import { getTimePeriodForSelection, handleUpdateTimePeriod } from '../../utils'
 import PieCenterLabel from '../../components/PieCenterLabel/PieCenterLabel'
-import { ValidApiError, TTimeSelection } from '../../types/generalTypes'
+import { geDateRangeAndPeriod, getFormattedDateString } from '../../utils'
 import LoadingModal from '../../components/LoadingModal/LoadingModal'
 import { useDeferredValue, useEffect, useState } from 'react'
 import Dropdown from '../../components/Dropdown/Dropdown'
@@ -18,6 +17,11 @@ import {
   TEnergyGoal,
   TEnergySums,
 } from '../../types/energyTypes'
+import {
+  TTimePeriod,
+  ValidApiError,
+  TTimeSelection,
+} from '../../types/generalTypes'
 import {
   LinearProgress,
   TextField,
@@ -39,6 +43,7 @@ const dateFormatter = new Intl.DateTimeFormat('en-GB', {
 })
 
 const Energy = () => {
+  const [timeSelection, setTimeSelection] = useState<TTimeSelection>('Today')
   const [deleteModalIsOpen, setDeleteModalIsOpen] = useState<boolean>(false)
   const [editModalIsOpen, setEditModalIsOpen] = useState<boolean>(false)
   const [addModalIsOpen, setAddModalIsOpen] = useState<boolean>(false)
@@ -65,10 +70,9 @@ const Energy = () => {
   const fetchEnergyData = (
     startDate: Date,
     endDate: Date,
-    timeSelection: TTimeSelection
+    period: TTimePeriod
   ) => {
     if (isAuthenticated) {
-      const period = getTimePeriodForSelection(timeSelection)
       API.get(
         `/energy/?startDate=${startDate.toISOString().split('T')[0]}&endDate=${
           endDate.toISOString().split('T')[0]
@@ -302,17 +306,10 @@ const Energy = () => {
     })
   }
 
-  const handleSelect = (value: string) => {
-    if (['Today', 'Past week', 'Past month', 'Past year'].includes(value)) {
-      const endDate = new Date()
-      const startDate = handleUpdateTimePeriod(value as TTimeSelection)
-      endDate.setDate(endDate.getDate() + 1)
-      startDate.setHours(0, 0, 0, 0)
-      endDate.setHours(0, 0, 0, 0)
-      fetchEnergyData(startDate, endDate, value as TTimeSelection)
-    } else {
-      console.error('Invalid time period selected:', value)
-    }
+  const handleSelect = (value: TTimeSelection) => {
+    setTimeSelection(value)
+    const [startDate, endDate, period] = geDateRangeAndPeriod(value)
+    fetchEnergyData(startDate, endDate, period)
   }
 
   const columns: GridColDef[] = [
@@ -428,10 +425,7 @@ const Energy = () => {
       <div className='energy-data page-card'>
         <div className='header'>
           Energy Generation and Usage
-          <Dropdown
-            options={['Today', 'Past week', 'Past month', 'Past year']}
-            onSelect={handleSelect}
-          />
+          <Dropdown onSelect={handleSelect} />
         </div>
         <div className='data-container'>
           <ul className='consumption-list'>
@@ -532,13 +526,10 @@ const Energy = () => {
                 {
                   scaleType: 'band',
                   data: energyValues?.map(entry => entry.datetime) ?? [],
-                  valueFormatter: value => {
-                    const date = value instanceof Date ? value : new Date(value)
-                    return date.toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                    })
-                  },
+                  valueFormatter: (date: Date, context) =>
+                    context.location === 'tick'
+                      ? getFormattedDateString(date, timeSelection, false)
+                      : getFormattedDateString(date, timeSelection, true),
                   tickLabelStyle: {
                     angle: 45,
                     textAnchor: 'start',

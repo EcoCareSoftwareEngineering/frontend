@@ -1,9 +1,9 @@
-import { getTimePeriodForSelection, handleUpdateTimePeriod } from '../../utils'
+import { TTimePeriod, TTimeSelection } from '../../types/generalTypes'
 import { TDevice, TDeviceUsage } from '../../types/deviceTypes'
-import React, { useRef, useEffect, useState } from 'react'
-import { TTimeSelection } from '../../types/generalTypes'
+import { geDateRangeAndPeriod } from '../../utils'
 import { BarChart, PieChart } from '@mui/x-charts'
 import { useApi } from '../../contexts/ApiContext'
+import React, { useRef, useState } from 'react'
 import { AxiosResponse } from 'axios'
 import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
@@ -377,7 +377,7 @@ const ReportContent = React.forwardRef<HTMLDivElement, ReportContentProps>(
                 Net energy: {energySums.netEnergy.toFixed(1)} kWh.
               </>
             )}
-            {/* {deviceFaults && deviceFaults.length > 0 && (
+            {deviceFaults && deviceFaults.length > 0 && (
               <>
                 <br />
                 <br />
@@ -386,7 +386,7 @@ const ReportContent = React.forwardRef<HTMLDivElement, ReportContentProps>(
                   {deviceFaults.length > 1 ? 's' : ''} detected.
                 </span>
               </>
-            )} */}
+            )}
           </Typography>
         </Box>
       </Paper>
@@ -415,15 +415,9 @@ const DownloadReportButton = ({ devices }: { devices: TDevice[] }) => {
 
   // Fetch data function
   const fetchData = (timeSelection: TTimeSelection) => {
-    // Create date range based on selected time frame
-    const endDate = new Date()
-    const startDate = handleUpdateTimePeriod(timeSelection)
-    endDate.setDate(endDate.getDate() + 1)
-    startDate.setHours(0, 0, 0, 0)
-    endDate.setHours(0, 0, 0, 0)
-
+    const [startDate, endDate, period] = geDateRangeAndPeriod(timeSelection)
     // Fetch energy data
-    fetchEnergyData(startDate, endDate, timeSelection)
+    fetchEnergyData(startDate, endDate, period)
 
     // Fetch device data
     fetchDeviceData(startDate, endDate)
@@ -433,11 +427,9 @@ const DownloadReportButton = ({ devices }: { devices: TDevice[] }) => {
   const fetchEnergyData = (
     startDate: Date,
     endDate: Date,
-    timeSelection: TTimeSelection
+    period: TTimePeriod
   ) => {
     if (isAuthenticated) {
-      const period = getTimePeriodForSelection(timeSelection)
-
       API.get(
         `/energy/?startDate=${startDate.toISOString().split('T')[0]}&endDate=${
           endDate.toISOString().split('T')[0]

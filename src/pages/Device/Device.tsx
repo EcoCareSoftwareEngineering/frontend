@@ -28,21 +28,23 @@ import {
 } from '@mui/material'
 
 import {
-  getTimePeriodForSelection,
-  handleUpdateTimePeriod,
-  getLinkTopLevel,
   getCSSVariable,
+  getLinkTopLevel,
+  geDateRangeAndPeriod,
+  getFormattedDateString,
 } from '../../utils'
 
 import {
   SetState,
   TTimeSelection,
   TMUIAutocompleteOption,
+  TTimePeriod,
 } from '../../types/generalTypes'
 
 const lineColor = getCSSVariable('--active-color')
 
 const Device = () => {
+  const [timeSelection, setTimeSelection] = useState<TTimeSelection>('Today')
   const { devices, setDevices, devicesLoaded } = useDevices()
   const { API, isAuthenticated, loading } = useApi()
   const { id } = useParams()
@@ -54,7 +56,6 @@ const Device = () => {
   const [currentStateValue, setCurrentStateValue] = useState<string>('')
   const [powerVisualState, setPowerVisualState] = useState<'On' | 'Off'>('Off')
   const [usageData, setUsageData] = useState<TDeviceUsage[]>([])
-  const [timeRange, setTimeRange] = useState<TTimeSelection>('Today')
   const deviceId = id ? parseInt(id, 10) : null
   const navigate = useNavigate()
 
@@ -84,9 +85,8 @@ const Device = () => {
   const fetchDeviceUsage = (
     startDate: Date,
     endDate: Date,
-    timeSelection: TTimeSelection
+    period: TTimePeriod
   ) => {
-    const period = getTimePeriodForSelection(timeSelection)
     API.get(
       `/devices/usage/?deviceId=${id}&rangeStart=${
         startDate.toISOString().split('T')[0]
@@ -109,19 +109,12 @@ const Device = () => {
     if (deviceId && isAuthenticated) {
       handleSelect('Today')
     }
-  }, [deviceId, isAuthenticated, timeRange])
+  }, [deviceId, isAuthenticated])
 
-  const handleSelect = (value: string) => {
-    if (['Today', 'Past week', 'Past month', 'Past year'].includes(value)) {
-      const endDate = new Date()
-      const startDate = handleUpdateTimePeriod(value as TTimeSelection)
-      endDate.setDate(endDate.getDate() + 1)
-      startDate.setHours(0, 0, 0, 0)
-      endDate.setHours(0, 0, 0, 0)
-      fetchDeviceUsage(startDate, endDate, value as TTimeSelection)
-    } else {
-      console.error('Invalid time period selected:', value)
-    }
+  const handleSelect = (value: TTimeSelection) => {
+    setTimeSelection(value)
+    const [startDate, endDate, period] = geDateRangeAndPeriod(value)
+    fetchDeviceUsage(startDate, endDate, period)
   }
 
   const updateDevice = (putData: TDevice | any) => {
@@ -198,7 +191,7 @@ const Device = () => {
   }
 
   const yAxisConfig = () => {
-    const yValues = usageData.map(d => d.usage)
+    const yValues = usageData.map(d => d.usage) ?? []
     const maxY = yValues.length > 0 ? Math.max(...yValues) * 1.2 : 10
     return [{ min: 0, max: Math.max(maxY, 10) }]
   }
@@ -314,13 +307,10 @@ const Device = () => {
                   {
                     scaleType: 'band',
                     data: usageData.map(entry => entry.datetime) ?? [],
-                    valueFormatter: (date: Date) => {
-                      return date.toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'short',
-                        // day: 'numeric',
-                      })
-                    },
+                    valueFormatter: (date: Date, context) =>
+                      context.location === 'tick'
+                        ? getFormattedDateString(date, timeSelection, false)
+                        : getFormattedDateString(date, timeSelection, true),
                     tickLabelStyle: {
                       angle: 45,
                       textAnchor: 'start',
@@ -345,7 +335,7 @@ const Device = () => {
                 }
                 slotProps={{ legend: { hidden: true } }}
                 grid={{ vertical: true, horizontal: true }}
-                className='line-chart'
+                className='device-line-chart'
               />
             </div>
           </div>
