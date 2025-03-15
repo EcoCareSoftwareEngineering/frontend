@@ -1,6 +1,9 @@
 @use '/variables' as *;
 
 .home {
+  overflow-x: hidden;
+  overflow-y: auto;
+
   .header {
     display: flex;
     justify-content: space-between;
@@ -37,15 +40,71 @@
     gap: 20px;
 
     .item {
-      flex: 1;
+      background-color: var(--grey-background);
+      color: var(--grey-text);
+      justify-content: center;
+      flex-direction: column;
+      align-items: center;
       border-radius: 10px;
       padding-block: 10px;
-      text-align: left;
       text-indent: 20px;
       font-size: 1.1rem;
       font-weight: bold;
-      color: var(--grey-text);
-      background-color: var(--grey-background);
+      text-align: left;
+      display: flex;
+      flex: 1;
+
+      .header {
+        padding-right: 2%;
+      }
+
+      &.device-faults {
+        display: flex;
+
+        .device-faults-data {
+          display: flex;
+          position: relative;
+          align-items: center;
+          height: 90%;
+          width: 100%;
+
+          .pie-chart {
+            padding-left: 15px;
+            margin-top: 2%;
+            width: 100%;
+            left: -10%;
+            height: clamp(5vw, 75%, 10vw);
+
+            svg .centerLabel {
+              font-size: 1.5rem;
+              font-weight: bold;
+            }
+          }
+
+          .data-label {
+            position: absolute;
+            flex-direction: column;
+            display: flex;
+            width: clamp(100px, 200px, 9vw);
+            left: 55%;
+            top: 23%;
+
+            p {
+              margin: 0;
+              text-indent: 0;
+            }
+
+            .label {
+              color: var(--clear-text);
+              position: relative;
+            }
+
+            .details {
+              position: relative;
+            }
+          }
+        }
+      }
     }
   }
 }
