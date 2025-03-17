@@ -33,7 +33,7 @@ const Home = () => {
   const [energyGoal, setEnergyGoal] = useState<TEnergyGoal>()
 
   const { devices, devicesLoaded } = useDevices()
-  const { API, loading } = useApi()
+  const { API, isAuthenticated, loading } = useApi()
 
   const activeColor = getCSSVariable('--active-color')
   const inactiveColor = getCSSVariable('--inactive-color')
@@ -48,28 +48,30 @@ const Home = () => {
   }, [])
 
   useEffect(() => {
-    handleSelectNetEnergy('Today')
-  }, [])
+    if (isAuthenticated) handleSelectNetEnergy('Today')
+  }, [isAuthenticated])
 
   useEffect(() => {
-    API.get('/goals/', 'Fetch energy goals request')
-      .then((res: AxiosResponse) => {
-        const data = res.data.map((goal: TEnergyGoal) => ({
-          ...goal,
-          percentage: goal.progress / goal.target,
-        }))
-        setEnergyGoal(
-          data.reduce(
-            (max: any, item: any) =>
-              item.percentage > max.percentage ? item : max,
-            data[0]
+    if (isAuthenticated) {
+      API.get('/goals/', 'Fetch energy goals request')
+        .then((res: AxiosResponse) => {
+          const data = res.data.map((goal: TEnergyGoal) => ({
+            ...goal,
+            percentage: goal.progress / goal.target,
+          }))
+          setEnergyGoal(
+            data.reduce(
+              (max: any, item: any) =>
+                item.percentage > max.percentage ? item : max,
+              data[0]
+            )
           )
-        )
-      })
-      .catch((err: AxiosError) => {
-        console.error('GET request failed', err)
-      })
-  }, [])
+        })
+        .catch((err: AxiosError) => {
+          console.error('GET request failed', err)
+        })
+    }
+  }, [isAuthenticated])
 
   useEffect(() => {
     if (devicesLoaded) {
@@ -196,14 +198,7 @@ const Home = () => {
               </PieCenterLabel>
             </PieChart>
             <div className='data-label'>
-              <p className='label'>
-                {`Device Faults:
-                ${
-                  deviceFaults.faultCount == 0
-                    ? 'all devices normal'
-                    : 'faults occurred'
-                }`}
-              </p>
+              <p className='label'>Device Faults:</p>
               <p className='details'>{`Normal: ${deviceFaults.okCount}`}</p>
               <p className='details'>{`Faults: ${deviceFaults.faultCount}`}</p>
             </div>
@@ -286,7 +281,7 @@ const Home = () => {
               </PieCenterLabel>
             </PieChart>
             <div className='data-label'>
-              <p className='label'>Energy Goal:</p>
+              <p className='label'>{energyGoal?.name}:</p>
               <p className='details'>{`Target: ${energyGoal?.target} kWh`}</p>
               <p className='details'>{`Progress: ${energyGoal?.progress} kWh`}</p>
             </div>

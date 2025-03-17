@@ -58,6 +58,10 @@
         padding-right: 2%;
       }
 
+      .dropdown-toggle {
+        min-width: 110px !important;
+      }
+
       &.pie-item {
         display: flex;
 
@@ -82,12 +86,12 @@
           }
 
           .data-label {
+            width: clamp(100px, 200px, 40%);
             position: absolute;
             flex-direction: column;
             display: flex;
-            width: clamp(100px, 200px, 9vw);
             left: 55%;
-            top: 23%;
+            top: 20%;
 
             p {
               margin: 0;
@@ -96,10 +100,12 @@
 
             .label {
               color: var(--clear-text);
+              font-size: 1rem;
               position: relative;
             }
 
             .details {
+              font-size: 0.9rem;
               position: relative;
             }
           }
