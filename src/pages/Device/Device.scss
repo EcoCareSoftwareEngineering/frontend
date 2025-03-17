@@ -3,6 +3,7 @@
 .device {
   &.page-content {
     display: flex;
+    overflow-y: auto;
     flex-direction: column;
     color: var(--clear-text);
 
@@ -161,12 +162,12 @@
               }
 
               &.status-ok {
-                background-color: var(--on-color);
+                background-color: var(--green-color);
                 font-weight: 600;
               }
 
               &.status-fault {
-                background-color: var(--off-color);
+                background-color: var(--red-color);
                 font-weight: 600;
               }
             }
@@ -331,11 +332,11 @@
 
         .power-btn {
           &.on {
-            background-color: var(--off-color);
+            background-color: var(--red-color);
           }
 
           &.off {
-            background-color: var(--on-color);
+            background-color: var(--green-color);
           }
         }
 
@@ -348,7 +349,7 @@
         }
 
         .delete-btn {
-          background-color: var(--off-color);
+          background-color: var(--red-color);
         }
       }
     }
@@ -362,7 +363,7 @@
         padding-right: 8px;
       }
 
-      background-color: var(--off-color) !important;
+      background-color: var(--red-color) !important;
       color: var(--clear-text) !important;
     }
   }

@@ -285,10 +285,6 @@ const Device = () => {
                       <th>Unlocked</th>
                       <td>{device?.unlocked ? 'Yes' : 'No'}</td>
                     </tr>
-                    <tr>
-                      <th>PIN Enabled</th>
-                      <td>{device?.pinEnabled ? 'Yes' : 'No'}</td>
-                    </tr>
                   </tbody>
                 </table>
               </Box>

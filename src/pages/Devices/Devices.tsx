@@ -34,8 +34,8 @@ const Devices = () => {
   const navigate = useNavigate()
   const { loading } = useApi()
 
-  const offColor = getCSSVariable('--off-color')
-  const onColor = getCSSVariable('--on-color')
+  const offColor = getCSSVariable('--red-color')
+  const onColor = getCSSVariable('--green-color')
 
   // DELETE device handlers
   const [showDelete, setShowDelete] = useState<boolean>(false)
