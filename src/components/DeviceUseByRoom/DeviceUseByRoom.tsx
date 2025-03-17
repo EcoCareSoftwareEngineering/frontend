@@ -12,6 +12,7 @@ import {
   getFormattedDateString,
   geDateRangeAndPeriod,
   formatDuration,
+  getCSSVariable,
 } from '../../utils'
 
 const colors = ['#07cb83', '#fbad53', '#ec443b', '#8440a0']
@@ -22,6 +23,8 @@ const DeviceUseByRoom = () => {
   const [roomUsageSum, setRoomUsageSum] = useState<number>(0)
   const { tags, devices, devicesLoaded } = useDevices()
   const { API } = useApi()
+
+  const inactiveColor = getCSSVariable('--inactive-color')
 
   useEffect(() => {
     if (devicesLoaded) {
@@ -160,7 +163,7 @@ const DeviceUseByRoom = () => {
                       data: [
                         {
                           value: roomUsageSum == 0 ? 1 : start,
-                          color: '#3d4e69',
+                          color: inactiveColor,
                         },
                         {
                           value: item.totalUsage,
@@ -168,7 +171,7 @@ const DeviceUseByRoom = () => {
                         },
                         {
                           value: roomUsageSum - (start + item.totalUsage),
-                          color: '#3d4e69',
+                          color: inactiveColor,
                         },
                       ],
                     },

@@ -1,3 +1,5 @@
+@use '/variables' as *;
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -31,6 +33,7 @@
 
     .page-title {
       font-size: 2rem;
+      color: var(--clear-text);
     }
 
     button {
@@ -120,11 +123,11 @@
       }
 
       .delete-btn {
-        background-color: var(--off-color);
+        background-color: var(--red-color);
       }
 
       .submit-btn {
-        background-color: var(--on-color);
+        background-color: var(--green-color);
       }
 
       .update-btn {
