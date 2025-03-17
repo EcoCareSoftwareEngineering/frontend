@@ -25,6 +25,7 @@ import {
   Modal,
   Table,
   Paper,
+  Radio,
   Box,
 } from '@mui/material'
 
@@ -237,12 +238,12 @@ const ConnectDeviceModal = ({
   handleAddModalClose,
 }: ConnectDeviceModal) => {
   const [unconnectedDevices, setUnconnectedDevices] = useState<TDevice[]>([])
-  const [ipAddress, setIpAddress] = useState<string>('')
+  const [ipAddress, setIpAddress] = useState<string>()
   const { devices, setDevices } = useDevices()
   const { API } = useApi()
 
-  const handleChangeIp = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setIpAddress(e.target.value)
+  const handleRowClick = (row: any) => {
+    setIpAddress(row.ipAddress)
   }
 
   useEffect(() => {
@@ -303,6 +304,7 @@ const ConnectDeviceModal = ({
           <Table aria-label='simple table'>
             <TableHead>
               <TableRow>
+                <TableCell />
                 <TableCell>Name</TableCell>
                 <TableCell align='right'>Description</TableCell>
                 <TableCell align='right'>IP Address</TableCell>
@@ -313,8 +315,12 @@ const ConnectDeviceModal = ({
               {unconnectedDevices.map(row => (
                 <TableRow
                   key={row.name}
+                  onClick={() => handleRowClick(row)}
                   sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                 >
+                  <TableCell align='right'>
+                    <Radio checked={ipAddress === row.ipAddress} />
+                  </TableCell>
                   <TableCell component='th' scope='row'>
                     {row.name}
                   </TableCell>
@@ -328,13 +334,7 @@ const ConnectDeviceModal = ({
         </TableContainer>
         <div className='modal-table device-info'>
           <strong className='input-field-name'>IP Address:</strong>
-          <TextField
-            size='small'
-            name='name'
-            value={ipAddress}
-            placeholder='192.168.0.1'
-            onChange={handleChangeIp}
-          />
+          <strong className='input-field-name'>{ipAddress}</strong>
         </div>
         <div className='event-actions actions'>
           <Button className='cancel-btn' onClick={handleAddModalClose}>
