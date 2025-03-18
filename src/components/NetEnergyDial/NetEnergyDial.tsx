@@ -14,7 +14,7 @@ const NetEnergyDial = ({
   const RED = getCSSVariable('--red-color')
   const YELLOW = getCSSVariable('--yellow-color')
   const GREEN = getCSSVariable('--green-color')
-  const DIAL = getCSSVariable('--active-color')
+  const DIAL = getCSSVariable('--clear-text')
 
   const textShift = value.length * -6 + 3
 
