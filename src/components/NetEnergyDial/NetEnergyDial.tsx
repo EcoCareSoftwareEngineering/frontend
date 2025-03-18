@@ -1,7 +1,6 @@
 import { useSpring, animated, easings } from '@react-spring/web'
 import { getCSSVariable } from '../../utils'
 import './NetEnergyDial.scss'
-import { duration } from '@mui/material'
 
 const NetEnergyDial = ({
   angle,
@@ -36,7 +35,6 @@ const NetEnergyDial = ({
 
   return (
     <svg className='pie-chart' width='1000' height='1000' viewBox='0 0 300 170'>
-      {/* Define the animated clip path */}
       <defs>
         <animated.clipPath id='revealClip'>
           <animated.path
@@ -50,7 +48,6 @@ const NetEnergyDial = ({
               Z
             `
             )}
-            // fill='white'
           />
         </animated.clipPath>
       </defs>
