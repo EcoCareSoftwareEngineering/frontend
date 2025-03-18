@@ -46,13 +46,12 @@ const EditDeviceModal = ({
 
   // Load location tags
   useEffect(() => {
-    const options = tags.map(tag => {
-      if (tag.tagType == 'Room')
-        return {
-          id: tag.tagId,
-          label: tag.name,
-        }
-    })
+    const options = tags
+      .filter(tag => tag.tagType == 'Room')
+      .map(tag => ({
+        id: tag.tagId,
+        label: tag.name,
+      }))
     setLocations(options ?? [])
   }, [devicesLoaded, currentDevice])
 
