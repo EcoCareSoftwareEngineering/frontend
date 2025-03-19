@@ -75,7 +75,7 @@ const Automation = () => {
   }, [devicesLoaded])
 
   useEffect(() => {
-    setNewState([])
+    setNewState(selectedAutomation?.newState ?? [])
   }, [addModalIsOpen, updateModalIsOpen])
 
   // Format automation events for calendar
@@ -368,6 +368,7 @@ const UpdateAutomationModal = ({
   ) => void
 }) => {
   const { API } = useApi()
+  console.log(newState)
 
   const handleUpdateModalClose = () => {
     setUpdateModalIsOpen(false)
@@ -388,12 +389,12 @@ const UpdateAutomationModal = ({
         setAutomations(
           automations.map((automation: TAutomation) =>
             automation.automationId == res.data.automationId
-              ? automation
-              : {
+              ? {
                   ...res.data,
                   dateTime: new Date(res.data.dateTime),
                   newState: res.data.newState,
                 }
+              : automation
           )
         )
 
