@@ -132,3 +132,16 @@
 .event-actions {
   margin-top: 20px;
 }
+
+.state-table {
+  margin-block: 25px;
+  div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .MuiFormControl-root {
+      width: 50%;
+    }
+  }
+}

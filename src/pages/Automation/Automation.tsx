@@ -32,7 +32,6 @@ import {
   Modal,
   Box,
 } from '@mui/material'
-import { data } from 'react-router-dom'
 
 const getDeviceOptions = (devices: TDevice[]): TMUIAutocompleteOption[] => {
   return devices.map(device => ({
@@ -502,43 +501,44 @@ const EditAutomationBox = ({
             <strong>Location:</strong>
             {selectedDevice?.location}
           </div>
-          <div className='modal-details-container'>
-            <Typography className='input-field-name'>
-              Set device{' '}
-              <span style={{ fontWeight: 'bold' }}>
-                {selectedDevice.state[0]?.fieldName}{' '}
-              </span>
-              to:
-            </Typography>
-            {selectedDevice.state[0].datatype === 'boolean' ? (
-              // Todo - Boolean automation interface
-              <RadioGroup
-                aria-labelledby='radio-buttons-group-label'
-                name='radio-buttons-group'
-                defaultValue={true}
-              >
-                <FormControlLabel control={<Radio />} value={true} label='On' />
-                <FormControlLabel
-                  control={<Radio />}
-                  value={false}
-                  label='Off'
-                />
-              </RadioGroup>
-            ) : (
-              <TextField
-                placeholder={`Input ${selectedDevice.state[0].datatype}`}
-                defaultValue={
-                  selectedAutomation && selectedAutomation.newState[0].value
-                }
-                onChange={handleNewStateChange}
-                size='small'
-                type={
-                  selectedDevice.state[0].datatype === 'string'
-                    ? 'text'
-                    : 'number'
-                }
-              />
-            )}
+          <div className='state-table'>
+            {selectedDevice.state.map(d => (
+              <div key={d.fieldName}>
+                <strong className='input-field-name'>
+                  Set device {d.fieldName} to:
+                </strong>
+                {d.datatype === 'boolean' ? (
+                  <RadioGroup
+                    aria-labelledby='radio-buttons-group-label'
+                    name='radio-buttons-group'
+                    defaultValue={true}
+                  >
+                    <FormControlLabel
+                      control={<Radio />}
+                      value={true}
+                      label='On'
+                    />
+                    <FormControlLabel
+                      control={<Radio />}
+                      value={false}
+                      label='Off'
+                    />
+                  </RadioGroup>
+                ) : (
+                  <TextField
+                    placeholder={`Input ${d.datatype}`}
+                    defaultValue={
+                      selectedAutomation?.newState.find(
+                        state => state.fieldName === d.fieldName
+                      )?.value
+                    }
+                    onChange={handleNewStateChange}
+                    size='small'
+                    type={d.datatype === 'string' ? 'text' : 'number'}
+                  />
+                )}
+              </div>
+            ))}
           </div>
         </div>
       )}
