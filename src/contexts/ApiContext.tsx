@@ -73,7 +73,8 @@ export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
     url: string,
     data?: any,
     requestDescription?: string,
-    validStatusCodes?: number[]
+    validStatusCodes?: number[],
+    showCustomError?: boolean
   ) => {
     activeRequests.current++
     setLoading(true)
@@ -112,19 +113,24 @@ export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
         throw new ValidApiError('API call valid failure')
       }
       // Show snackbar if error
-      enqueueSnackbar(`${requestDescription ?? ''} ${error.message}`, {
-        preventDuplicate: true,
-        variant: 'error',
-        style: {
-          maxWidth: '200px',
-          textAlign: 'left',
-          whiteSpace: 'pre-line',
-        },
-        anchorOrigin: {
-          vertical: 'bottom',
-          horizontal: 'center',
-        },
-      })
+      enqueueSnackbar(
+        `${requestDescription ?? ''} ${
+          showCustomError ? error.response.data.Error : error.message
+        }`,
+        {
+          preventDuplicate: true,
+          variant: 'error',
+          style: {
+            maxWidth: '200px',
+            textAlign: 'left',
+            whiteSpace: 'pre-line',
+          },
+          anchorOrigin: {
+            vertical: 'bottom',
+            horizontal: 'center',
+          },
+        }
+      )
 
       throw error
     } finally {
@@ -136,22 +142,64 @@ export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   const API: ApiWrapper = {
-    get: (url: string, requestDescription?: string, validCodes?: number[]) =>
-      request('GET', url, null, requestDescription, validCodes),
+    get: (
+      url: string,
+      requestDescription?: string,
+      validCodes?: number[],
+      showCustomError?: boolean
+    ) =>
+      request(
+        'GET',
+        url,
+        null,
+        requestDescription,
+        validCodes,
+        showCustomError
+      ),
     post: (
       url: string,
       data: any,
       requestDescription?: string,
-      validCodes?: number[]
-    ) => request('POST', url, data, requestDescription, validCodes),
+      validCodes?: number[],
+      showCustomError?: boolean
+    ) =>
+      request(
+        'POST',
+        url,
+        data,
+        requestDescription,
+        validCodes,
+        showCustomError
+      ),
     put: (
       url: string,
       data: any,
       requestDescription?: string,
-      validCodes?: number[]
-    ) => request('PUT', url, data, requestDescription, validCodes),
-    delete: (url: string, requestDescription?: string, validCodes?: number[]) =>
-      request('DELETE', url, null, requestDescription, validCodes),
+      validCodes?: number[],
+      showCustomError?: boolean
+    ) =>
+      request(
+        'PUT',
+        url,
+        data,
+        requestDescription,
+        validCodes,
+        showCustomError
+      ),
+    delete: (
+      url: string,
+      requestDescription?: string,
+      validCodes?: number[],
+      showCustomError?: boolean
+    ) =>
+      request(
+        'DELETE',
+        url,
+        null,
+        requestDescription,
+        validCodes,
+        showCustomError
+      ),
   }
 
   return (

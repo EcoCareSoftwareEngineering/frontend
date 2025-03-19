@@ -102,7 +102,8 @@ const Login = () => {
     API.post(
       '/unlock/',
       postData,
-      'Failed to unlock device\n Incorrect pin code\n'
+      'Failed to unlock device\n Incorrect pin code\n',
+      true
     ).then((_: AxiosResponse) => {
       handleLogin(true)
     })
