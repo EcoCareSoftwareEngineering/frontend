@@ -1,7 +1,6 @@
 import DownloadReportButton from '../../components/ReportGeneration/ReportGeneration'
-import { getTimePeriodForSelection, handleUpdateTimePeriod } from '../../utils'
 import PieCenterLabel from '../../components/PieCenterLabel/PieCenterLabel'
-import { ValidApiError, TTimeSelection } from '../../types/generalTypes'
+import NetEnergyDial from '../../components/NetEnergyDial/NetEnergyDial'
 import LoadingModal from '../../components/LoadingModal/LoadingModal'
 import { useDeferredValue, useEffect, useState } from 'react'
 import Dropdown from '../../components/Dropdown/Dropdown'
@@ -13,6 +12,17 @@ import { AxiosError, AxiosResponse } from 'axios'
 import { DatePicker } from '@mui/x-date-pickers'
 import { enqueueSnackbar } from 'notistack'
 import dayjs, { Dayjs } from 'dayjs'
+import './Energy.scss'
+import {
+  getFormattedDateString,
+  geDateRangeAndPeriod,
+  getCSSVariable,
+} from '../../utils'
+import {
+  TTimeSelection,
+  ValidApiError,
+  TTimePeriod,
+} from '../../types/generalTypes'
 import {
   TEnergyValues,
   TEnergyGoal,
@@ -27,7 +37,6 @@ import {
   Modal,
   Box,
 } from '@mui/material'
-import './Energy.scss'
 
 const colors = ['#07cb83', '#fbad53', '#ec443b']
 
@@ -39,6 +48,7 @@ const dateFormatter = new Intl.DateTimeFormat('en-GB', {
 })
 
 const Energy = () => {
+  const [timeSelection, setTimeSelection] = useState<TTimeSelection>('Today')
   const [deleteModalIsOpen, setDeleteModalIsOpen] = useState<boolean>(false)
   const [editModalIsOpen, setEditModalIsOpen] = useState<boolean>(false)
   const [addModalIsOpen, setAddModalIsOpen] = useState<boolean>(false)
@@ -62,13 +72,14 @@ const Energy = () => {
   const { API, loading, isAuthenticated } = useApi()
   const { devices } = useDevices()
 
+  const inactiveColor = getCSSVariable('--inactive-color')
+
   const fetchEnergyData = (
     startDate: Date,
     endDate: Date,
-    timeSelection: TTimeSelection
+    period: TTimePeriod
   ) => {
     if (isAuthenticated) {
-      const period = getTimePeriodForSelection(timeSelection)
       API.get(
         `/energy/?startDate=${startDate.toISOString().split('T')[0]}&endDate=${
           endDate.toISOString().split('T')[0]
@@ -302,17 +313,10 @@ const Energy = () => {
     })
   }
 
-  const handleSelect = (value: string) => {
-    if (['Today', 'Past week', 'Past month', 'Past year'].includes(value)) {
-      const endDate = new Date()
-      const startDate = handleUpdateTimePeriod(value as TTimeSelection)
-      endDate.setDate(endDate.getDate() + 1)
-      startDate.setHours(0, 0, 0, 0)
-      endDate.setHours(0, 0, 0, 0)
-      fetchEnergyData(startDate, endDate, value as TTimeSelection)
-    } else {
-      console.error('Invalid time period selected:', value)
-    }
+  const handleSelect = (value: TTimeSelection) => {
+    setTimeSelection(value)
+    const [startDate, endDate, period] = geDateRangeAndPeriod(value)
+    fetchEnergyData(startDate, endDate, period)
   }
 
   const columns: GridColDef[] = [
@@ -428,10 +432,7 @@ const Energy = () => {
       <div className='energy-data page-card'>
         <div className='header'>
           Energy Generation and Usage
-          <Dropdown
-            options={['Today', 'Past week', 'Past month', 'Past year']}
-            onSelect={handleSelect}
-          />
+          <Dropdown onSelect={handleSelect} />
         </div>
         <div className='data-container'>
           <ul className='consumption-list'>
@@ -452,7 +453,7 @@ const Energy = () => {
                         value: energySums.totalSum
                           ? energySums.energyUsed / energySums.totalSum
                           : 100,
-                        color: '#3d4e69',
+                        color: inactiveColor,
                       },
                     ],
                   },
@@ -489,7 +490,7 @@ const Energy = () => {
                         value: energySums.totalSum
                           ? energySums.energyGenerated / energySums.totalSum
                           : 100,
-                        color: '#3d4e69',
+                        color: inactiveColor,
                       },
                     ],
                   },
@@ -512,6 +513,7 @@ const Energy = () => {
             <li>
               <div className='net-energy'>
                 <NetEnergyDial
+                  transform='translate(125, 190)'
                   value={energySums.netEnergy.toFixed(2) + ' kWh'}
                   angle={(() => {
                     const totalEnergy =
@@ -528,17 +530,15 @@ const Energy = () => {
           {!loading && (
             <BarChart
               dataset={energyValues}
+              yAxis={[{ label: 'kWh' }]}
               xAxis={[
                 {
                   scaleType: 'band',
                   data: energyValues?.map(entry => entry.datetime) ?? [],
-                  valueFormatter: value => {
-                    const date = value instanceof Date ? value : new Date(value)
-                    return date.toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                    })
-                  },
+                  valueFormatter: (date: Date, context) =>
+                    context.location === 'tick'
+                      ? getFormattedDateString(date, timeSelection, false)
+                      : getFormattedDateString(date, timeSelection, true),
                   tickLabelStyle: {
                     angle: 45,
                     textAnchor: 'start',
@@ -675,61 +675,6 @@ const Energy = () => {
         </Box>
       </Modal>
     </div>
-  )
-}
-
-const NetEnergyDial = ({ angle, value }: { angle: number; value: string }) => {
-  return (
-    <svg className='pie-chart' width='1000' height='1000' viewBox='0 0 300 170'>
-      <g transform='translate(125, 190)'>
-        <path
-          d='M-116.438,-3.812A116.5,116.5,0,0,1,-56.525,-101.868L-43.225,-75.934A87.375,87.375,0,0,0,-87.292,-3.812Z'
-          visibility='visible'
-          cursor='unset'
-          fill='#ec443b'
-          opacity='1'
-          filter='none'
-          strokeWidth='0'
-          strokeLinejoin='round'
-        />
-        <path
-          d='M-49.741,-105.347A116.5,116.5,0,0,1,-0.763,-116.498L-1.526,-87.362A87.375,87.375,0,0,0,-36.441,-79.413Z'
-          visibility='visible'
-          cursor='unset'
-          fill='#fbad53'
-          opacity='1'
-          filter='none'
-          strokeWidth='0'
-          strokeLinejoin='round'
-        />
-        <path
-          d='M6.859,-116.298A116.5,116.5,0,0,1,116.438,-3.812L87.292,-3.812A87.375,87.375,0,0,0,6.096,-87.162Z'
-          visibility='visible'
-          cursor='unset'
-          fill='#07cb83'
-          opacity='1'
-          filter='none'
-          strokeWidth='0'
-          strokeLinejoin='round'
-        />
-        <text x='-48' y='-6' className='pie-center-item'>
-          {value}
-        </text>
-        <text x='-104' y='20' className='net-energy-label'>
-          Net returned to the grid
-        </text>
-        <line
-          x1='0'
-          y1='-50'
-          x2='0'
-          y2='-100'
-          stroke='white'
-          strokeWidth='6'
-          strokeLinecap='round'
-          transform={`rotate(${angle})`}
-        />
-      </g>
-    </svg>
   )
 }
 

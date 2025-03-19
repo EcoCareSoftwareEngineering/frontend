@@ -12,37 +12,99 @@ export const getLinkTopLevel = () => {
   return location.pathname.includes('local') ? '/local' : '/remote'
 }
 
-export const handleUpdateTimePeriod = (value: TTimeSelection) => {
-  const date = new Date()
-  const adjustTime = {
-    Today: () => date,
-    'Past week': () => {
-      date.setDate(date.getDate() - 6)
-      return date
-    },
-    'Past month': () => {
-      date.setMonth(date.getMonth() - 1)
-      return date
-    },
-    'Past year': () => {
-      date.setFullYear(date.getFullYear() - 1)
-      return date
-    },
+// Get start and end date for time selection and matching time period
+export const geDateRangeAndPeriod = (
+  value: TTimeSelection
+): [Date, Date, TTimePeriod] => {
+  const startDate = new Date()
+  startDate.setHours(0, 0, 0, 0)
+  let timePeriod: TTimePeriod
+
+  switch (value) {
+    case 'Past year':
+      startDate.setFullYear(startDate.getFullYear() - 1)
+      timePeriod = 'monthly'
+      break
+    case 'Past month':
+      startDate.setMonth(startDate.getMonth() - 1)
+      timePeriod = 'daily'
+      break
+    case 'Past week':
+      startDate.setDate(startDate.getDate() - 6)
+      timePeriod = 'daily'
+      break
+    default:
+      timePeriod = 'hourly'
+      break
   }
-  return adjustTime[value]()
+
+  const endDate = new Date()
+  endDate.setDate(endDate.getDate() + 1)
+  endDate.setHours(0, 0, 0, 0)
+
+  return [startDate, endDate, timePeriod]
 }
 
-export const getTimePeriodForSelection = (
-  range: TTimeSelection
-): TTimePeriod => {
-  switch (range) {
+// Return formatted string for date
+export const getFormattedDateString = (
+  date: Date,
+  interval: TTimeSelection,
+  verboseString: boolean
+): string => {
+  switch (interval) {
+    case 'Today':
+      return verboseString
+        ? date.toLocaleString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            hour12: true,
+          })
+        : date.toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: 'numeric',
+            hour12: false,
+          })
+
     case 'Past year':
-      return 'monthly'
-    case 'Past month':
-      return 'daily'
-    case 'Past week':
-      return 'daily'
+      return verboseString
+        ? date.toLocaleString('en-US', {
+            year: 'numeric',
+            month: 'long',
+          })
+        : date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+          })
+
     default:
-      return 'hourly'
+      return verboseString
+        ? date.toLocaleString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+          })
+        : date.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+          })
   }
+}
+
+// Get the string value of a duration in minutes
+export const formatDuration = (minutes: number | null): string => {
+  if (!minutes || minutes == null || minutes <= 0) return '0 mins'
+
+  const days = Math.floor(minutes / 1440)
+  const hours = Math.floor((minutes % 1440) / 60)
+  const mins = minutes % 60
+
+  let result = ''
+  if (days > 0) result += `${days} d `
+  if (hours > 0) result += `${hours} h `
+  if (mins > 0 || result === '') result += `${mins} m`
+
+  return result.trim()
 }

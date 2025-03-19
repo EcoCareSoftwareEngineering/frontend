@@ -1,7 +1,8 @@
+import { useState, useRef, useEffect } from 'react'
 import { useApi } from '../../contexts/ApiContext'
 import { useNavigate } from 'react-router-dom'
 import axios, { AxiosResponse } from 'axios'
-import { useState, useRef, useEffect } from 'react'
+import { enqueueSnackbar } from 'notistack'
 import {
   ToggleButtonGroup,
   InputAdornment,
@@ -14,7 +15,6 @@ import {
   Card,
 } from '@mui/material'
 import './Login.scss'
-import { enqueueSnackbar } from 'notistack'
 
 const TOUCHSCREEN_LOGIN = {
   username: 'touchscreen',
@@ -102,7 +102,9 @@ const Login = () => {
     API.post(
       '/unlock/',
       postData,
-      'Failed to unlock device\n Incorrect pin code\n'
+      'Failed to unlock device\n Incorrect pin code\n',
+      undefined,
+      true
     ).then((_: AxiosResponse) => {
       handleLogin(true)
     })

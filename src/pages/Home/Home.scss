@@ -1,6 +1,9 @@
 @use '/variables' as *;
 
 .home {
+  overflow-x: hidden;
+  overflow-y: auto;
+
   .header {
     display: flex;
     justify-content: space-between;
@@ -27,82 +30,6 @@
     text-indent: 20px;
     font-size: 1.1rem;
     background-color: var(--grey-background);
-
-    .data-container {
-      position: relative;
-      display: flex;
-      width: 100%;
-      height: 95%;
-
-      .consumption-list {
-        position: absolute;
-        list-style: none;
-        height: 80%;
-        min-width: 200px;
-        margin-inline-start: -0.5%;
-        width: 20%;
-        top: 4%;
-
-        li {
-          position: relative;
-          margin-bottom: 10px;
-          display: flex;
-          height: 25%;
-
-          .pie-chart {
-            position: relative;
-            left: -20%;
-            width: 50%;
-            height: 100%;
-
-            svg g g g path {
-              stroke: none;
-            }
-          }
-
-          .data-label {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            left: 30%;
-
-            p {
-              margin: 0;
-            }
-            .label {
-              color: var(--clear-text);
-              position: absolute;
-              top: 25%;
-            }
-
-            .details {
-              position: absolute;
-              top: 55%;
-            }
-          }
-        }
-      }
-
-      .line-chart {
-        position: absolute;
-        width: calc(100% - max(20%, 200px));
-        height: 100%;
-        right: 0;
-
-        .MuiChartsAxis-line {
-          stroke: var(--background-color);
-        }
-
-        .MuiChartsAxis-tickLabel {
-          fill: var(--grey-text);
-        }
-
-        .MuiChartsAxis-tick {
-          fill: var(--grey-background);
-          display: 'none';
-        }
-      }
-    }
   }
 
   .item-container {
@@ -113,15 +40,77 @@
     gap: 20px;
 
     .item {
-      flex: 1;
+      background-color: var(--grey-background);
+      color: var(--grey-text);
+      justify-content: center;
+      flex-direction: column;
+      align-items: center;
       border-radius: 10px;
       padding-block: 10px;
-      text-align: left;
       text-indent: 20px;
       font-size: 1.1rem;
       font-weight: bold;
-      color: var(--grey-text);
-      background-color: var(--grey-background);
+      text-align: left;
+      display: flex;
+      flex: 1;
+
+      .header {
+        padding-right: 2%;
+      }
+
+      .dropdown-toggle {
+        min-width: 110px !important;
+      }
+
+      &.pie-item {
+        display: flex;
+
+        .pie-data {
+          display: flex;
+          position: relative;
+          align-items: center;
+          height: 90%;
+          width: 100%;
+
+          .pie-chart {
+            padding-left: 15px;
+            margin-top: 2%;
+            width: 100%;
+            left: -10%;
+            height: clamp(5vw, 75%, 10vw);
+
+            svg .centerLabel {
+              font-size: 1.5rem;
+              font-weight: bold;
+            }
+          }
+
+          .data-label {
+            width: clamp(100px, 200px, 40%);
+            position: absolute;
+            flex-direction: column;
+            display: flex;
+            left: 55%;
+            top: 20%;
+
+            p {
+              margin: 0;
+              text-indent: 0;
+            }
+
+            .label {
+              color: var(--clear-text);
+              font-size: 1rem;
+              position: relative;
+            }
+
+            .details {
+              font-size: 0.9rem;
+              position: relative;
+            }
+          }
+        }
+      }
     }
   }
 }

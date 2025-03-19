@@ -72,7 +72,9 @@
               height: 45%;
               display: flex;
               min-width: 50px;
+              color: #ffffff;
               padding: 2px 3px;
+              font-weight: bold;
               align-items: center;
               justify-content: center;
             }
@@ -87,20 +89,29 @@
           }
 
           .actions {
+            gap: 10px;
             height: 100%;
             display: flex;
             align-items: center;
             justify-content: flex-start;
+
+            .edit-btn {
+              background-color: var(--active-color);
+            }
+
+            .delete-btn {
+              background-color: var(--red-color);
+            }
 
             button {
               width: 45%;
               height: 75%;
               display: flex;
               min-width: unset;
+              color: #ffffff;
               border-radius: 25px;
               align-items: center;
               justify-content: center;
-              color: var(--clear-text);
               transition: background-color 0.1s, color 0.1s;
 
               &:hover {

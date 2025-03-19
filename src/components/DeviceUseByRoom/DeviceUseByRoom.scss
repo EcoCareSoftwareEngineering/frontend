@@ -1,0 +1,82 @@
+@use '/variables' as *;
+
+.data-container {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 95%;
+
+  .consumption-list {
+    position: absolute;
+    list-style: none;
+    height: 80%;
+    min-width: 200px;
+    margin-inline-start: -0.5%;
+    width: 20%;
+    top: 4%;
+
+    li {
+      position: relative;
+      margin-bottom: 10px;
+      display: flex;
+      height: 25%;
+
+      .pie-chart {
+        position: relative;
+        left: -20%;
+        width: 50%;
+        height: 100%;
+
+        svg g g g path {
+          stroke: none;
+        }
+      }
+
+      .data-label {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        left: 30%;
+
+        p {
+          margin: 0;
+        }
+        .label {
+          color: var(--clear-text);
+          position: absolute;
+          top: 25%;
+        }
+
+        .details {
+          position: absolute;
+          top: 55%;
+        }
+      }
+    }
+  }
+
+  .usage-line-chart {
+    position: absolute;
+    width: calc(100% - max(20%, 200px));
+    height: 100%;
+    right: 0;
+
+    .MuiChartsAxis-line {
+      stroke: var(--background-color);
+    }
+
+    .MuiChartsAxis-tickLabel {
+      fill: var(--grey-text);
+    }
+
+    .MuiChartsAxis-tick {
+      fill: var(--grey-background);
+      display: 'none';
+    }
+
+    .MuiChartsAxisHighlight-root {
+      stroke: var(--active-color);
+      stroke-width: 2;
+    }
+  }
+}

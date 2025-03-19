@@ -1,3 +1,6 @@
+import DeleteDeviceModal from '../../components/DeviceModals/DeleteDeviceModal'
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react'
+import EditDeviceModal from '../../components/DeviceModals/EditDeviceModal'
 import { TDevice, TDeviceUsage, TTag } from '../../types/deviceTypes'
 import LoadingModal from '../../components/LoadingModal/LoadingModal'
 import { useParams, useNavigate } from 'react-router-dom'
@@ -6,9 +9,23 @@ import Dropdown from '../../components/Dropdown/Dropdown'
 import { LineChart } from '@mui/x-charts/LineChart'
 import { useApi } from '../../contexts/ApiContext'
 import { AxiosError, AxiosResponse } from 'axios'
-import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { enqueueSnackbar } from 'notistack'
 import './Device.scss'
+
+import {
+  getFormattedDateString,
+  geDateRangeAndPeriod,
+  getLinkTopLevel,
+  getCSSVariable,
+} from '../../utils'
+
+import {
+  TMUIAutocompleteOption,
+  TTimeSelection,
+  TTimePeriod,
+  SetState,
+} from '../../types/generalTypes'
+
 import {
   ListItemIcon,
   ListItemText,
@@ -25,46 +42,34 @@ import {
   Box,
 } from '@mui/material'
 
-import {
-  getTimePeriodForSelection,
-  handleUpdateTimePeriod,
-  getLinkTopLevel,
-  getCSSVariable,
-} from '../../utils'
-
-import {
-  SetState,
-  TTimeSelection,
-  TMUIAutocompleteOption,
-} from '../../types/generalTypes'
-import DeleteDeviceModal from '../../components/DeleteDeviceModal/DeleteDeviceModal'
-import EditDeviceModal from '../../components/EditDeviceModal/EditDeviceModal'
-
-const lineColor = getCSSVariable('--active-color')
-
 const Device = () => {
+  const [timeSelection, setTimeSelection] = useState<TTimeSelection>('Today')
   const { devices, setDevices, devicesLoaded } = useDevices()
   const { API, isAuthenticated, loading } = useApi()
   const { id } = useParams()
 
   const [device, setDevice] = useState<TDevice>()
   const [updating, setUpdating] = useState<boolean>(false)
-  const [stateValue, setStateValue] = useState<string>('')
   const [stateIndex, setStateIndex] = useState<number>(0)
   const [currentStateValue, setCurrentStateValue] = useState<string>('')
   const [powerVisualState, setPowerVisualState] = useState<'On' | 'Off'>('Off')
   const [usageData, setUsageData] = useState<TDeviceUsage[]>([])
-  const [timeRange, setTimeRange] = useState<string>('Today')
   const deviceId = id ? parseInt(id, 10) : null
   const navigate = useNavigate()
 
-  const [showEdit, setShowEdit] = useState<boolean>(false)
   const [showDelete, setShowDelete] = useState<boolean>(false)
+  const [showEdit, setShowEdit] = useState<boolean>(false)
   const setDeleteIsClosed = () => setShowDelete(false)
   const handleClickDelete = () => {
     setShowDelete(true)
     setDevice(device)
   }
+
+  const [showUnlock, setShowUnlock] = useState<boolean>(false)
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([])
+  const [pin, setPin] = useState(['', '', '', ''])
+
+  const lineColor = getCSSVariable('--active-color')
 
   useEffect(() => {
     if (deviceId && devices.length > 0) {
@@ -74,19 +79,21 @@ const Device = () => {
         setPowerVisualState(foundDevice.status)
         if (foundDevice.state && foundDevice.state.length > 0) {
           const value = String(foundDevice.state[stateIndex].value || '')
-          setStateValue(value)
           setCurrentStateValue(value)
         }
       }
     }
   }, [deviceId, devices])
 
+  useEffect(() => {
+    setCurrentStateValue(device?.state[stateIndex].value?.toString() ?? '')
+  }, [device, stateIndex])
+
   const fetchDeviceUsage = (
     startDate: Date,
     endDate: Date,
-    timeSelection: TTimeSelection
+    period: TTimePeriod
   ) => {
-    const period = getTimePeriodForSelection(timeSelection)
     API.get(
       `/devices/usage/?deviceId=${id}&rangeStart=${
         startDate.toISOString().split('T')[0]
@@ -109,19 +116,12 @@ const Device = () => {
     if (deviceId && isAuthenticated) {
       handleSelect('Today')
     }
-  }, [deviceId, isAuthenticated, timeRange])
+  }, [deviceId, isAuthenticated])
 
-  const handleSelect = (value: string) => {
-    if (['Today', 'Past week', 'Past month', 'Past year'].includes(value)) {
-      const endDate = new Date()
-      const startDate = handleUpdateTimePeriod(value as TTimeSelection)
-      endDate.setDate(endDate.getDate() + 1)
-      startDate.setHours(0, 0, 0, 0)
-      endDate.setHours(0, 0, 0, 0)
-      fetchDeviceUsage(startDate, endDate, value as TTimeSelection)
-    } else {
-      console.error('Invalid time period selected:', value)
-    }
+  const handleSelect = (value: TTimeSelection) => {
+    setTimeSelection(value)
+    const [startDate, endDate, period] = geDateRangeAndPeriod(value)
+    fetchDeviceUsage(startDate, endDate, period)
   }
 
   const updateDevice = (putData: TDevice | any) => {
@@ -132,10 +132,8 @@ const Device = () => {
           ...response.data,
           location: device?.location,
         }
+        console.log(updatedDevice)
         setDevice(updatedDevice)
-        if (device && device.state.length > 0) {
-          setStateValue(response.data.state[stateIndex].value)
-        }
         setPowerVisualState(response.data.status)
         setDevices(
           devices.map(d =>
@@ -197,15 +195,116 @@ const Device = () => {
     }
   }
 
+  const handleCloseUnlock = () => {
+    setPin(['', '', '', ''])
+    setShowUnlock(false)
+  }
+
+  const handlePinChange = (index: number, value: string) => {
+    // Regex to accept only digits in 0-9
+    if (!/^[0-9]?$/.test(value)) return
+
+    const newPin = [...pin]
+    newPin[index] = value
+    setPin(newPin)
+
+    if (value && index < 3) {
+      inputRefs.current[index + 1]?.focus()
+    }
+  }
+
+  const handleKeyDown = (
+    index: number,
+    e: React.KeyboardEvent<HTMLInputElement>
+  ) => {
+    if (e.key === 'Backspace' && pin[index] === '') {
+      if (index > 0) {
+        inputRefs.current[index - 1]?.focus()
+        const newPin = [...pin]
+        newPin[index - 1] = ''
+        setPin(newPin)
+      }
+    }
+  }
+
+  const unlockDevice = () => {
+    const postData = {
+      pin: pin.join(''),
+    }
+    API.post(
+      `/devices/unlock/${id}/`,
+      postData,
+      `Unlock device with ID ${device?.deviceId} request.\n`
+    )
+      .then((_: AxiosResponse) => {
+        const newDevice = {
+          ...(device as TDevice),
+          unlocked: true,
+        }
+        setDevice(newDevice)
+        setDevices(
+          devices.map(d => (d.deviceId == device?.deviceId ? newDevice : d))
+        )
+        handleCloseUnlock()
+      })
+      .catch((err: AxiosError) => {
+        console.error('POST request failed', err)
+        inputRefs.current[0]?.focus()
+        setPin(['', '', '', ''])
+      })
+  }
+
   const yAxisConfig = () => {
-    const yValues = usageData.map(d => d.usage)
+    const yValues = usageData.map(d => d.usage) ?? []
     const maxY = yValues.length > 0 ? Math.max(...yValues) * 1.2 : 10
-    return [{ min: 0, max: Math.max(maxY, 10) }]
+    return [{ min: 0, max: Math.max(maxY, 10), label: 'Minutes' }]
   }
 
   return (
     <div className='device page-content'>
       <LoadingModal open={!devicesLoaded || loading} />
+      <Modal open={showUnlock} onClose={handleCloseUnlock}>
+        <Box className='unlock-device-modal'>
+          <Typography id='modal-modal-title' fontWeight='bold' variant='h5'>
+            Unlock Device
+          </Typography>
+          <Typography id='modal-description'>Enter device pin code</Typography>
+          <div className='pin-inputs'>
+            {pin.map((digit, index) => (
+              <TextField
+                key={index}
+                type='tel'
+                inputRef={el => (inputRefs.current[index] = el)}
+                value={digit}
+                onChange={e => handlePinChange(index, e.target.value)}
+                onKeyDown={e =>
+                  handleKeyDown(
+                    index,
+                    e as React.KeyboardEvent<HTMLInputElement>
+                  )
+                }
+                variant='outlined'
+                inputProps={{
+                  maxLength: 1,
+                  inputMode: 'numeric',
+                  style: { textAlign: 'center', fontSize: '1.5rem' },
+                }}
+                className='pin-field'
+              />
+            ))}
+          </div>
+          <div className='actions'>
+            <Button className='cancel-btn' onClick={handleCloseUnlock}>
+              <i className='bi bi-x-lg' />
+              Cancel
+            </Button>
+            <Button className='update-btn' onClick={unlockDevice}>
+              <i className='bi bi-unlock-fill' />
+              Unlock
+            </Button>
+          </div>
+        </Box>
+      </Modal>
       <div className='page-header'>
         <h2 className='page-title'>{`Devices - ${device?.name}`}</h2>
         <Button
@@ -292,10 +391,6 @@ const Device = () => {
                       <th>Unlocked</th>
                       <td>{device?.unlocked ? 'Yes' : 'No'}</td>
                     </tr>
-                    <tr>
-                      <th>PIN Enabled</th>
-                      <td>{device?.pinEnabled ? 'Yes' : 'No'}</td>
-                    </tr>
                   </tbody>
                 </table>
               </Box>
@@ -305,10 +400,7 @@ const Device = () => {
           <div className='device-grid-item device-usage'>
             <div className='usage-header'>
               <h5>Device Usage</h5>
-              <Dropdown
-                options={['Today', 'Past week', 'Past month', 'Past year']}
-                onSelect={handleSelect}
-              />
+              <Dropdown onSelect={handleSelect} />
             </div>
             <div className='data-container'>
               <LineChart
@@ -317,13 +409,10 @@ const Device = () => {
                   {
                     scaleType: 'band',
                     data: usageData.map(entry => entry.datetime) ?? [],
-                    valueFormatter: (date: Date) => {
-                      return date.toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'short',
-                        // day: 'numeric',
-                      })
-                    },
+                    valueFormatter: (date: Date, context) =>
+                      context.location === 'tick'
+                        ? getFormattedDateString(date, timeSelection, false)
+                        : getFormattedDateString(date, timeSelection, true),
                     tickLabelStyle: {
                       angle: 45,
                       textAnchor: 'start',
@@ -348,7 +437,7 @@ const Device = () => {
                 }
                 slotProps={{ legend: { hidden: true } }}
                 grid={{ vertical: true, horizontal: true }}
-                className='line-chart'
+                className='device-line-chart line-chart'
               />
             </div>
           </div>
@@ -421,7 +510,7 @@ const Device = () => {
                                 marginLeft: '5%',
                               }}
                             >
-                              {stateValue}
+                              {device?.state[stateIndex].value}
                             </p>
                           </td>
                         </tr>
@@ -508,7 +597,7 @@ const Device = () => {
                   </Button>
                   <Button
                     disabled={updating || device?.unlocked}
-                    onClick={() => setShowEdit(true)}
+                    onClick={() => setShowUnlock(true)}
                     className='unlock-btn'
                   >
                     <i
@@ -524,7 +613,7 @@ const Device = () => {
                     className='edit-btn'
                   >
                     <i className='bi bi-pencil' />
-                    Edit Device
+                    Edit Device Details
                   </Button>
                   <EditDeviceModal
                     showEdit={showEdit}
@@ -748,11 +837,11 @@ const TagsAutocomplete = ({
   return (
     <>
       <Autocomplete
-        multiple={type != 'Room'}
         id='tags-autocomplete'
         value={value}
         options={options}
         inputValue={inputValue}
+        multiple={type != 'Room'}
         onChange={(_, option) => handleTagSelected(option)}
         onInputChange={(_, newInputValue) => setInputValue(newInputValue)}
         isOptionEqualToValue={(option, value) => option.id === value.id}

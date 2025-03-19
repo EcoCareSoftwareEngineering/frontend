@@ -1,0 +1,5 @@
+@use '/variables' as *;
+
+h3 {
+  color: var(--clear-text);
+}

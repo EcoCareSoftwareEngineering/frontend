@@ -1,6 +1,7 @@
-import DeleteDeviceModal from '../../components/DeleteDeviceModal/DeleteDeviceModal'
-import EditDeviceModal from '../../components/EditDeviceModal/EditDeviceModal'
+import DeleteDeviceModal from '../../components/DeviceModals/DeleteDeviceModal'
+import EditDeviceModal from '../../components/DeviceModals/EditDeviceModal'
 import LoadingModal from '../../components/LoadingModal/LoadingModal'
+import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { getCSSVariable, getLinkTopLevel } from '../../utils'
 import { useDevices } from '../../contexts/DeviceContext'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
@@ -9,23 +10,22 @@ import { useApi } from '../../contexts/ApiContext'
 import { AxiosError, AxiosResponse } from 'axios'
 import { TDevice } from '../../types/deviceTypes'
 import { enqueueSnackbar } from 'notistack'
-import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import './Devices.scss'
 import {
+  TableContainer,
   useMediaQuery,
   Typography,
-  TextField,
+  TableBody,
+  TableHead,
+  TableCell,
+  TableRow,
   Tooltip,
   Button,
   Modal,
-  Box,
-  Paper,
   Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
+  Paper,
+  Radio,
+  Box,
 } from '@mui/material'
 
 const Devices = () => {
@@ -34,8 +34,8 @@ const Devices = () => {
   const navigate = useNavigate()
   const { loading } = useApi()
 
-  const offColor = getCSSVariable('--off-color')
-  const onColor = getCSSVariable('--on-color')
+  const offColor = getCSSVariable('--red-color')
+  const onColor = getCSSVariable('--green-color')
 
   // DELETE device handlers
   const [showDelete, setShowDelete] = useState<boolean>(false)
@@ -152,6 +152,7 @@ const Devices = () => {
           <div className='actions'>
             <Tooltip title='Edit device'>
               <Button
+                className='edit-btn'
                 onClick={event => {
                   event.stopPropagation()
                   handleClickEdit(params.row)
@@ -162,6 +163,7 @@ const Devices = () => {
             </Tooltip>
             <Tooltip title='Delete device'>
               <Button
+                className='delete-btn'
                 onClick={event => {
                   event.stopPropagation()
                   handleClickDelete(params.row)
@@ -237,12 +239,12 @@ const ConnectDeviceModal = ({
   handleAddModalClose,
 }: ConnectDeviceModal) => {
   const [unconnectedDevices, setUnconnectedDevices] = useState<TDevice[]>([])
-  const [ipAddress, setIpAddress] = useState<string>('')
+  const [ipAddress, setIpAddress] = useState<string>()
   const { devices, setDevices } = useDevices()
   const { API } = useApi()
 
-  const handleChangeIp = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setIpAddress(e.target.value)
+  const handleRowClick = (row: any) => {
+    setIpAddress(row.ipAddress)
   }
 
   useEffect(() => {
@@ -303,6 +305,7 @@ const ConnectDeviceModal = ({
           <Table aria-label='simple table'>
             <TableHead>
               <TableRow>
+                <TableCell />
                 <TableCell>Name</TableCell>
                 <TableCell align='right'>Description</TableCell>
                 <TableCell align='right'>IP Address</TableCell>
@@ -313,8 +316,14 @@ const ConnectDeviceModal = ({
               {unconnectedDevices.map(row => (
                 <TableRow
                   key={row.name}
+                  onClick={() => handleRowClick(row)}
                   sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                 >
+                  <TableCell align='right'>
+                    {row.ipAddress && (
+                      <Radio checked={ipAddress === row.ipAddress} />
+                    )}
+                  </TableCell>
                   <TableCell component='th' scope='row'>
                     {row.name}
                   </TableCell>
@@ -328,13 +337,7 @@ const ConnectDeviceModal = ({
         </TableContainer>
         <div className='modal-table device-info'>
           <strong className='input-field-name'>IP Address:</strong>
-          <TextField
-            size='small'
-            name='name'
-            value={ipAddress}
-            placeholder='192.168.0.1'
-            onChange={handleChangeIp}
-          />
+          <strong className='input-field-name'>{ipAddress}</strong>
         </div>
         <div className='event-actions actions'>
           <Button className='cancel-btn' onClick={handleAddModalClose}>

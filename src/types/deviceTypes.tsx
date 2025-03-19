@@ -16,9 +16,9 @@ export interface TDevice {
 }
 
 export interface TDeviceState {
-  fieldName: 'integer' | 'float' | 'string' | 'boolean'
+  fieldName: string
   value?: number | string | boolean
-  datatype: string
+  datatype: 'integer' | 'float' | 'string' | 'boolean'
 }
 
 export interface TTag {
@@ -27,7 +27,34 @@ export interface TTag {
   name: string
 }
 
+export interface TDeviceFaults {
+  okCount: number
+  faultCount: number
+}
+
+export interface TDevicePower {
+  powerOn: number
+  powerOff: number
+}
+
 export interface TDeviceUsage {
   datetime: Date
   usage: number
 }
+
+export type TAllDeviceUsages = {
+  deviceId: number
+  usage: TDeviceUsage[]
+}[]
+
+export type TUsagesByRoom = {
+  label?: string
+  roomTag: number
+  totalUsage: number
+  usage: TDeviceUsage[]
+}[]
+
+export type TDevicesByRooms = {
+  roomTag: number
+  devices: number[]
+}[]
