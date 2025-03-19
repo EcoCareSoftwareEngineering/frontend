@@ -38,6 +38,10 @@ const Home = () => {
   const activeColor = getCSSVariable('--active-color')
   const inactiveColor = getCSSVariable('--inactive-color')
 
+  const GREEN = getCSSVariable('--green-color')
+  const YELLOW = getCSSVariable('--yellow-color')
+  const RED = getCSSVariable('--red-color')
+
   // Fix viewport size update styles
   useEffect(() => {
     if (localStorage.getItem('starting')) {
@@ -178,12 +182,12 @@ const Home = () => {
                     {
                       label: 'Status: Ok',
                       value: deviceFaults.okCount,
-                      color: '#07cb83',
+                      color: GREEN,
                     },
                     {
                       label: 'Status: Fault',
                       value: deviceFaults.faultCount,
-                      color: '#ec443b',
+                      color: YELLOW,
                     },
                   ],
                 },
@@ -219,12 +223,12 @@ const Home = () => {
                     {
                       label: 'Power: On',
                       value: devicePower.powerOn,
-                      color: '#07cb83',
+                      color: GREEN,
                     },
                     {
                       label: 'Power: Off',
                       value: devicePower.powerOff,
-                      color: '#ec443b',
+                      color: RED,
                     },
                   ],
                 },
