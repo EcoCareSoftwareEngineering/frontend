@@ -86,7 +86,9 @@ const Device = () => {
   }, [deviceId, devices])
 
   useEffect(() => {
-    setCurrentStateValue(device?.state[stateIndex].value?.toString() ?? '')
+    if (device?.state && device?.state.length > 0)
+      setCurrentStateValue(device?.state[stateIndex].value?.toString() ?? '')
+    else setCurrentStateValue('')
   }, [device, stateIndex])
 
   const fetchDeviceUsage = (
