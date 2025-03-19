@@ -1,6 +1,6 @@
 import DeleteDeviceModal from '../../components/DeviceModals/DeleteDeviceModal'
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react'
 import EditDeviceModal from '../../components/DeviceModals/EditDeviceModal'
-import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { TDevice, TDeviceUsage, TTag } from '../../types/deviceTypes'
 import LoadingModal from '../../components/LoadingModal/LoadingModal'
 import { useParams, useNavigate } from 'react-router-dom'
@@ -11,6 +11,21 @@ import { useApi } from '../../contexts/ApiContext'
 import { AxiosError, AxiosResponse } from 'axios'
 import { enqueueSnackbar } from 'notistack'
 import './Device.scss'
+
+import {
+  getFormattedDateString,
+  geDateRangeAndPeriod,
+  getLinkTopLevel,
+  getCSSVariable,
+} from '../../utils'
+
+import {
+  TMUIAutocompleteOption,
+  TTimeSelection,
+  TTimePeriod,
+  SetState,
+} from '../../types/generalTypes'
+
 import {
   ListItemIcon,
   ListItemText,
@@ -26,22 +41,6 @@ import {
   Chip,
   Box,
 } from '@mui/material'
-
-import {
-  getCSSVariable,
-  getLinkTopLevel,
-  geDateRangeAndPeriod,
-  getFormattedDateString,
-} from '../../utils'
-
-import {
-  SetState,
-  TTimeSelection,
-  TMUIAutocompleteOption,
-  TTimePeriod,
-} from '../../types/generalTypes'
-
-const lineColor = getCSSVariable('--active-color')
 
 const Device = () => {
   const [timeSelection, setTimeSelection] = useState<TTimeSelection>('Today')
@@ -59,13 +58,19 @@ const Device = () => {
   const deviceId = id ? parseInt(id, 10) : null
   const navigate = useNavigate()
 
-  const [showEdit, setShowEdit] = useState<boolean>(false)
   const [showDelete, setShowDelete] = useState<boolean>(false)
+  const [showEdit, setShowEdit] = useState<boolean>(false)
   const setDeleteIsClosed = () => setShowDelete(false)
   const handleClickDelete = () => {
     setShowDelete(true)
     setDevice(device)
   }
+
+  const [showUnlock, setShowUnlock] = useState<boolean>(false)
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([])
+  const [pin, setPin] = useState(['', '', '', ''])
+
+  const lineColor = getCSSVariable('--active-color')
 
   useEffect(() => {
     if (deviceId && devices.length > 0) {
@@ -190,6 +195,65 @@ const Device = () => {
     }
   }
 
+  const handleCloseUnlock = () => {
+    setPin(['', '', '', ''])
+    setShowUnlock(false)
+  }
+
+  const handlePinChange = (index: number, value: string) => {
+    // Regex to accept only digits in 0-9
+    if (!/^[0-9]?$/.test(value)) return
+
+    const newPin = [...pin]
+    newPin[index] = value
+    setPin(newPin)
+
+    if (value && index < 3) {
+      inputRefs.current[index + 1]?.focus()
+    }
+  }
+
+  const handleKeyDown = (
+    index: number,
+    e: React.KeyboardEvent<HTMLInputElement>
+  ) => {
+    if (e.key === 'Backspace' && pin[index] === '') {
+      if (index > 0) {
+        inputRefs.current[index - 1]?.focus()
+        const newPin = [...pin]
+        newPin[index - 1] = ''
+        setPin(newPin)
+      }
+    }
+  }
+
+  const unlockDevice = () => {
+    const postData = {
+      pin: pin.join(''),
+    }
+    API.post(
+      `/devices/unlock/${id}/`,
+      postData,
+      `Unlock device with ID ${device?.deviceId} request.\n`
+    )
+      .then((_: AxiosResponse) => {
+        const newDevice = {
+          ...(device as TDevice),
+          unlocked: true,
+        }
+        setDevice(newDevice)
+        setDevices(
+          devices.map(d => (d.deviceId == device?.deviceId ? newDevice : d))
+        )
+        handleCloseUnlock()
+      })
+      .catch((err: AxiosError) => {
+        console.error('POST request failed', err)
+        inputRefs.current[0]?.focus()
+        setPin(['', '', '', ''])
+      })
+  }
+
   const yAxisConfig = () => {
     const yValues = usageData.map(d => d.usage) ?? []
     const maxY = yValues.length > 0 ? Math.max(...yValues) * 1.2 : 10
@@ -199,6 +263,48 @@ const Device = () => {
   return (
     <div className='device page-content'>
       <LoadingModal open={!devicesLoaded || loading} />
+      <Modal open={showUnlock} onClose={handleCloseUnlock}>
+        <Box className='unlock-device-modal'>
+          <Typography id='modal-modal-title' fontWeight='bold' variant='h5'>
+            Unlock Device
+          </Typography>
+          <Typography id='modal-description'>Enter device pin code</Typography>
+          <div className='pin-inputs'>
+            {pin.map((digit, index) => (
+              <TextField
+                key={index}
+                type='tel'
+                inputRef={el => (inputRefs.current[index] = el)}
+                value={digit}
+                onChange={e => handlePinChange(index, e.target.value)}
+                onKeyDown={e =>
+                  handleKeyDown(
+                    index,
+                    e as React.KeyboardEvent<HTMLInputElement>
+                  )
+                }
+                variant='outlined'
+                inputProps={{
+                  maxLength: 1,
+                  inputMode: 'numeric',
+                  style: { textAlign: 'center', fontSize: '1.5rem' },
+                }}
+                className='pin-field'
+              />
+            ))}
+          </div>
+          <div className='actions'>
+            <Button className='cancel-btn' onClick={handleCloseUnlock}>
+              <i className='bi bi-x-lg' />
+              Cancel
+            </Button>
+            <Button className='update-btn' onClick={unlockDevice}>
+              <i className='bi bi-unlock-fill' />
+              Unlock
+            </Button>
+          </div>
+        </Box>
+      </Modal>
       <div className='page-header'>
         <h2 className='page-title'>{`Devices - ${device?.name}`}</h2>
         <Button
@@ -491,7 +597,7 @@ const Device = () => {
                   </Button>
                   <Button
                     disabled={updating || device?.unlocked}
-                    onClick={() => setShowEdit(true)}
+                    onClick={() => setShowUnlock(true)}
                     className='unlock-btn'
                   >
                     <i
@@ -731,11 +837,11 @@ const TagsAutocomplete = ({
   return (
     <>
       <Autocomplete
-        multiple={type != 'Room'}
         id='tags-autocomplete'
         value={value}
         options={options}
         inputValue={inputValue}
+        multiple={type != 'Room'}
         onChange={(_, option) => handleTagSelected(option)}
         onInputChange={(_, newInputValue) => setInputValue(newInputValue)}
         isOptionEqualToValue={(option, value) => option.id === value.id}
