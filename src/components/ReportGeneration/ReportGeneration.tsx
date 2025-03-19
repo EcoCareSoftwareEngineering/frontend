@@ -3,7 +3,7 @@ import { TDevice, TDeviceUsage } from '../../types/deviceTypes'
 import { geDateRangeAndPeriod } from '../../utils'
 import { BarChart, PieChart } from '@mui/x-charts'
 import { useApi } from '../../contexts/ApiContext'
-import React, { useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { AxiosResponse } from 'axios'
 import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
@@ -411,7 +411,22 @@ const DownloadReportButton = ({ devices }: { devices: TDevice[] }) => {
   })
   const [energyGoals, setEnergyGoals] = useState<TEnergyGoal[]>([])
   const [deviceUsage, setDeviceUsage] = useState<AllDevicesUsage>([])
+  const [showReport, setShowReport] = useState<boolean>(false)
   const { API, isAuthenticated } = useApi()
+
+  const energyValuesRef = useRef(energyValues)
+
+  // Keep ref updated but prevent re-renders
+  useEffect(() => {
+    energyValuesRef.current = energyValues
+  }, [energyValues])
+
+  // Ensure function reference remains stable
+  const waitForEnergyValues = useCallback(async () => {
+    while (energyValuesRef.current.length === 0) {
+      await new Promise(resolve => setTimeout(resolve, 100))
+    }
+  }, [])
 
   // Fetch data function
   const fetchData = (timeSelection: TTimeSelection) => {
@@ -524,9 +539,15 @@ const DownloadReportButton = ({ devices }: { devices: TDevice[] }) => {
   }
 
   const generatePDF = async () => {
-    if (!reportRef.current) return
+    setShowReport(true)
+
     fetchData('Today')
     fetchEnergyGoal()
+
+    waitForEnergyValues()
+    await new Promise(resolve => setTimeout(resolve, 500))
+
+    if (!reportRef.current) return
 
     try {
       const canvas = await html2canvas(reportRef.current, {
@@ -563,6 +584,7 @@ const DownloadReportButton = ({ devices }: { devices: TDevice[] }) => {
       }
 
       pdf.save('ecocare_smart_home_report.pdf')
+      setShowReport(false)
     } catch (error) {
       console.error('Error generating PDF:', error)
     }
@@ -570,14 +592,16 @@ const DownloadReportButton = ({ devices }: { devices: TDevice[] }) => {
 
   return (
     <div>
-      <ReportContent
-        ref={reportRef}
-        energyValues={energyValues}
-        energySums={energySums}
-        deviceUsage={deviceUsage}
-        energyGoals={energyGoals}
-        devices={devices}
-      />
+      {showReport && (
+        <ReportContent
+          ref={reportRef}
+          energyValues={energyValues}
+          energySums={energySums}
+          deviceUsage={deviceUsage}
+          energyGoals={energyGoals}
+          devices={devices}
+        />
+      )}
       <Button variant='contained' color='primary' onClick={generatePDF}>
         <i className='bi bi-clipboard-data' />
         Generate Report
