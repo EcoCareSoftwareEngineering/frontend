@@ -16,9 +16,9 @@ export interface TDevice {
 }
 
 export interface TDeviceState {
-  fieldName: 'integer' | 'float' | 'string' | 'boolean'
+  fieldName: string
   value?: number | string | boolean
-  datatype: string
+  datatype: 'integer' | 'float' | 'string' | 'boolean'
 }
 
 export interface TTag {

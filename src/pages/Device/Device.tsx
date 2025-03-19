@@ -50,7 +50,6 @@ const Device = () => {
 
   const [device, setDevice] = useState<TDevice>()
   const [updating, setUpdating] = useState<boolean>(false)
-  const [stateValue, setStateValue] = useState<string>('')
   const [stateIndex, setStateIndex] = useState<number>(0)
   const [currentStateValue, setCurrentStateValue] = useState<string>('')
   const [powerVisualState, setPowerVisualState] = useState<'On' | 'Off'>('Off')
@@ -80,12 +79,15 @@ const Device = () => {
         setPowerVisualState(foundDevice.status)
         if (foundDevice.state && foundDevice.state.length > 0) {
           const value = String(foundDevice.state[stateIndex].value || '')
-          setStateValue(value)
           setCurrentStateValue(value)
         }
       }
     }
   }, [deviceId, devices])
+
+  useEffect(() => {
+    setCurrentStateValue(device?.state[stateIndex].value?.toString() ?? '')
+  }, [device, stateIndex])
 
   const fetchDeviceUsage = (
     startDate: Date,
@@ -130,10 +132,8 @@ const Device = () => {
           ...response.data,
           location: device?.location,
         }
+        console.log(updatedDevice)
         setDevice(updatedDevice)
-        if (device && device.state.length > 0) {
-          setStateValue(response.data.state[stateIndex].value)
-        }
         setPowerVisualState(response.data.status)
         setDevices(
           devices.map(d =>
@@ -510,7 +510,7 @@ const Device = () => {
                                 marginLeft: '5%',
                               }}
                             >
-                              {stateValue}
+                              {device?.state[stateIndex].value}
                             </p>
                           </td>
                         </tr>

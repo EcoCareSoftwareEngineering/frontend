@@ -2,11 +2,11 @@ import { TAutomation, TAutomationEvent } from '../../types/automationTypes'
 import LoadingModal from '../../components/LoadingModal/LoadingModal'
 import { TMUIAutocompleteOption } from '../../types/generalTypes'
 import { TDevice, TDeviceState } from '../../types/deviceTypes'
-import * as generalTypes from '../../types/generalTypes'
 import { useDevices } from '../../contexts/DeviceContext'
+import { ChangeEvent, useEffect, useState } from 'react'
+import * as generalTypes from '../../types/generalTypes'
 import { useApi } from '../../contexts/ApiContext'
 import { AxiosError, AxiosResponse } from 'axios'
-import { useEffect, useState } from 'react'
 import { enqueueSnackbar } from 'notistack'
 import dayjs, { Dayjs } from 'dayjs'
 import './Automation.scss'
@@ -47,7 +47,7 @@ const Automation = () => {
   const [automations, setAutomations] = useState<TAutomation[]>([])
   const [selectedDevice, setSelectedDevice] = useState<TDevice>()
   const [selectedEvent, setSelectedEvent] = useState<EventImpl>()
-  const [newState, setNewState] = useState<TDeviceState[]>()
+  const [newState, setNewState] = useState<TDeviceState[]>([])
   const { devices, devicesLoaded } = useDevices()
   const { API, loading } = useApi()
 
@@ -73,6 +73,10 @@ const Automation = () => {
         console.error('GET request failed', err)
       })
   }, [devicesLoaded])
+
+  useEffect(() => {
+    setNewState([])
+  }, [addModalIsOpen, updateModalIsOpen])
 
   // Format automation events for calendar
   useEffect(() => {
@@ -100,15 +104,31 @@ const Automation = () => {
     setAddModalIsOpen(true)
   }
 
-  const handleNewStateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleNewStateChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    fieldName: string
+  ) => {
     if (!selectedDevice) return
-    setNewState([
-      {
-        datatype: selectedDevice.state[0].datatype,
-        fieldName: selectedDevice.state[0].fieldName,
-        value: getCurrentStateValue(e.target.value),
-      },
-    ])
+    setNewState(
+      newState?.some(s => s.fieldName == fieldName)
+        ? newState.map(state =>
+            state.fieldName == fieldName
+              ? {
+                  ...state,
+                  value: getCurrentStateValue(e.target.value),
+                }
+              : state
+          )
+        : [
+            ...(newState as TDeviceState[]),
+            {
+              fieldName: fieldName,
+              datatype: selectedDevice.state.find(s => s.fieldName == fieldName)
+                ?.datatype as 'integer' | 'float' | 'string' | 'boolean',
+              value: getCurrentStateValue(e.target.value),
+            },
+          ]
+    )
   }
 
   const handleEventClick = (clickInfo: EventClickArg) => {
@@ -247,7 +267,10 @@ const AddAutomationModal = ({
   setAddModalIsOpen: generalTypes.SetState<boolean>
   selectedDevice: TDevice | undefined
   setSelectedDevice: generalTypes.SetState<TDevice | undefined>
-  handleNewStateChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  handleNewStateChange: (
+    e: React.ChangeEvent<HTMLInputElement>,
+    fieldName: string
+  ) => void
 }) => {
   const { API } = useApi()
 
@@ -339,7 +362,10 @@ const UpdateAutomationModal = ({
   setUpdateModalIsOpen: generalTypes.SetState<boolean>
   selectedDevice: TDevice | undefined
   setSelectedDevice: generalTypes.SetState<TDevice | undefined>
-  handleNewStateChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  handleNewStateChange: (
+    e: React.ChangeEvent<HTMLInputElement>,
+    fieldName: string
+  ) => void
 }) => {
   const { API } = useApi()
 
@@ -435,7 +461,10 @@ const EditAutomationBox = ({
   selectedDevice: TDevice | undefined
   setSelectedDate: generalTypes.SetState<Dayjs | null>
   setSelectedDevice: generalTypes.SetState<TDevice | undefined>
-  handleNewStateChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  handleNewStateChange: (
+    e: React.ChangeEvent<HTMLInputElement>,
+    fieldName: string
+  ) => void
 }) => {
   return (
     <>
@@ -502,7 +531,7 @@ const EditAutomationBox = ({
             {selectedDevice?.location}
           </div>
           <div className='state-table'>
-            {selectedDevice.state.map(d => (
+            {selectedDevice.state.map((d, index) => (
               <div key={d.fieldName}>
                 <strong className='input-field-name'>
                   Set device {d.fieldName} to:
@@ -532,7 +561,12 @@ const EditAutomationBox = ({
                         state => state.fieldName === d.fieldName
                       )?.value
                     }
-                    onChange={handleNewStateChange}
+                    onChange={e =>
+                      handleNewStateChange(
+                        e as ChangeEvent<HTMLInputElement>,
+                        d.fieldName
+                      )
+                    }
                     size='small'
                     type={d.datatype === 'string' ? 'text' : 'number'}
                   />
