@@ -15,24 +15,28 @@ interface ApiWrapper {
   get: (
     url: string,
     requestDescription?: string,
-    validCodes?: number[]
+    validCodes?: number[],
+    showCustomError?: boolean
   ) => Promise<any>
   post: (
     url: string,
     data: any,
     requestDescription?: string,
-    validCodes?: number[]
+    validCodes?: number[],
+    showCustomError?: boolean
   ) => Promise<any>
   put: (
     url: string,
     data: any,
     requestDescription?: string,
-    validCodes?: number[]
+    validCodes?: number[],
+    showCustomError?: boolean
   ) => Promise<any>
   delete: (
     url: string,
     requestDescription?: string,
-    validCodes?: number[]
+    validCodes?: number[],
+    showCustomError?: boolean
   ) => Promise<any>
 }
 
