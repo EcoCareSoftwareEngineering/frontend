@@ -89,20 +89,19 @@
     // Calendar events
     .fc-daygrid-day-events .fc-event {
       background-color: var(--active-color);
-      color: var(--clear-text);
+      border: 3px var(--active-color);
+      text-overflow: ellipsis;
       padding-block: 3px;
       margin-bottom: 3px;
+      text-indent: 8px;
+      color: #ffffff;
+      overflow: hidden;
       cursor: pointer;
 
       &:hover {
         background-color: var(--background-color);
         transition: background-color 0.2s;
-      }
-
-      .event-content {
-        overflow: hidden;
-        text-indent: 8px;
-        text-overflow: ellipsis;
+        color: var(--active-color);
       }
     }
 

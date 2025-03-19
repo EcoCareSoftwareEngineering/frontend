@@ -1,6 +1,5 @@
 import DownloadReportButton from '../../components/ReportGeneration/ReportGeneration'
 import PieCenterLabel from '../../components/PieCenterLabel/PieCenterLabel'
-import { geDateRangeAndPeriod, getFormattedDateString } from '../../utils'
 import NetEnergyDial from '../../components/NetEnergyDial/NetEnergyDial'
 import LoadingModal from '../../components/LoadingModal/LoadingModal'
 import { useDeferredValue, useEffect, useState } from 'react'
@@ -13,16 +12,22 @@ import { AxiosError, AxiosResponse } from 'axios'
 import { DatePicker } from '@mui/x-date-pickers'
 import { enqueueSnackbar } from 'notistack'
 import dayjs, { Dayjs } from 'dayjs'
+import './Energy.scss'
+import {
+  getFormattedDateString,
+  geDateRangeAndPeriod,
+  getCSSVariable,
+} from '../../utils'
+import {
+  TTimeSelection,
+  ValidApiError,
+  TTimePeriod,
+} from '../../types/generalTypes'
 import {
   TEnergyValues,
   TEnergyGoal,
   TEnergySums,
 } from '../../types/energyTypes'
-import {
-  TTimePeriod,
-  ValidApiError,
-  TTimeSelection,
-} from '../../types/generalTypes'
 import {
   LinearProgress,
   TextField,
@@ -32,7 +37,6 @@ import {
   Modal,
   Box,
 } from '@mui/material'
-import './Energy.scss'
 
 const colors = ['#07cb83', '#fbad53', '#ec443b']
 
@@ -67,6 +71,8 @@ const Energy = () => {
 
   const { API, loading, isAuthenticated } = useApi()
   const { devices } = useDevices()
+
+  const inactiveColor = getCSSVariable('--inactive-color')
 
   const fetchEnergyData = (
     startDate: Date,
@@ -447,7 +453,7 @@ const Energy = () => {
                         value: energySums.totalSum
                           ? energySums.energyUsed / energySums.totalSum
                           : 100,
-                        color: '#3d4e69',
+                        color: inactiveColor,
                       },
                     ],
                   },
@@ -484,7 +490,7 @@ const Energy = () => {
                         value: energySums.totalSum
                           ? energySums.energyGenerated / energySums.totalSum
                           : 100,
-                        color: '#3d4e69',
+                        color: inactiveColor,
                       },
                     ],
                   },

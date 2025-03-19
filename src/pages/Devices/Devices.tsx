@@ -15,7 +15,6 @@ import {
   TableContainer,
   useMediaQuery,
   Typography,
-  TextField,
   TableBody,
   TableHead,
   TableCell,
@@ -153,6 +152,7 @@ const Devices = () => {
           <div className='actions'>
             <Tooltip title='Edit device'>
               <Button
+                className='edit-btn'
                 onClick={event => {
                   event.stopPropagation()
                   handleClickEdit(params.row)
@@ -163,6 +163,7 @@ const Devices = () => {
             </Tooltip>
             <Tooltip title='Delete device'>
               <Button
+                className='delete-btn'
                 onClick={event => {
                   event.stopPropagation()
                   handleClickDelete(params.row)
@@ -319,7 +320,9 @@ const ConnectDeviceModal = ({
                   sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                 >
                   <TableCell align='right'>
-                    <Radio checked={ipAddress === row.ipAddress} />
+                    {row.ipAddress && (
+                      <Radio checked={ipAddress === row.ipAddress} />
+                    )}
                   </TableCell>
                   <TableCell component='th' scope='row'>
                     {row.name}

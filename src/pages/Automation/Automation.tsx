@@ -32,6 +32,7 @@ import {
   Modal,
   Box,
 } from '@mui/material'
+import { data } from 'react-router-dom'
 
 const getDeviceOptions = (devices: TDevice[]): TMUIAutocompleteOption[] => {
   return devices.map(device => ({
@@ -359,10 +360,18 @@ const UpdateAutomationModal = ({
       'Update an automation request.\n'
     )
       .then((res: AxiosResponse) => {
-        setAutomations([
-          ...automations,
-          { ...res.data, dateTime: new Date(res.data.dateTime) },
-        ])
+        setAutomations(
+          automations.map((automation: TAutomation) =>
+            automation.automationId == res.data.automationId
+              ? automation
+              : {
+                  ...res.data,
+                  dateTime: new Date(res.data.dateTime),
+                  newState: res.data.newState,
+                }
+          )
+        )
+
         enqueueSnackbar('Successfully updated automation', {
           variant: 'success',
           anchorOrigin: {

@@ -1,16 +1,17 @@
 :root {
-  --background-color: #ffffff; // Soft off-white for a clean background
-  --grey-background: #e1e1e1; // Light grey-blue for subtle contrast
-  --grey-backdrop: #c8c7c7; // Slightly darker grey-blue for depth
-  --inactive-color: #b8c4d9; // Muted blue-grey for inactive elements
-  --active-color: #0d3e64; // Brighter blue for active elements
+  --background-color: #ffffff;
+  --grey-background: #f0f0f0;
+  --grey-backdrop: #c8c7c7;
+  --inactive-color: #b8c4d9;
+  --active-color: #0d3e64;
 
-  --highlight-color: #b0b2b6; // Softened version of highlight for light mode
-  --green-color: #4a903d; // Vibrant green for 'on' state
-  --red-color: #d64b46; // Softer red for 'off' state
+  --highlight-color: #cbced4;
+  --green-color: #45a634;
+  --yellow-color: #ffbb00;
+  --red-color: #bd241f;
 
-  --clear-text: #0d1d46; // Dark text for readability
-  --grey-text: #3b454f; // Medium grey for less prominent text
+  --clear-text: #0d1d46;
+  --grey-text: #3b454f;
 }
 
 .dark-theme {
@@ -22,6 +23,7 @@
 
   --highlight-color: #1a2130;
   --green-color: #188921;
+  --yellow-color: #edb717;
   --red-color: #a72a24;
 
   --clear-text: #e8e7ea;
